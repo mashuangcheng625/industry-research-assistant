@@ -1,0 +1,60 @@
+{
+  "summary": {
+    "passed": 4,
+    "total": 4,
+    "positive_hits": 4,
+    "positive_total": 4,
+    "negative_rejections": 0,
+    "negative_total": 0
+  },
+  "results": [
+    {
+      "id": "expanded-design-riscv-debug-001",
+      "knowledge_base": "semiconductor_chip_design_eda_ip",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "result_count": 4,
+      "top_score": 0.672300523519516,
+      "top_document": "riscv-debug-v1.0.md",
+      "missing_terms": []
+    },
+    {
+      "id": "expanded-materials-equipment-001",
+      "knowledge_base": "semiconductor_materials_equipment",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "result_count": 4,
+      "top_score": 0.47419146498044334,
+      "top_document": "nist-materials-equipment-vision-2023.md",
+      "missing_terms": []
+    },
+    {
+      "id": "expanded-process-metrology-001",
+      "knowledge_base": "semiconductor_process",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "result_count": 4,
+      "top_score": 0.4726564586162567,
+      "top_document": "nist-ir-8577.md",
+      "missing_terms": []
+    },
+    {
+      "id": "expanded-packaging-chiplet-001",
+      "knowledge_base": "semiconductor_packaging_testing",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "result_count": 4,
+      "top_score": 0.5063856393098831,
+      "top_document": "nist-ir-8577.md",
+      "missing_terms": []
+    }
+  ]
+}

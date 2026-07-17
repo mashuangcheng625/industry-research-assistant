@@ -1,0 +1,11 @@
+# 针对本项目 RAG 问答的本地生成模型配置。
+# 创建命令：ollama create industry-qwen3:4b -f backend/ollama/Modelfile.qwen3-4b
+FROM qwen3:4b-instruct
+
+# 给检索证据、会话历史和回答预留足够空间。
+PARAMETER num_ctx 8192
+
+# RAG 需要稳定复述证据，不需要高随机性。
+PARAMETER temperature 0.2
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.05

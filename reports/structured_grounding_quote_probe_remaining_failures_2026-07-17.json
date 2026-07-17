@@ -1,0 +1,520 @@
+{
+  "metadata": {
+    "generated_at": "2026-07-17T08:31:51+00:00",
+    "dataset": "../sample-data/semiconductor_rag_eval_regression.json",
+    "dataset_sha256": "8f363f7dc590e9a15c4fb9d77a4562ee5d834dda1d58f531b81eb5e2797a8aea",
+    "api_url": "http://127.0.0.1:8001/chat/completion",
+    "model_mode": "local",
+    "timeout_seconds": 120.0,
+    "max_latency_seconds": 20.0
+  },
+  "summary": {
+    "passed": 0,
+    "strict_passed": 0,
+    "quality_passed": 0,
+    "sla_passed": 3,
+    "total": 3,
+    "pass_rate": 0.0,
+    "quality_pass_rate": 0.0,
+    "sla_pass_rate": 1.0,
+    "average_latency_seconds": 10.213,
+    "p95_latency_seconds": 11.447,
+    "first_case_latency_seconds": 10.738,
+    "p50_latency_seconds": 10.738,
+    "max_latency_seconds": 11.447,
+    "gold_source_retrieval_hits": 3,
+    "gold_source_total": 3,
+    "gold_citation_hits": 0,
+    "citation_support_passed": 0,
+    "citation_support_total": 3,
+    "average_citation_completeness": 0.333,
+    "average_citation_support_coverage": 0.0,
+    "refusal_hits": 0,
+    "refusal_total": 0,
+    "error_cases": 0
+  },
+  "results": [
+    {
+      "id": "materials-metrology-009",
+      "domain": "半导体材料与设备",
+      "category": "跨段落题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 10.738,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 0.0,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "参考材料",
+          "reference materials"
+        ],
+        [
+          "缺陷",
+          "defects"
+        ],
+        [
+          "污染物",
+          "contaminants"
+        ],
+        [
+          "计量",
+          "metrology"
+        ]
+      ],
+      "citations": [
+        2,
+        6,
+        5
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": false,
+      "gold_citation_required": false,
+      "citation_completeness": 0.0,
+      "citation_support_coverage": 0.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "参考材料",
+            "reference materials"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "缺陷",
+            "defects"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "污染物",
+            "contaminants"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "计量",
+            "metrology"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "document_names": [
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md"
+      ],
+      "cited_document_names": [
+        "nist-chips-1000.md",
+        "nist-ir-8577.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "通过开发新的测量技术和标准，可以支持材料纯度、物理性能和来源的一致性，从而确保材料质量的可追溯性和可靠性",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "Develop measurement technologies, properties data, and standards focused on defect and contaminant identification to support uniform materials quality and traceability across the supply chain."
+                }
+              ]
+            },
+            {
+              "text": "需要建立标准的测量方法和数据交换协议，以解决当前半导体制造生态系统中缺乏标准化导致的一致性和效率问题",
+              "citation_ids": [
+                6
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "6": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 6,
+                  "quote": "There is a lack of standardized measurement methods and data exchange protocols across the semiconductor manufacturing ecosystem, leading to inconsistencies and inefficiencies."
+                }
+              ]
+            },
+            {
+              "text": "材料性能的评估需要结合物理性质和可预测性建模，特别是在先进封装中温度、压力和机械应力对长期可靠性和潜在电路损伤的影响仍不明确",
+              "citation_ids": [
+                5
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "5": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 5,
+                  "quote": "The effects of temperature, pressure, and mechanical stress during epoxy molding on long-term reliability and potential damage to circuits and components remain relatively unknown."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [
+            {
+              "claim_index": 2,
+              "reason": "citation_out_of_range",
+              "support_scores": {},
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 4,
+          "accepted_claim_count": 3,
+          "rejected_claim_count": 1,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 3,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 通过开发新的测量技术和标准，可以支持材料纯度、物理性能和来源的一致性，从而确保材料质量的可追溯性和可靠性。[[2]]\n- 需要建立标准的测量方法和数据交换协议，以解决当前半导体制造生态系统中缺乏标准化导致的一致性和效率问题。[[6]]\n- 根据当前证据，材料性能的评估需要结合物理性质和可预测性建模，特别是在先进封装中温度、压力和机械应力对长期可靠性和潜在电路损伤的影响仍不明确。[[5]]\n\n> 部分候选论断因未通过证据支持校验而未展示。"
+    },
+    {
+      "id": "process-inline-011",
+      "domain": "晶圆制造与前道工艺",
+      "category": "单文档事实题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 8.453,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        2,
+        2
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": false,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 0.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "在线计量",
+            "in-line metrology"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1,
+            2
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "高吞吐量",
+            "high-throughput"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "过程控制",
+            "process control"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            2
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "质量保证",
+            "quality assurance"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            2
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "document_names": [
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-chips-1000.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "高吞吐量晶圆制造需要 in-line metrology，因为它必须适用于在生产线上的高通量生产，并且能够提供实时结果",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.0606
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "in-line high-volume production, be non-destructive, and be able to provide results in real time."
+                }
+              ]
+            },
+            {
+              "text": "in-line metrology 对过程控制的作用是帮助识别、表征和缓解影响性能和质量的缺陷及其他问题",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.0303
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "Metrology is required to identify, characterize, and mitigate defects and other issues that impact performance and quality and provides product assurance at many stages of manufacturing."
+                }
+              ]
+            },
+            {
+              "text": "in-line metrology 对质量保证的作用是确保在制造过程的多个阶段提供产品保障",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.0357
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "provides product assurance at many stages of manufacturing."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 3,
+          "accepted_claim_count": 3,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 3,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 高吞吐量晶圆制造需要 in-line metrology，因为它必须适用于在生产线上的高通量生产，并且能够提供实时结果。[[1]]\n- in-line metrology 对过程控制的作用是帮助识别、表征和缓解影响性能和质量的缺陷及其他问题。[[2]]\n- in-line metrology 对质量保证的作用是确保在制造过程的多个阶段提供产品保障。[[2]]"
+    },
+    {
+      "id": "process-digital-twin-013",
+      "domain": "晶圆制造与前道工艺",
+      "category": "综合分析题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 11.447,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 0.0,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "数字孪生",
+          "digital twin"
+        ],
+        [
+          "真实世界数据",
+          "真实世界",
+          "real world"
+        ],
+        [
+          "物理世界",
+          "physical world"
+        ],
+        [
+          "控制",
+          "优化",
+          "control",
+          "optimization"
+        ]
+      ],
+      "citations": [],
+      "citation_ok": false,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": false,
+      "gold_citation_required": false,
+      "citation_completeness": 0.0,
+      "citation_support_coverage": 0.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "数字孪生",
+            "digital twin"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "真实世界数据",
+            "真实世界",
+            "real world"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "物理世界",
+            "physical world"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "控制",
+            "优化",
+            "control",
+            "optimization"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "document_names": [
+        "nist-ir-8577.md",
+        "nist-ir-8501.md",
+        "nist-ir-8577.md",
+        "nist-chips-1400-3.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md",
+        "nist-ir-8501.md",
+        "nist-ir-8501.md"
+      ],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "insufficient",
+          "accepted_claims": [],
+          "rejected_claims": [
+            {
+              "claim_index": 0,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "1": 0.0
+              },
+              "verified_quote_count": 0
+            },
+            {
+              "claim_index": 1,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "3": 0.0
+              },
+              "verified_quote_count": 0
+            },
+            {
+              "claim_index": 2,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "4": 0.0
+              },
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 3,
+          "accepted_claim_count": 0,
+          "rejected_claim_count": 3,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 0,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "当前候选回答未通过逐论断证据校验，无法基于可追溯证据给出结论。请补充资料或缩小问题范围后重试。"
+    }
+  ]
+}

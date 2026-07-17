@@ -1,0 +1,423 @@
+{
+  "started_at": "2026-07-17T07:54:37+00:00",
+  "finished_at": "2026-07-17T07:54:37+00:00",
+  "elapsed_seconds": 0.217,
+  "queue": "../data/semiconductor_sources/review/candidates-v2.jsonl",
+  "chunk_size": 1200,
+  "force": false,
+  "retry_incomplete": true,
+  "selected_domains": [
+    "chip_design_eda_ip",
+    "materials_equipment",
+    "packaging_testing",
+    "wafer_fabrication"
+  ],
+  "selected_candidate_ids": [],
+  "attempted": 40,
+  "status_counts": {
+    "skipped": 40
+  },
+  "total_chunks": 5256,
+  "results": [
+    {
+      "candidate_id": "nist-chips-1400-4",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "nist-chips-1400-4.md",
+      "status": "skipped",
+      "chunk_count": 70,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 10.9
+    },
+    {
+      "candidate_id": "nist-chips-1400-4",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "nist-chips-1400-4.md",
+      "status": "skipped",
+      "chunk_count": 70,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 4.0
+    },
+    {
+      "candidate_id": "nist-chips-1400-4",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "nist-chips-1400-4.md",
+      "status": "skipped",
+      "chunk_count": 70,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.8
+    },
+    {
+      "candidate_id": "nist-chips-1400-4",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "nist-chips-1400-4.md",
+      "status": "skipped",
+      "chunk_count": 70,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.6
+    },
+    {
+      "candidate_id": "nist-chips-1400-3",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "nist-chips-1400-3.md",
+      "status": "skipped",
+      "chunk_count": 96,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.6
+    },
+    {
+      "candidate_id": "nist-chips-1400-3",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "nist-chips-1400-3.md",
+      "status": "skipped",
+      "chunk_count": 96,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.7
+    },
+    {
+      "candidate_id": "nist-chips-1400-3",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "nist-chips-1400-3.md",
+      "status": "skipped",
+      "chunk_count": 96,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.6
+    },
+    {
+      "candidate_id": "nist-chips-1400-2",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "nist-chips-1400-2.md",
+      "status": "skipped",
+      "chunk_count": 89,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.6
+    },
+    {
+      "candidate_id": "nist-chips-1400-2",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "nist-chips-1400-2.md",
+      "status": "skipped",
+      "chunk_count": 89,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.5
+    },
+    {
+      "candidate_id": "nist-chips-1400-2",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "nist-chips-1400-2.md",
+      "status": "skipped",
+      "chunk_count": 89,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.5
+    },
+    {
+      "candidate_id": "nist-metrology-gaps-2023",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "nist-metrology-gaps-2023.md",
+      "status": "skipped",
+      "chunk_count": 86,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.5
+    },
+    {
+      "candidate_id": "nist-metrology-gaps-2023",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "nist-metrology-gaps-2023.md",
+      "status": "skipped",
+      "chunk_count": 86,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 4.0
+    },
+    {
+      "candidate_id": "nist-metrology-gaps-2023",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "nist-metrology-gaps-2023.md",
+      "status": "skipped",
+      "chunk_count": 86,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.7
+    },
+    {
+      "candidate_id": "nist-metrology-gaps-2023",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "nist-metrology-gaps-2023.md",
+      "status": "skipped",
+      "chunk_count": 86,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.8
+    },
+    {
+      "candidate_id": "nist-ir-8501",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "nist-ir-8501.md",
+      "status": "skipped",
+      "chunk_count": 93,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.8
+    },
+    {
+      "candidate_id": "nist-ir-8501",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "nist-ir-8501.md",
+      "status": "skipped",
+      "chunk_count": 93,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.7
+    },
+    {
+      "candidate_id": "nist-ir-8501",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "nist-ir-8501.md",
+      "status": "skipped",
+      "chunk_count": 93,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.9
+    },
+    {
+      "candidate_id": "nist-ir-8501",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "nist-ir-8501.md",
+      "status": "skipped",
+      "chunk_count": 93,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.6
+    },
+    {
+      "candidate_id": "nist-ir-8577",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "nist-ir-8577.md",
+      "status": "skipped",
+      "chunk_count": 149,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.6
+    },
+    {
+      "candidate_id": "nist-ir-8577",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "nist-ir-8577.md",
+      "status": "skipped",
+      "chunk_count": 149,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.6
+    },
+    {
+      "candidate_id": "nist-ir-8577",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "nist-ir-8577.md",
+      "status": "skipped",
+      "chunk_count": 149,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.6
+    },
+    {
+      "candidate_id": "nist-ir-8577",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "nist-ir-8577.md",
+      "status": "skipped",
+      "chunk_count": 149,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.4
+    },
+    {
+      "candidate_id": "nist-chips-1000",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "nist-chips-1000.md",
+      "status": "skipped",
+      "chunk_count": 72,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.5
+    },
+    {
+      "candidate_id": "nist-chips-1000",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "nist-chips-1000.md",
+      "status": "skipped",
+      "chunk_count": 72,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.7
+    },
+    {
+      "candidate_id": "nist-chips-1000",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "nist-chips-1000.md",
+      "status": "skipped",
+      "chunk_count": 72,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.9
+    },
+    {
+      "candidate_id": "nist-napmp-vision-2023",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "nist-napmp-vision-2023.md",
+      "status": "skipped",
+      "chunk_count": 24,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 4.2
+    },
+    {
+      "candidate_id": "nist-napmp-vision-2023",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "nist-napmp-vision-2023.md",
+      "status": "skipped",
+      "chunk_count": 24,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.8
+    },
+    {
+      "candidate_id": "nist-napmp-vision-2023",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "nist-napmp-vision-2023.md",
+      "status": "skipped",
+      "chunk_count": 24,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 4.1
+    },
+    {
+      "candidate_id": "nist-materials-equipment-vision-2023",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "nist-materials-equipment-vision-2023.md",
+      "status": "skipped",
+      "chunk_count": 37,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.7
+    },
+    {
+      "candidate_id": "nist-materials-equipment-vision-2023",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "nist-materials-equipment-vision-2023.md",
+      "status": "skipped",
+      "chunk_count": 37,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.8
+    },
+    {
+      "candidate_id": "riscv-privileged-20260120",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "riscv-privileged-20260120.md",
+      "status": "skipped",
+      "chunk_count": 750,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.7
+    },
+    {
+      "candidate_id": "riscv-unprivileged-20260120",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "riscv-unprivileged-20260120.md",
+      "status": "skipped",
+      "chunk_count": 1501,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.8
+    },
+    {
+      "candidate_id": "openroad-orfs-flow-variables-bea7dcd7",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "openroad-orfs-flow-variables-bea7dcd7.md",
+      "status": "skipped",
+      "chunk_count": 74,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 4.0
+    },
+    {
+      "candidate_id": "openroad-orfs-overview-bea7dcd7",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "openroad-orfs-overview-bea7dcd7.md",
+      "status": "skipped",
+      "chunk_count": 15,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.9
+    },
+    {
+      "candidate_id": "openroad-orfs-flow-tutorial-bea7dcd7",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "openroad-orfs-flow-tutorial-bea7dcd7.md",
+      "status": "skipped",
+      "chunk_count": 102,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.3
+    },
+    {
+      "candidate_id": "riscv-debug-v1.0",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "riscv-debug-v1.0.md",
+      "status": "skipped",
+      "chunk_count": 305,
+      "message": "已完成，未要求强制重建",
+      "elapsed_ms": 3.4
+    },
+    {
+      "candidate_id": "ucie-specifications",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "ucie-specifications.md",
+      "status": "skipped",
+      "chunk_count": 0,
+      "message": "未批准或无本地全文",
+      "elapsed_ms": 0.0
+    },
+    {
+      "candidate_id": "ucie-specifications",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "document": "ucie-specifications.md",
+      "status": "skipped",
+      "chunk_count": 0,
+      "message": "未批准或无本地全文",
+      "elapsed_ms": 0.0
+    },
+    {
+      "candidate_id": "ieee-irds-more-moore-2024",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "document": "ieee-irds-more-moore-2024.md",
+      "status": "skipped",
+      "chunk_count": 0,
+      "message": "未批准或无本地全文",
+      "elapsed_ms": 0.0
+    },
+    {
+      "candidate_id": "ieee-irds-more-moore-2024",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "document": "ieee-irds-more-moore-2024.md",
+      "status": "skipped",
+      "chunk_count": 0,
+      "message": "未批准或无本地全文",
+      "elapsed_ms": 0.0
+    }
+  ]
+}

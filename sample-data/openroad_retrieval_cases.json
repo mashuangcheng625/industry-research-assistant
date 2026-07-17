@@ -1,0 +1,23 @@
+[
+  {
+    "id": "openroad-flow-stages-001",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "OpenROAD 从 RTL 到 GDSII 的完整物理设计流程包含哪些阶段，分别使用什么工具？",
+    "expected_retrieval": true,
+    "expected_terms": ["RTL-to-GDS", "synthesis", "floorplan", "routing"]
+  },
+  {
+    "id": "openroad-ppa-tuning-001",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "如何使用 PLACE_DENSITY、CORE_UTILIZATION 和时钟周期调优 OpenROAD 的 PPA 与 QoR？",
+    "expected_retrieval": true,
+    "expected_terms": ["PLACE_DENSITY", "CORE_UTILIZATION", "clock"]
+  },
+  {
+    "id": "openroad-signoff-debug-001",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "OpenROAD 在详细布线和 signoff 阶段如何检查 DRC、LVS、拥塞与时序报告？",
+    "expected_retrieval": true,
+    "expected_terms": ["DRC", "LVS", "congestion"]
+  }
+]

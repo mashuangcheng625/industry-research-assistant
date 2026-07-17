@@ -1,0 +1,446 @@
+{
+  "summary": {
+    "passed": 7,
+    "total": 20,
+    "positive_hits": 16,
+    "positive_total": 16,
+    "negative_rejections": 4,
+    "negative_total": 4,
+    "gold_source_hits": 10,
+    "gold_source_total": 16
+  },
+  "results": [
+    {
+      "id": "design-gui-021",
+      "domain": "芯片设计与EDA/IP",
+      "category": "单文档事实题",
+      "knowledge_base": "semiconductor_chip_design_eda_ip",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": true,
+      "result_count": 6,
+      "top_score": 0.6432593671899093,
+      "top_document": "openroad-orfs-flow-tutorial-bea7dcd7.md",
+      "retrieved_documents": [
+        "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      ],
+      "missing_terms": [
+        "timing report",
+        "DRC Viewer"
+      ],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "design-sdc-024",
+      "domain": "芯片设计与EDA/IP",
+      "category": "专业参数题",
+      "knowledge_base": "semiconductor_chip_design_eda_ip",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.6091534656027089,
+      "top_document": "openroad-orfs-flow-tutorial-bea7dcd7.md",
+      "retrieved_documents": [
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md"
+      ],
+      "missing_terms": [
+        "clock period"
+      ],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "design-ppa-report-027",
+      "domain": "芯片设计与EDA/IP",
+      "category": "综合分析题",
+      "knowledge_base": "semiconductor_chip_design_eda_ip",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.6015277082269842,
+      "top_document": "openroad-orfs-flow-tutorial-bea7dcd7.md",
+      "retrieved_documents": [
+        "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      ],
+      "missing_terms": [],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "design-flow-cross-030",
+      "domain": "芯片设计与EDA/IP",
+      "category": "跨段落题",
+      "knowledge_base": "semiconductor_chip_design_eda_ip",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.4949186172174371,
+      "top_document": "openroad-orfs-flow-tutorial-bea7dcd7.md",
+      "retrieved_documents": [
+        "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      ],
+      "missing_terms": [
+        "clock tree"
+      ],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "design-negative-033",
+      "domain": "芯片设计与EDA/IP",
+      "category": "无证据题",
+      "knowledge_base": "semiconductor_chip_design_eda_ip",
+      "expected_retrieval": false,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "gold_source_ok": true,
+      "result_count": 0,
+      "top_score": null,
+      "top_document": null,
+      "retrieved_documents": [],
+      "missing_terms": [],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "materials-facilities-036",
+      "domain": "半导体材料与设备",
+      "category": "单文档事实题",
+      "knowledge_base": "semiconductor_materials_equipment",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.4489453285932541,
+      "top_document": "nist-materials-equipment-vision-2023.md",
+      "retrieved_documents": [
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "missing_terms": [
+        "infrastructure",
+        "workforce",
+        "cybersecurity"
+      ],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "materials-purity-039",
+      "domain": "半导体材料与设备",
+      "category": "专业参数题",
+      "knowledge_base": "semiconductor_materials_equipment",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.44628100097179413,
+      "top_document": "nist-metrology-gaps-2023.md",
+      "retrieved_documents": [
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md"
+      ],
+      "missing_terms": [
+        "trace impurities"
+      ],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "materials-security-042",
+      "domain": "半导体材料与设备",
+      "category": "综合分析题",
+      "knowledge_base": "semiconductor_materials_equipment",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.5074583292634863,
+      "top_document": "nist-ir-8501.md",
+      "retrieved_documents": [
+        "nist-ir-8501.md",
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "missing_terms": [],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "materials-trace-cross-045",
+      "domain": "半导体材料与设备",
+      "category": "跨段落题",
+      "knowledge_base": "semiconductor_materials_equipment",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": false,
+      "result_count": 5,
+      "top_score": 0.48704977333545685,
+      "top_document": "nist-chips-1400-3.md",
+      "retrieved_documents": [
+        "nist-chips-1400-3.md"
+      ],
+      "missing_terms": [
+        "purity",
+        "metrology",
+        "supplier"
+      ],
+      "missing_gold_sources": [
+        "nist-metrology-gaps-2023.md"
+      ]
+    },
+    {
+      "id": "materials-negative-048",
+      "domain": "半导体材料与设备",
+      "category": "无证据题",
+      "knowledge_base": "semiconductor_materials_equipment",
+      "expected_retrieval": false,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "gold_source_ok": true,
+      "result_count": 0,
+      "top_score": null,
+      "top_document": null,
+      "retrieved_documents": [],
+      "missing_terms": [],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "process-modeling-051",
+      "domain": "晶圆制造与前道工艺",
+      "category": "单文档事实题",
+      "knowledge_base": "semiconductor_process",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": false,
+      "result_count": 7,
+      "top_score": 0.47043098509311676,
+      "top_document": "nist-chips-1000.md",
+      "retrieved_documents": [
+        "nist-chips-1000.md",
+        "nist-ir-8577.md"
+      ],
+      "missing_terms": [
+        "experimental data"
+      ],
+      "missing_gold_sources": [
+        "nist-metrology-gaps-2023.md"
+      ]
+    },
+    {
+      "id": "process-inline-metrics-054",
+      "domain": "晶圆制造与前道工艺",
+      "category": "专业参数题",
+      "knowledge_base": "semiconductor_process",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": false,
+      "result_count": 7,
+      "top_score": 0.4152025133371353,
+      "top_document": "nist-ir-8577.md",
+      "retrieved_documents": [
+        "nist-ir-8577.md"
+      ],
+      "missing_terms": [
+        "in-line metrology",
+        "throughput",
+        "sensitivity"
+      ],
+      "missing_gold_sources": [
+        "nist-metrology-gaps-2023.md"
+      ]
+    },
+    {
+      "id": "process-control-057",
+      "domain": "晶圆制造与前道工艺",
+      "category": "综合分析题",
+      "knowledge_base": "semiconductor_process",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.5919933095243242,
+      "top_document": "nist-ir-8501.md",
+      "retrieved_documents": [
+        "nist-ir-8501.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md"
+      ],
+      "missing_terms": [
+        "quality assurance"
+      ],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "process-loop-cross-060",
+      "domain": "晶圆制造与前道工艺",
+      "category": "跨段落题",
+      "knowledge_base": "semiconductor_process",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": false,
+      "result_count": 7,
+      "top_score": 0.45233309268951416,
+      "top_document": "nist-ir-8577.md",
+      "retrieved_documents": [
+        "nist-ir-8577.md",
+        "nist-chips-1400-2.md",
+        "nist-ir-8501.md"
+      ],
+      "missing_terms": [
+        "in-line",
+        "feedback"
+      ],
+      "missing_gold_sources": [
+        "nist-metrology-gaps-2023.md"
+      ]
+    },
+    {
+      "id": "process-negative-063",
+      "domain": "晶圆制造与前道工艺",
+      "category": "无证据题",
+      "knowledge_base": "semiconductor_process",
+      "expected_retrieval": false,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "gold_source_ok": true,
+      "result_count": 0,
+      "top_score": null,
+      "top_document": null,
+      "retrieved_documents": [],
+      "missing_terms": [],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "packaging-purpose-066",
+      "domain": "封装与测试",
+      "category": "单文档事实题",
+      "knowledge_base": "semiconductor_packaging_testing",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": false,
+      "result_count": 7,
+      "top_score": 0.43888118863105774,
+      "top_document": "nist-ir-8577.md",
+      "retrieved_documents": [
+        "nist-ir-8577.md",
+        "nist-ir-8501.md"
+      ],
+      "missing_terms": [
+        "mechanically",
+        "inter-chip communication"
+      ],
+      "missing_gold_sources": [
+        "nist-napmp-vision-2023.md"
+      ]
+    },
+    {
+      "id": "packaging-substrate-069",
+      "domain": "封装与测试",
+      "category": "专业参数题",
+      "knowledge_base": "semiconductor_packaging_testing",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.42000724375247955,
+      "top_document": "nist-ir-8577.md",
+      "retrieved_documents": [
+        "nist-ir-8577.md",
+        "nist-napmp-vision-2023.md"
+      ],
+      "missing_terms": [],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "packaging-codesign-072",
+      "domain": "封装与测试",
+      "category": "综合分析题",
+      "knowledge_base": "semiconductor_packaging_testing",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": false,
+      "result_count": 7,
+      "top_score": 0.45092180371284485,
+      "top_document": "nist-ir-8577.md",
+      "retrieved_documents": [
+        "nist-ir-8577.md",
+        "nist-chips-1400-3.md"
+      ],
+      "missing_terms": [
+        "built-in test"
+      ],
+      "missing_gold_sources": [
+        "nist-napmp-vision-2023.md"
+      ]
+    },
+    {
+      "id": "packaging-chain-cross-075",
+      "domain": "封装与测试",
+      "category": "跨段落题",
+      "knowledge_base": "semiconductor_packaging_testing",
+      "expected_retrieval": true,
+      "passed": false,
+      "retrieval_ok": true,
+      "terms_ok": false,
+      "gold_source_ok": true,
+      "result_count": 7,
+      "top_score": 0.4723055362701416,
+      "top_document": "nist-chips-1000.md",
+      "retrieved_documents": [
+        "nist-chips-1000.md",
+        "nist-napmp-vision-2023.md",
+        "nist-ir-8577.md"
+      ],
+      "missing_terms": [
+        "assembly"
+      ],
+      "missing_gold_sources": []
+    },
+    {
+      "id": "packaging-negative-078",
+      "domain": "封装与测试",
+      "category": "无证据题",
+      "knowledge_base": "semiconductor_packaging_testing",
+      "expected_retrieval": false,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "gold_source_ok": true,
+      "result_count": 0,
+      "top_score": null,
+      "top_document": null,
+      "retrieved_documents": [],
+      "missing_terms": [],
+      "missing_gold_sources": []
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "datasets": [
+    "sample-data/semiconductor_rag_eval_80.json"
+  ],
+  "case_count": 80,
+  "domain_counts": {
+    "芯片设计与EDA/IP": 20,
+    "半导体材料与设备": 20,
+    "晶圆制造与前道工艺": 20,
+    "封装与测试": 20
+  },
+  "category_counts": {
+    "单文档事实题": 16,
+    "专业参数题": 16,
+    "综合分析题": 16,
+    "跨段落题": 16,
+    "无证据题": 16
+  },
+  "split_counts": {
+    "regression": 20,
+    "development": 20,
+    "test": 20,
+    "hidden": 20
+  },
+  "errors": 0,
+  "warnings": 0,
+  "issues": []
+}

@@ -1,0 +1,30 @@
+[
+  {
+    "id": "expanded-design-riscv-debug-001",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V Debug Module Interface DMI 和 JTAG Debug Transport Module 如何支持硬件调试？",
+    "expected_retrieval": true,
+    "expected_terms": ["Debug Transport Module", "dmi"]
+  },
+  {
+    "id": "expanded-materials-equipment-001",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "半导体制造材料与设备面临哪些供应链瓶颈，EUV 光刻设备需要哪些关键技术协同？",
+    "expected_retrieval": true,
+    "expected_terms": ["EUV", "supply"]
+  },
+  {
+    "id": "expanded-process-metrology-001",
+    "knowledge_base": "semiconductor_process",
+    "question": "先进半导体制造在三维结构、纳米材料和设备软件互操作方面有哪些计量缺口？",
+    "expected_retrieval": true,
+    "expected_terms": ["metrology", "Gap"]
+  },
+  {
+    "id": "expanded-packaging-chiplet-001",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "先进封装的 chiplet、热管理、翘曲、缺陷检测和对准面临哪些技术挑战？",
+    "expected_retrieval": true,
+    "expected_terms": ["chiplet", "thermal management"]
+  }
+]

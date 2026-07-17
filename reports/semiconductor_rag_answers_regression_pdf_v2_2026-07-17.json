@@ -1,0 +1,888 @@
+{
+  "summary": {
+    "passed": 20,
+    "total": 20,
+    "pass_rate": 1.0,
+    "average_latency_seconds": 8.97,
+    "p95_latency_seconds": 17.053,
+    "gold_source_retrieval_hits": 16,
+    "gold_source_total": 16,
+    "gold_citation_hits": 16
+  },
+  "results": [
+    {
+      "id": "design-flow-001",
+      "domain": "芯片设计与EDA/IP",
+      "category": "单文档事实题",
+      "passed": true,
+      "latency_seconds": 17.053,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      ],
+      "cited_document_names": [
+        "openroad-orfs-overview-bea7dcd7.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "OpenROAD 从 RTL 到 GDSII 的物理设计流程主要包括以下阶段：  \nSynthesis（综合）：输入为 RTL、SDC、.lib 和 .lef 文件，使用 Yosys 进行逻辑综合，输出为网表和 SDC 文件 [[1]]。  \nFloorplan（布局规划）：包括初始布局、IO 布局（随机放置）、基于时序的混合尺寸布局、宏放置、Tapcell 和 welltie 插入以及电源分配网络（PDN）生成 [[1]]。  \nPlacement（布线）：包括无 IO 放置的全局布局、优化的 IO 放置、带有已放置 IO 的全局布局、尺寸调整与缓冲，以及详细布局 [[1]]。  \nCTS（时钟树综合）：进行时序优化和填充单元插入 [[1]]。  \nRouting（布线）：包括全局布线和详细布线 [[1]]。  \nFinishing（收尾）：包括金属填充插入、时序签核报告、生成 GDSII 文件（使用 KLayout）、以及 DRC/LVS 检查（使用 KLayout）[[1]]。  \n\n这些阶段共同构成了从 RTL 到 GDSII 的完整物理设计流程。"
+    },
+    {
+      "id": "design-ppa-002",
+      "domain": "芯片设计与EDA/IP",
+      "category": "专业参数题",
+      "passed": true,
+      "latency_seconds": 12.45,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 8,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        6
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md"
+      ],
+      "cited_document_names": [
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "在 OpenROAD 流程中：\n\n- **PLACE_DENSITY** 表示标准单元或宏的放置密度（placement density），用于控制布局时单元的分布密集程度。其值范围通常在 0 到 1 之间，例如 0.50 或 0.60，较高的值表示更稀疏的分布，较低的值则表示更密集的分布[[3]]。该变量可通过修改 `config.mk` 文件中的默认值或通过命令行参数进行设置。\n\n- **CORE_UTILIZATION** 表示核心区域的利用率百分比（0–100），用于定义设计中核心区域的使用程度，影响布局时的单元分布和密度策略[[3]]。例如，当其从 20 提升至 40 时，会显著改变标准单元的放置方式，使其分布更广泛[[3]]。\n\n关于如何设置变量覆盖默认值：\n\n1. **命令行设置**：可通过在运行 `make` 命令时直接指定参数来覆盖默认值，例如：`make PLACE_DENSITY=0.5`。这种方式具有最高优先级[[1]]。\n\n2. **环境变量设置**：通过导出环境变量（如 `export PLACE_DENSITY=0.5`）来定义变量，若未被命令行覆盖，则使用该值[[1]]。\n\n3. **配置文件设置**：在 `config.mk` 文件中使用 `export VARIABLE?=default_value` 语法定义默认值。当变量在命令行或环境变量中被定义后，将优先于该默认值[[1]]。\n\n实际使用的变量值遵循 `make` 的优先级规则：  \n- 首先使用 `Makefile` 或包含文件中的定义（优先级顺序为：DESIGN_CONFIG 文件 > Makefile 定义 > 平台/设计特定变量）；  \n- 其次是命令行参数；  \n- 最后是环境变量[[1]]。\n\n因此，若需覆盖默认值，应优先通过命令行或环境变量设置，并确保 `config.mk` 中已定义该变量的默认值（使用 `?=` 语法）[[6]]。"
+    },
+    {
+      "id": "design-debug-003",
+      "domain": "芯片设计与EDA/IP",
+      "category": "综合分析题",
+      "passed": true,
+      "latency_seconds": 11.279,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        2,
+        5,
+        7,
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-unprivileged-20260120.md",
+        "riscv-unprivileged-20260120.md"
+      ],
+      "cited_document_names": [
+        "riscv-debug-v1.0.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "在 RISC-V 外部调试中，Debug Module Interface（DMI）与 JTAG Debug Transport Module（JTAG DTM）通过以下方式配合：\n\nJTAG Debug Transport Module（JTAG DTM）基于标准的 JTAG Test Access Port（TAP），提供对 Debug Module Interface（DMI）的访问。具体而言，JTAG TAP 通过指令寄存器（IR）选择特定的 JTAG 指令，然后通过数据寄存器（DR）访问对应寄存器。其中，JTAG DTM 所使用的 TAP 必须具有至少 5 位的 IR，以支持标准的 JTAG 指令集，如 BYPASS 和 IDCODE，同时保留空间用于其他标准指令[[2]]。\n\n当调试器通过 JTAG 与目标芯片通信时，它首先通过 TAP 的 IR 选择一个指令（例如 IDCODE 或 BYPASS），然后通过 DR 读写寄存器。JTAG DTM 提供的寄存器包括 DTM Control and Status（dtmcs）和 Debug Module Interface Access（dmi），其中 dmi 寄存器位于地址 0x11，允许调试器访问 DMI，从而与内部调试模块交互[[5]]。\n\nDMI 是一个用于在调试过程中与处理器内部状态通信的接口，它接收来自调试器的操作指令（op），并执行相应的操作（如读取或写入内存地址），其结果通过数据寄存器（data）返回。例如，在 Update-DR 操作中，调试器设置 address 和 data 字段，并通过 op 字段指定操作类型（如读取或无操作），DMI 会根据指令执行相应动作，并在 Capture-DR 中返回结果[[7]]。\n\n因此，JTAG DTM 作为外部接口，负责将调试命令通过 JTAG 传输到目标芯片，并通过 TAP 与 DMI 通信，而 DMI 则作为内部接口，处理实际的调试操作（如读写内存、执行程序等），实现对处理器状态的访问和控制[[1]]。"
+    },
+    {
+      "id": "design-pmp-004",
+      "domain": "芯片设计与EDA/IP",
+      "category": "跨段落题",
+      "passed": true,
+      "latency_seconds": 17.175,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        8,
+        1,
+        7,
+        9,
+        5,
+        5,
+        6,
+        4
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md"
+      ],
+      "cited_document_names": [
+        "riscv-privileged-20260120.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "RISC-V Physical Memory Protection（PMP）通过PMP CSR、地址匹配和锁定机制限制访存，具体如下：\n\n1. **PMP CSR 机制**：  \n   PMP配置由8位配置寄存器（pmpcfg）和一个MXLEN位的地址寄存器（pmpaddr）组成。对于RV32，共16个配置寄存器（pmpcfg0–pmpcfg15）对应64个PMP条目；对于RV64，仅使用偶数编号的配置寄存器（如pmpcfg0、pmpcfg2等）来配置PMP条目，奇数编号的寄存器（如pmpcfg1）被禁止使用。每个PMP条目通过其配置寄存器中的R、W、X位定义访问权限，分别表示读、写和执行权限，当任一权限位为0时，对应访问类型被拒绝[[8]]。此外，所有PMP CSR字段均为WARL（Write-Access-Restricted or Write-Arbitrary-Last），且仅可由M模式访问[[1]]。\n\n2. **地址匹配机制**：  \n   地址匹配通过PMP配置寄存器中的A字段实现，支持三种模式：OFF（禁用）、TOR（顶部边界）和NA4（自然对齐四字节区域）。当A=0时，该条目被禁用；A=1表示TOR模式，即匹配从某个地址到其上界的所有范围；A=2表示NA4模式，即支持自然对齐的四字节区域；A=3则对应NAPOT模式（自然对齐的2^G字节区域），支持更粗粒度的区域划分[[7]]。这些模式均以四字节为最小粒度，确保访问权限的精确控制[[9]]。\n\n3. **锁定机制**：  \n   通过设置L位可锁定PMP条目。当L位被置为1时，该条目被锁定，后续对配置寄存器（pmpcfg）和地址寄存器（pmpaddr）的写入操作将被忽略[[5]]。此外，若L位为1，则其R/W/X权限不仅适用于S和U模式，也扩展至M模式，从而在M模式下强制执行访问权限检查[[5]]。锁定状态在hart复位前保持不变，且一旦锁定，即使A字段设置为OFF，也不会影响PMP条目的有效性[[6]]。\n\n综上，PMP通过CSR配置权限、地址匹配定义访问范围、锁定机制防止恶意修改，共同实现对物理内存访问的细粒度控制。所有PMP检查均在处理器层面精确触发异常，确保安全性[[4]]。"
+    },
+    {
+      "id": "design-negative-005",
+      "domain": "芯片设计与EDA/IP",
+      "category": "无证据题",
+      "passed": true,
+      "latency_seconds": 0.881,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 0,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": null,
+      "errors": [],
+      "answer": "当前知识库未检索到足够相关的资料，无法基于可追溯证据回答该问题。请补充相关文档，或调整问题的范围后重试。"
+    },
+    {
+      "id": "materials-euv-006",
+      "domain": "半导体材料与设备",
+      "category": "单文档事实题",
+      "passed": true,
+      "latency_seconds": 5.778,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 8,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md",
+        "nist-chips-1400-3.md"
+      ],
+      "cited_document_names": [
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "开发极端紫外（EUV）光刻工具需要设备厂商与领先芯片制造商之间的协同优化，包括光罩、光刻胶和电子设计自动化软件等多个环节的共同调整。这种协同关系源于先进芯片制造过程中对工艺精度和良率的极高要求，而这些要求只有通过长期的测试和反馈才能实现。芯片制造商作为最终产品需求方，能够提供真实生产环境下的性能数据与使用挑战，帮助设备厂商不断改进工具的设计与稳定性，从而确保EUV光刻技术在实际生产中具备足够的可靠性和可扩展性[[1]]。"
+    },
+    {
+      "id": "materials-neon-007",
+      "domain": "半导体材料与设备",
+      "category": "专业参数题",
+      "passed": true,
+      "latency_seconds": 6.428,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 8,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        4,
+        4
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-chips-1000.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "氖气等上游输入的地理集中会增加半导体供应链对特定地区供应中断的脆弱性，从而带来供应风险。例如，2022年乌克兰生产了全球约一半的氖气，这种高度集中的供应情况使美国在面临地缘政治或突发事件时，容易受到供应短缺的影响[[4]]。此外，美国对中国的依赖也体现在多个上游输入（如稀土元素和镓）上，这进一步暴露了其供应链因地理集中而产生的风险[[4]]。这种地理集中不仅可能导致价格剧烈波动，还可能使整个半导体制造过程面临中断或质量下降的风险。"
+    },
+    {
+      "id": "materials-facility-008",
+      "domain": "半导体材料与设备",
+      "category": "综合分析题",
+      "passed": true,
+      "latency_seconds": 9.728,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 10,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        5,
+        3,
+        8,
+        10,
+        10,
+        3
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-ir-8501.md"
+      ],
+      "cited_document_names": [
+        "nist-materials-equipment-vision-2023.md",
+        "nist-ir-8501.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "在建设半导体材料与制造设备设施时，除产能外，还应同时规划以下供应链、人才和安全能力：\n\n- 供应链方面：必须列出并绘制所有关键供应商，并采用技术手段管理供应链风险，例如开展供应链压力测试分析和定期进行第二级及更远层级供应商的供应链映射[[1]]。此外，需建立安全的跨行业供应链信息共享机制，以提升整体供应链透明度与韧性[[5]]。\n\n- 人才方面：应致力于构建一支技能全面且多元化的劳动力队伍（workforce），以支持半导体制造的持续创新与高效运营[[3]]。\n\n- 安全能力方面：需强化运营安全、供应链安全和网络安全（cybersecurity）[[8]]。其中，网络安全重点在于通过安全设计、测试和供应链完整性措施，防范硬件漏洞被利用的风险[[10]]；同时，应建立可量化的微电子部件与系统安全验证指标（Microelectronics Quantifiable Assurance, MQA），以提升安全评估的科学性[[10]]。\n\n此外，为应对关键材料与设备的地理集中风险，需推动供应商多元化，并通过与盟友和伙伴的双边或多边合作，共同分担供应缺口风险[[3]]。"
+    },
+    {
+      "id": "materials-metrology-009",
+      "domain": "半导体材料与设备",
+      "category": "跨段落题",
+      "passed": true,
+      "latency_seconds": 11.543,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 10,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        2,
+        4,
+        1,
+        7,
+        4,
+        5,
+        9,
+        3
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md"
+      ],
+      "cited_document_names": [
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-ir-8577.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "先进半导体材料的缺陷、污染物和材料性能应通过以下方式评估：\n\n- 开发新型测量技术和标准，以满足半导体材料纯度、物理性质和来源追溯的日益严格要求[[2]]。  \n- 建立标准参考材料（Standard Reference Materials, SRMs），用于痕量杂质检测和材料的参考数据，包括材料的热物性参数[[4]]。  \n- 采用高分辨率、非破坏性的快速检测技术，用于表征缺陷和杂质，并将其与器件性能和可靠性相关联[[1]]。  \n- 通过计量方法对材料表面、埋入特征、界面及器件进行物理性质表征，提升测量的分辨率、灵敏度、准确性和通量[[7]]。  \n- 建立可跨材料供应链使用的数据评估与关联机制，以支持标准制定和来源追溯[[4]]。  \n- 开发用于先进封装中界面和亚表面互连结构（如翘曲、空洞、应力、粘附性、可靠性）的原位、快速测量与验证方法，提高通量和分辨率[[5]]。  \n- 建立标准化的测量方法和数据交换协议，以减少供应链中的不一致性和效率低下问题[[9]]。\n\n这些计量方法和参考材料将有助于确保材料质量的一致性、可追溯性，并支持半导体制造过程中的高可靠性和高产量[[3]]。"
+    },
+    {
+      "id": "materials-negative-010",
+      "domain": "半导体材料与设备",
+      "category": "无证据题",
+      "passed": true,
+      "latency_seconds": 0.884,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 0,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": null,
+      "errors": [],
+      "answer": "当前知识库未检索到足够相关的资料，无法基于可追溯证据回答该问题。请补充相关文档，或调整问题的范围后重试。"
+    },
+    {
+      "id": "process-inline-011",
+      "domain": "晶圆制造与前道工艺",
+      "category": "单文档事实题",
+      "passed": true,
+      "latency_seconds": 9.238,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 10,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        4,
+        5,
+        2,
+        5
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "高吞吐量晶圆制造需要 in-line metrology，是因为在大规模、连续的生产过程中，必须实时监测和评估材料与器件的关键物理属性，以确保每一批次产品的性能一致性与可靠性。in-line metrology 能够在制造流程中多个关键节点进行非破坏性、高频率的测量，从而及时发现偏差或缺陷，避免不良品流入后续工序[[4]]。\n\n这种实时测量对于过程控制的作用体现在：能够提供即时反馈，帮助调整工艺参数（如温度、压力、沉积速率等），实现对制造过程的动态优化与闭环控制，从而提高良率和设备利用率[[5]]。\n\n在质量保证方面，in-line metrology 可以持续验证晶圆层间结构、尺寸精度、材料纯度及表面特性是否符合设计规范，确保产品在整个制造链条中保持高质量标准，并为最终产品的性能和可靠性提供可追溯的数据支持[[2]]。此外，它还能支持缺陷根因分析，助力识别并解决影响质量的关键问题[[5]]。"
+    },
+    {
+      "id": "process-3d-012",
+      "domain": "晶圆制造与前道工艺",
+      "category": "专业参数题",
+      "passed": true,
+      "latency_seconds": 11.84,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 10,
+      "term_group_coverage": 0.75,
+      "coverage_ok": true,
+      "missing_term_groups": [
+        [
+          "内部互连",
+          "internal 3D"
+        ]
+      ],
+      "citations": [
+        1,
+        1,
+        1,
+        3,
+        3,
+        3,
+        3
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1400-3.md"
+      ],
+      "cited_document_names": [
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "三维器件和内部3D结构需要新的计量方法，是因为在先进节点制造中，随着器件复杂性的增加，每个原子的位置和类型都需要被精确知晓，以满足系统性能持续提升的需求[[1]]。传统的二维计量方法难以有效穿透多层材料和微小通道，且无法充分表征三维结构中的内部特征[[1]]。此外，由于3D结构包含多种材料/薄膜、多层结构以及细小的通道孔，其内部特征的表征变得愈发困难，而目前没有单一的计量工具能够完成所有必要的测量任务[[1]]。\n\n应关注的界面包括：芯片间集成界面、封装内部接口、器件与基板之间的界面、不同材料之间的界面（如薄膜与衬底）、以及在制造过程中形成的界面（如连接层与金属层之间的界面）[[3]]。这些界面的表征对于确保电气性能、机械稳定性和可靠性至关重要。\n\n应重点关注的内部缺陷包括：空洞（voids）、应力（stresses）、附着力（adhesion）、翘曲（warpage）、亚表面互连结构缺陷以及埋入式特征的完整性[[3]]。这些缺陷可能影响器件的长期可靠性和功能表现，因此需要通过高分辨率、高通量的在位（in situ）测量方法进行实时检测与验证[[3]]。\n\n上述内容涉及的计量需求已明确指向对内部3D结构和关键界面的物理特性、材料行为及集成过程的综合表征，强调了发展新型计量工具与标准的重要性[[3]]。"
+    },
+    {
+      "id": "process-digital-twin-013",
+      "domain": "晶圆制造与前道工艺",
+      "category": "综合分析题",
+      "passed": true,
+      "latency_seconds": 7.596,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 0.75,
+      "coverage_ok": true,
+      "missing_term_groups": [
+        [
+          "真实世界数据",
+          "真实世界",
+          "real world"
+        ]
+      ],
+      "citations": [
+        3,
+        1,
+        4,
+        6
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-ir-8577.md",
+        "nist-ir-8501.md",
+        "nist-ir-8577.md",
+        "nist-chips-1400-3.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md",
+        "nist-ir-8501.md",
+        "nist-ir-8501.md"
+      ],
+      "cited_document_names": [
+        "nist-ir-8577.md",
+        "nist-chips-1400-3.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "数字孪生通过持续的双向通信，将真实制造数据、虚拟模型与物理世界连接成一个反馈闭环。具体而言，物联网（IoT）传感器实时采集物理系统中的数据，并将其传输至虚拟模型中，使虚拟模型能够动态更新并准确反映物理系统的状态[[3]]。在此基础上，虚拟模型基于收集的数据进行分析和预测，生成优化建议或控制指令，这些信息通过反馈机制发送回物理系统，用于调整运行参数、执行维护操作或优化生产流程[[1]]。这种双向交互确保了制造过程能够实时响应变化条件，实现预测性维护、生产调度优化以及主动决策，从而提升整体运营效率和可靠性[[4]]。此外，该闭环依赖于数据的持续同步与高质量采集，以保障虚拟模型对物理系统的准确映射和有效决策支持[[6]]。"
+    },
+    {
+      "id": "process-interoperability-014",
+      "domain": "晶圆制造与前道工艺",
+      "category": "跨段落题",
+      "passed": true,
+      "latency_seconds": 11.861,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        4,
+        2,
+        7
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-ir-8577.md",
+        "nist-chips-1400-2.md",
+        "nist-chips-1400-3.md",
+        "nist-ir-8577.md",
+        "nist-chips-1400-2.md",
+        "nist-chips-1400-2.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-ir-8577.md",
+        "nist-chips-1400-2.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "晶圆厂需要设备与软件互操作标准，是因为在制造过程中，不同来源的设备和软件系统往往采用不同的数据格式、通信协议和模型结构，这会导致信息孤岛，阻碍实时数据共享与协同决策。通过建立统一的互操作标准，可以确保来自不同供应商的设备和软件之间能够高效、安全地交换数据，实现跨平台的信息集成[[1]]。\n\n这种互操作性直接支持制造自动化，因为它使得物理制造过程（如工艺步骤、设备运行状态）可以通过数字孪生模型进行实时监控与模拟。在这一过程中，设备采集的数据被传输到虚拟模型中，用于预测故障、优化生产调度，并将分析结果反馈至实际系统以调整运行参数[[4]]。例如，OPC UA（Open Platform Communications Unified Architecture）作为一种机器对机器的通信协议，提供了安全可靠的数据交换能力，能够将异构数据转化为统一的信息模型，从而支撑自动化系统的闭环控制[[2]]。\n\n此外，互操作标准不仅促进数据交换，还保障了数据完整性、安全性和可追溯性，尤其在涉及知识产权保护和材料全生命周期管理的场景中至关重要[[7]]。因此，设备与软件之间的互操作标准是实现高效、智能、可扩展制造自动化的核心基础。"
+    },
+    {
+      "id": "process-negative-015",
+      "domain": "晶圆制造与前道工艺",
+      "category": "无证据题",
+      "passed": true,
+      "latency_seconds": 1.294,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 0,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": null,
+      "errors": [],
+      "answer": "当前知识库未检索到足够相关的资料，无法基于可追溯证据回答该问题。请补充相关文档，或调整问题的范围后重试。"
+    },
+    {
+      "id": "packaging-scaling-016",
+      "domain": "封装与测试",
+      "category": "单文档事实题",
+      "passed": true,
+      "latency_seconds": 8.01,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-napmp-vision-2023.md",
+        "nist-napmp-vision-2023.md",
+        "nist-napmp-vision-2023.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md"
+      ],
+      "cited_document_names": [
+        "nist-napmp-vision-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "在先进封装中，“scale-down”通常指的是缩小封装内特征尺寸，即减小芯片或组件的物理尺寸，以实现更紧凑的设计和更高的集成密度；“scale-out”则指的是在基板上集成更多的芯片，通过增加芯片数量来提升系统性能和功能[[1]]。  \n\n两者需要协同，是因为“scale-down”与“scale-out”分别对应了尺寸缩减和功能扩展两个关键维度，而先进封装的性能提升依赖于这两者的结合：一方面，缩小特征尺寸有助于降低功耗、减小物理 footprint 并提高集成度；另一方面，增加芯片数量可以增强系统处理能力，满足高性能计算（HPC）、人工智能（AI）等应用的需求。这种协同关系使得封装技术能够在保持高密度的同时，实现更高效的功能扩展与性能优化，从而推动整体系统在性能、功耗和成本之间的平衡[[1]]。"
+    },
+    {
+      "id": "packaging-thermal-017",
+      "domain": "封装与测试",
+      "category": "专业参数题",
+      "passed": true,
+      "latency_seconds": 13.641,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        1,
+        2,
+        2,
+        1,
+        2
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-napmp-vision-2023.md",
+        "nist-ir-8577.md",
+        "nist-napmp-vision-2023.md",
+        "nist-napmp-vision-2023.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md"
+      ],
+      "cited_document_names": [
+        "nist-napmp-vision-2023.md",
+        "nist-ir-8577.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "多芯粒先进封装的基板需要同时关注低翘曲、供电和热管理，原因如下：\n\n首先，低翘曲（low warpage）是确保基板在制造和装配过程中结构稳定性的关键要求。高翘曲会导致基板在受热或应力作用下发生变形，进而影响芯片与基板之间的对准和连接可靠性，尤其在多层精细布线结构中更为显著[[1]]。\n\n其次，供电（power delivery）和热管理（thermal management）是先进封装面临的核心挑战。由于多芯粒封装中芯片密度高、功耗大，局部功率密度显著增加，导致严重的热积聚和热应力问题。有效的热管理能够确保器件在长时间运行下保持稳定性能与可靠性，而高效的供电系统则需满足高带宽、低延迟的电力传输需求，同时兼容不同基板材料和工艺[[1]]。\n\n此外，基板材料（如硅、玻璃或有机材料）必须与芯片集成过程及最终封装结构相匹配，因此在设计时需综合考虑其热膨胀系数、机械强度以及对供电路径的支撑能力，以实现供电与热管理的协同优化[[2]]。同时，通过采用具有相似热膨胀系数的芯片和基板，可显著减少因温度变化引起的机械应力，提升整体结构可靠性[[2]]。\n\n综上所述，低翘曲保障了基板的物理稳定性，而供电与热管理则直接关系到封装系统的性能、可靠性和可扩展性，三者共同构成多芯粒先进封装基板设计中的关键要素。[[1]] [[2]]"
+    },
+    {
+      "id": "packaging-ucie-018",
+      "domain": "封装与测试",
+      "category": "综合分析题",
+      "passed": true,
+      "latency_seconds": 8.93,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        4,
+        2
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-ir-8577.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "Universal Chiplet Interconnect Express (UCIe) 等 die-to-die 互连标准对不同厂商芯粒的互操作至关重要，因为它们致力于制定开放的标准，专注于芯粒之间的芯片到芯片（die-to-die）互连，从而确保来自不同制造商的芯粒之间能够实现高效、可靠和一致的通信与集成[[1]]。这种互操作性减少了因接口不兼容导致的集成复杂性和兼容性问题，使设计者可以灵活选择不同厂商的芯粒组件，而不必受限于单一供应商的技术生态[[4]]。此外，UCIe 标准通过定义统一的物理和逻辑层协议，为跨厂商的芯粒集成提供了可预测、可验证的基础，从而推动了更广泛、更具弹性的半导体生态系统的发展[[2]]。"
+    },
+    {
+      "id": "packaging-metrology-019",
+      "domain": "封装与测试",
+      "category": "跨段落题",
+      "passed": true,
+      "latency_seconds": 12.78,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 10,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        3,
+        10,
+        3,
+        10,
+        10,
+        10
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "nist-metrology-gaps-2023.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1400-3.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-ir-8577.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "先进封装内部互连的计量与验证需要检查翘曲（warpage）、空洞（voids）、应力（stresses）和粘附（adhesion），是因为这些参数直接关系到封装结构的完整性、电气性能的稳定性以及长期运行中的可靠性。具体而言：\n\n- 翘曲（warpage）是由于材料在热循环过程中因热膨胀系数不匹配而产生的形变，可能导致芯片与基板之间的对准偏差，进而引发电气连接失效或机械应力集中[[3]]。\n- 空洞（voids）通常出现在焊点或界面层中，是由于材料在固化或焊接过程中气体残留或流动不足形成的空隙，会削弱互连的机械强度和电导性能，影响信号传输质量与热管理[[10]]。\n- 应力（stresses）在封装内部各层之间传递，尤其是在不同材料组合（如高介电常数材料与金属层）中，可能导致裂纹萌生或界面剥离，从而降低器件的寿命和可靠性[[3]]。\n- 粘附（adhesion）是确保各层材料之间牢固结合的关键因素，若粘附力不足，会在热循环或机械冲击下发生分层，破坏封装结构完整性[[10]]。\n\n这些参数的检测与验证属于“内部3D结构”的关键测量内容，其目标是实现对先进封装中复杂互连结构的高精度、高分辨率计量，并通过在位（in situ）快速测量方法提升检测效率和可靠性[[10]]。因此，对这些物理特性的系统性检查是保障先进封装产品性能、可靠性和可制造性的必要环节。[[10]]"
+    },
+    {
+      "id": "packaging-negative-020",
+      "domain": "封装与测试",
+      "category": "无证据题",
+      "passed": true,
+      "latency_seconds": 1.007,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 0,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": null,
+      "errors": [],
+      "answer": "当前知识库未检索到足够相关的资料，无法基于可追溯证据回答该问题。请补充相关文档，或调整问题的范围后重试。"
+    }
+  ]
+}

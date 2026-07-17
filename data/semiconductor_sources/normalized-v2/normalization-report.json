@@ -1,0 +1,131 @@
+{
+  "source_root": ".",
+  "output_dir": "normalized-v2",
+  "processed": 12,
+  "failed": 0,
+  "documents": [
+    {
+      "document": "nist-chips-1000.md",
+      "pages": 33,
+      "raw_characters": 62134,
+      "normalized_characters": 61744,
+      "character_ratio": 0.994,
+      "markdown_headings": 17,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "nist-chips-1400-2.md",
+      "pages": 42,
+      "raw_characters": 75066,
+      "normalized_characters": 67322,
+      "character_ratio": 0.897,
+      "markdown_headings": 34,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "nist-chips-1400-3.md",
+      "pages": 38,
+      "raw_characters": 73843,
+      "normalized_characters": 68039,
+      "character_ratio": 0.921,
+      "markdown_headings": 39,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "nist-chips-1400-4.md",
+      "pages": 30,
+      "raw_characters": 56361,
+      "normalized_characters": 47292,
+      "character_ratio": 0.839,
+      "markdown_headings": 32,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "nist-ir-8501.md",
+      "pages": 45,
+      "raw_characters": 90035,
+      "normalized_characters": 83619,
+      "character_ratio": 0.929,
+      "markdown_headings": 6,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "nist-ir-8577.md",
+      "pages": 61,
+      "raw_characters": 132820,
+      "normalized_characters": 126658,
+      "character_ratio": 0.954,
+      "markdown_headings": 28,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "nist-materials-equipment-vision-2023.md",
+      "pages": 10,
+      "raw_characters": 30357,
+      "normalized_characters": 29568,
+      "character_ratio": 0.974,
+      "markdown_headings": 9,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "nist-metrology-gaps-2023.md",
+      "pages": 32,
+      "raw_characters": 68226,
+      "normalized_characters": 65956,
+      "character_ratio": 0.967,
+      "markdown_headings": 24,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "nist-napmp-vision-2023.md",
+      "pages": 9,
+      "raw_characters": 17603,
+      "normalized_characters": 17532,
+      "character_ratio": 0.996,
+      "markdown_headings": 11,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "riscv-debug-v1.0.md",
+      "pages": 119,
+      "raw_characters": 252333,
+      "normalized_characters": 223275,
+      "character_ratio": 0.885,
+      "markdown_headings": 134,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "riscv-privileged-20260120.md",
+      "pages": 213,
+      "raw_characters": 623841,
+      "normalized_characters": 572327,
+      "character_ratio": 0.917,
+      "markdown_headings": 230,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    },
+    {
+      "document": "riscv-unprivileged-20260120.md",
+      "pages": 695,
+      "raw_characters": 1384057,
+      "normalized_characters": 1209294,
+      "character_ratio": 0.874,
+      "markdown_headings": 498,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    }
+  ],
+  "failures": [],
+  "output_queue": "review/candidates-v2.jsonl",
+  "queue_candidates_updated": 12
+}

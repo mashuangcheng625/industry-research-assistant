@@ -1,0 +1,719 @@
+[
+  {
+    "id": "design-gui-021",
+    "domain": "芯片设计与EDA/IP",
+    "category": "单文档事实题",
+    "split": "development",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "OpenROAD GUI 可以通过哪些视图检查布局、时序和布线问题？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "heat map",
+      "timing report",
+      "DRC Viewer"
+    ],
+    "required_term_groups": [
+      [
+        "heat map",
+        "热图"
+      ],
+      [
+        "timing report",
+        "时序报告"
+      ],
+      [
+        "DRC Viewer",
+        "DRC 查看器"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "design-sdc-024",
+    "domain": "芯片设计与EDA/IP",
+    "category": "专业参数题",
+    "split": "development",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "OpenROAD 设计配置中时钟周期和 SDC 时序约束如何影响自动化流程？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "clock period",
+      "SDC",
+      "timing"
+    ],
+    "required_term_groups": [
+      [
+        "clock period",
+        "时钟周期"
+      ],
+      [
+        "SDC"
+      ],
+      [
+        "timing",
+        "时序"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "design-ppa-report-027",
+    "domain": "芯片设计与EDA/IP",
+    "category": "综合分析题",
+    "split": "development",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "如何结合 OpenROAD 的面积、时序和功耗报告判断一次 PPA 优化是否有效？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "area",
+      "timing",
+      "power",
+      "PPA"
+    ],
+    "required_term_groups": [
+      [
+        "area",
+        "面积"
+      ],
+      [
+        "timing",
+        "时序"
+      ],
+      [
+        "power",
+        "功耗"
+      ],
+      [
+        "PPA"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "design-flow-cross-030",
+    "domain": "芯片设计与EDA/IP",
+    "category": "跨段落题",
+    "split": "development",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "从综合、布图规划、布局、时钟树到全局与详细布线，OpenROAD 各阶段如何衔接？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "synthesis",
+      "floorplan",
+      "clock tree",
+      "global routing",
+      "detail routing"
+    ],
+    "required_term_groups": [
+      [
+        "synthesis",
+        "综合"
+      ],
+      [
+        "floorplan",
+        "布图规划"
+      ],
+      [
+        "clock tree",
+        "时钟树"
+      ],
+      [
+        "global routing",
+        "全局布线"
+      ],
+      [
+        "detail routing",
+        "详细布线"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.8
+  },
+  {
+    "id": "design-negative-033",
+    "domain": "芯片设计与EDA/IP",
+    "category": "无证据题",
+    "split": "development",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "请给出虚构 OR-PPA900 量子布局器的官方默认拥塞阈值和签核参数。",
+    "expected_retrieval": false,
+    "expected_terms": [],
+    "required_term_groups": [],
+    "gold_sources": [],
+    "must_cite": false,
+    "must_not_cite": true,
+    "must_refuse": true,
+    "forbidden_terms": [
+      "OR-PPA900 的默认拥塞阈值"
+    ]
+  },
+  {
+    "id": "materials-facilities-036",
+    "domain": "半导体材料与设备",
+    "category": "单文档事实题",
+    "split": "development",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "半导体材料与设备设施除了厂房本体，还需要哪些基础设施和运营能力？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "infrastructure",
+      "workforce",
+      "cybersecurity"
+    ],
+    "required_term_groups": [
+      [
+        "infrastructure",
+        "基础设施"
+      ],
+      [
+        "workforce",
+        "人才"
+      ],
+      [
+        "cybersecurity",
+        "网络安全"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-materials-equipment-vision-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "materials-purity-039",
+    "domain": "半导体材料与设备",
+    "category": "专业参数题",
+    "split": "development",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "先进材料纯度评估需要关注哪些颗粒、污染物和痕量杂质指标？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "particles",
+      "contaminants",
+      "trace impurities"
+    ],
+    "required_term_groups": [
+      [
+        "particles",
+        "颗粒"
+      ],
+      [
+        "contaminants",
+        "污染物"
+      ],
+      [
+        "trace impurities",
+        "痕量杂质"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-metrology-gaps-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "materials-security-042",
+    "domain": "半导体材料与设备",
+    "category": "综合分析题",
+    "split": "development",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "新建材料与设备设施为什么要把网络安全、运营安全和供应链安全纳入设计？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "cybersecurity",
+      "operational security",
+      "supply chain security"
+    ],
+    "required_term_groups": [
+      [
+        "cybersecurity",
+        "网络安全"
+      ],
+      [
+        "operational security",
+        "运营安全"
+      ],
+      [
+        "supply chain security",
+        "供应链安全"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-materials-equipment-vision-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "materials-trace-cross-045",
+    "domain": "半导体材料与设备",
+    "category": "跨段落题",
+    "split": "development",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "如何把原料来源、材料纯度、计量结果和供应商记录串成可追溯链路？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "provenance",
+      "purity",
+      "metrology",
+      "supplier",
+      "traceability"
+    ],
+    "required_term_groups": [
+      [
+        "provenance",
+        "来源"
+      ],
+      [
+        "purity",
+        "纯度"
+      ],
+      [
+        "metrology",
+        "计量"
+      ],
+      [
+        "supplier",
+        "供应商"
+      ],
+      [
+        "traceability",
+        "可追溯"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-metrology-gaps-2023.md"
+      },
+      {
+        "document": "nist-chips-1000.md"
+      },
+      {
+        "document": "nist-chips-1400-3.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.8
+  },
+  {
+    "id": "materials-negative-048",
+    "domain": "半导体材料与设备",
+    "category": "无证据题",
+    "split": "development",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "请给出虚构 NeonPure-X88 电子气体的官方原子级配方和终身纯度保证。",
+    "expected_retrieval": false,
+    "expected_terms": [],
+    "required_term_groups": [],
+    "gold_sources": [],
+    "must_cite": false,
+    "must_not_cite": true,
+    "must_refuse": true,
+    "forbidden_terms": [
+      "NeonPure-X88 的官方配方"
+    ]
+  },
+  {
+    "id": "process-modeling-051",
+    "domain": "晶圆制造与前道工艺",
+    "category": "单文档事实题",
+    "split": "development",
+    "knowledge_base": "semiconductor_process",
+    "question": "下一代制造工艺为什么需要把先进建模、仿真与验证结合起来？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "modeling",
+      "simulation",
+      "validation"
+    ],
+    "required_term_groups": [
+      [
+        "modeling",
+        "建模"
+      ],
+      [
+        "simulation",
+        "仿真"
+      ],
+      [
+        "validation",
+        "验证"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-metrology-gaps-2023.md"
+      },
+      {
+        "document": "nist-chips-1000.md"
+      },
+      {
+        "document": "nist-ir-8577.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "process-inline-metrics-054",
+    "domain": "晶圆制造与前道工艺",
+    "category": "专业参数题",
+    "split": "development",
+    "knowledge_base": "semiconductor_process",
+    "question": "在线计量用于高吞吐制造时，应同时权衡哪些速度、灵敏度和准确度指标？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "in-line metrology",
+      "throughput",
+      "sensitivity",
+      "accuracy"
+    ],
+    "required_term_groups": [
+      [
+        "in-line metrology",
+        "在线计量"
+      ],
+      [
+        "throughput",
+        "吞吐量"
+      ],
+      [
+        "sensitivity",
+        "灵敏度"
+      ],
+      [
+        "accuracy",
+        "准确度"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-metrology-gaps-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "process-control-057",
+    "domain": "晶圆制造与前道工艺",
+    "category": "综合分析题",
+    "split": "development",
+    "knowledge_base": "semiconductor_process",
+    "question": "为什么在线计量必须与过程控制和质量保证联动，而不能只做离线抽检？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "in-line metrology",
+      "process control",
+      "quality assurance",
+      "high-throughput"
+    ],
+    "required_term_groups": [
+      [
+        "in-line metrology",
+        "在线计量"
+      ],
+      [
+        "process control",
+        "过程控制"
+      ],
+      [
+        "quality assurance",
+        "质量保证"
+      ],
+      [
+        "high-throughput",
+        "高吞吐"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-metrology-gaps-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "process-loop-cross-060",
+    "domain": "晶圆制造与前道工艺",
+    "category": "跨段落题",
+    "split": "development",
+    "knowledge_base": "semiconductor_process",
+    "question": "如何把在线量测、缺陷检测、工艺模型和控制反馈组成晶圆制造闭环？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "in-line",
+      "defects",
+      "model",
+      "control",
+      "feedback"
+    ],
+    "required_term_groups": [
+      [
+        "in-line",
+        "在线"
+      ],
+      [
+        "defects",
+        "缺陷"
+      ],
+      [
+        "model",
+        "模型"
+      ],
+      [
+        "control",
+        "控制"
+      ],
+      [
+        "feedback",
+        "反馈"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-metrology-gaps-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.8
+  },
+  {
+    "id": "process-negative-063",
+    "domain": "晶圆制造与前道工艺",
+    "category": "无证据题",
+    "split": "development",
+    "knowledge_base": "semiconductor_process",
+    "question": "请提供虚构 CMP-X404 设备在 0.02 皮米节点的官方压力与转速 Recipe。",
+    "expected_retrieval": false,
+    "expected_terms": [],
+    "required_term_groups": [],
+    "gold_sources": [],
+    "must_cite": false,
+    "must_not_cite": true,
+    "must_refuse": true,
+    "forbidden_terms": [
+      "CMP-X404 的官方 Recipe"
+    ]
+  },
+  {
+    "id": "packaging-purpose-066",
+    "domain": "封装与测试",
+    "category": "单文档事实题",
+    "split": "development",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "半导体封装保护芯片和连接系统的两类基本作用是什么？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "protect",
+      "mechanically",
+      "inter-chip communication",
+      "power"
+    ],
+    "required_term_groups": [
+      [
+        "protect",
+        "保护"
+      ],
+      [
+        "mechanically",
+        "机械"
+      ],
+      [
+        "inter-chip communication",
+        "芯片间通信"
+      ],
+      [
+        "power",
+        "供电"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-napmp-vision-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.75
+  },
+  {
+    "id": "packaging-substrate-069",
+    "domain": "封装与测试",
+    "category": "专业参数题",
+    "split": "development",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "先进封装基板的细线宽、过孔节距、面积和翘曲有哪些关键要求？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "fine wiring",
+      "via pitches",
+      "large area",
+      "low warpage"
+    ],
+    "required_term_groups": [
+      [
+        "fine wiring",
+        "精细布线"
+      ],
+      [
+        "via pitches",
+        "过孔节距"
+      ],
+      [
+        "large area",
+        "大面积"
+      ],
+      [
+        "low warpage",
+        "低翘曲"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-napmp-vision-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 1.0
+  },
+  {
+    "id": "packaging-codesign-072",
+    "domain": "封装与测试",
+    "category": "综合分析题",
+    "split": "development",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "多芯粒协同设计为什么必须同时考虑内建测试、修复、安全、互操作和可靠性？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "co-design",
+      "built-in test",
+      "security",
+      "interoperability",
+      "reliability"
+    ],
+    "required_term_groups": [
+      [
+        "co-design",
+        "协同设计"
+      ],
+      [
+        "built-in test",
+        "内建测试"
+      ],
+      [
+        "security",
+        "安全"
+      ],
+      [
+        "interoperability",
+        "互操作"
+      ],
+      [
+        "reliability",
+        "可靠性"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-napmp-vision-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.8
+  },
+  {
+    "id": "packaging-chain-cross-075",
+    "domain": "封装与测试",
+    "category": "跨段落题",
+    "split": "development",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "从基板、芯粒装配、供电散热到外部光互连，先进封装各技术环节如何相互依赖？",
+    "expected_retrieval": true,
+    "expected_terms": [
+      "substrate",
+      "assembly",
+      "power delivery",
+      "thermal management",
+      "photonics"
+    ],
+    "required_term_groups": [
+      [
+        "substrate",
+        "基板"
+      ],
+      [
+        "assembly",
+        "装配"
+      ],
+      [
+        "power delivery",
+        "供电"
+      ],
+      [
+        "thermal management",
+        "热管理"
+      ],
+      [
+        "photonics",
+        "光子"
+      ]
+    ],
+    "gold_sources": [
+      {
+        "document": "nist-napmp-vision-2023.md"
+      }
+    ],
+    "must_cite": true,
+    "min_group_coverage": 0.8
+  },
+  {
+    "id": "packaging-negative-078",
+    "domain": "封装与测试",
+    "category": "无证据题",
+    "split": "development",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "请给出虚构 Bond-X909 混合键合设备的官方零缺陷温度窗口。",
+    "expected_retrieval": false,
+    "expected_terms": [],
+    "required_term_groups": [],
+    "gold_sources": [],
+    "must_cite": false,
+    "must_not_cite": true,
+    "must_refuse": true,
+    "forbidden_terms": [
+      "Bond-X909 的温度窗口"
+    ]
+  }
+]

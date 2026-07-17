@@ -1,0 +1,119 @@
+{
+  "summary": {
+    "passed": 0,
+    "strict_passed": 0,
+    "quality_passed": 1,
+    "sla_passed": 0,
+    "total": 1,
+    "pass_rate": 0.0,
+    "quality_pass_rate": 1.0,
+    "sla_pass_rate": 0.0,
+    "average_latency_seconds": 20.06,
+    "p95_latency_seconds": 20.06,
+    "gold_source_retrieval_hits": 1,
+    "gold_source_total": 1,
+    "gold_citation_hits": 1
+  },
+  "results": [
+    {
+      "id": "design-ppa-002",
+      "domain": "芯片设计与EDA/IP",
+      "category": "专业参数题",
+      "passed": false,
+      "quality_passed": true,
+      "latency_seconds": 20.06,
+      "latency_ok": false,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        3,
+        4,
+        1,
+        1,
+        6,
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 0.75,
+      "citation_support_coverage": 0.75,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "PLACE_DENSITY"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "CORE_UTILIZATION"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            4
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "命令行",
+            "command line"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1,
+            6
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "环境变量",
+            "environment variable"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            6,
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "document_names": [
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md"
+      ],
+      "cited_document_names": [
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "在 OpenROAD 流程中，`PLACE_DENSITY` 和 `CORE_UTILIZATION` 是用于控制标准单元或宏放置行为的配置变量。\n\n- **PLACE_DENSITY** 表示放置密度（placement density），定义为设计中标准单元布局的密集程度，其值范围通常在 0 到 1 之间。较高的放置密度意味着更紧凑的布局，而较低的值则导致更分散的布局。例如，在 `ibex` 设计中，当 `PLACE_DENSITY` 从默认值 0.60 调整为 0.50 时，标准单元的放置会变得更为广泛[[3]]。\n\n- **CORE_UTILIZATION** 表示核心利用率（core utilization percentage），表示设计中核心区域的使用率，范围为 0 到 100%，用于控制布局过程中核心区域的填充程度。例如，在 `ibex` 设计中，将 `CORE_UTILIZATION` 设置为 40 可以影响标准单元的放置分布[[4]]。\n\n关于如何设置变量覆盖默认值：\n\n这些变量可以通过以下三种方式设置，其优先级从高到低如下：\n1. **命令行参数**：通过 `make` 命令直接指定，例如 `make PLACE_DENSITY=0.5`，具有最高优先级[[1]]。\n2. **环境变量**：通过在 shell 中导出变量，例如 `export PLACE_DENSITY=0.5`，若未被命令行覆盖，则使用该值[[1]]。\n3. **Makefile 默认值**：在 `config.mk` 文件中使用 `export VARIABLE?=default_value` 语法定义默认值，当变量未被命令行或环境变量覆盖时，将使用此默认值[[6]]。\n\n实际使用的变量值由 `make` 的优先级规则决定：首先使用 Makefile 中定义的变量（包括 `DESIGN_CONFIG` 文件、`Makefile` 和平台/设计特定变量），其次为命令行参数，最后为环境变量[[1]]。因此，若需覆盖默认值，应优先通过命令行或环境变量进行设置。"
+    }
+  ]
+}

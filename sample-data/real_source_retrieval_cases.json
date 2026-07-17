@@ -1,0 +1,30 @@
+[
+  {
+    "id": "real-design-riscv-001",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V 非特权指令集规范如何描述 V 向量扩展？",
+    "expected_retrieval": true,
+    "expected_terms": ["RISC-V Instruction Set Manual"]
+  },
+  {
+    "id": "real-materials-nist-001",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "NIST 对半导体计量、测量和标准体系提出了哪些战略机会？",
+    "expected_retrieval": true,
+    "expected_terms": ["NIST"]
+  },
+  {
+    "id": "real-process-digital-twin-001",
+    "knowledge_base": "semiconductor_process",
+    "question": "数字孪生在半导体制造中的数据互操作标准面临哪些问题？",
+    "expected_retrieval": true,
+    "expected_terms": ["Digital Twin"]
+  },
+  {
+    "id": "real-packaging-chiplet-001",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "NIST 技术标准研讨会对 chiplet 接口标准提出了哪些优先事项？",
+    "expected_retrieval": true,
+    "expected_terms": ["chiplet"]
+  }
+]

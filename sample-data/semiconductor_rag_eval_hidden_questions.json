@@ -1,0 +1,162 @@
+[
+  {
+    "id": "design-privilege-023",
+    "domain": "芯片设计与EDA/IP",
+    "category": "单文档事实题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V 的 Machine、Supervisor 和 User 三种特权级承担什么角色？"
+  },
+  {
+    "id": "design-pmp-mode-026",
+    "domain": "芯片设计与EDA/IP",
+    "category": "专业参数题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V PMP 的 OFF、TOR、NA4 和 NAPOT 地址匹配模式有何区别？"
+  },
+  {
+    "id": "design-sv39-029",
+    "domain": "芯片设计与EDA/IP",
+    "category": "综合分析题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V Sv39 地址转换中 satp、页表遍历和页表项如何共同得到物理地址？"
+  },
+  {
+    "id": "design-delegation-032",
+    "domain": "芯片设计与EDA/IP",
+    "category": "跨段落题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V 的 medeleg、mideleg 与当前特权级如何共同决定异常和中断交给哪个模式？"
+  },
+  {
+    "id": "design-negative-035",
+    "domain": "芯片设计与EDA/IP",
+    "category": "无证据题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "请提供虚构 EDA-X777 工具在 0.05 皮米节点的官方 PPA 保证值。"
+  },
+  {
+    "id": "materials-resilience-038",
+    "domain": "半导体材料与设备",
+    "category": "单文档事实题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "材料和制造设备供应链韧性建设为什么需要国内能力与国际协作并重？"
+  },
+  {
+    "id": "materials-substrate-041",
+    "domain": "半导体材料与设备",
+    "category": "专业参数题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "先进封装基板可采用哪些材料体系，并需要满足哪些布线与翘曲要求？"
+  },
+  {
+    "id": "materials-euv-scale-044",
+    "domain": "半导体材料与设备",
+    "category": "综合分析题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "EUV 等复杂设备从研发走向量产时，为什么需要测试反馈、供应商协同和规模化制造能力？"
+  },
+  {
+    "id": "materials-metrology-cross-047",
+    "domain": "半导体材料与设备",
+    "category": "跨段落题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "对新材料和埋藏界面进行质量认证时，如何结合无损检测、参考数据与性能关联？"
+  },
+  {
+    "id": "materials-negative-050",
+    "domain": "半导体材料与设备",
+    "category": "无证据题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "请列出虚构 Resist-Q55 在 0.01 皮米曝光下的官方量产窗口。"
+  },
+  {
+    "id": "process-predictive-053",
+    "domain": "晶圆制造与前道工艺",
+    "category": "单文档事实题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_process",
+    "question": "数字孪生可为晶圆厂的预测性维护和排程优化提供什么能力？"
+  },
+  {
+    "id": "process-twin-data-056",
+    "domain": "晶圆制造与前道工艺",
+    "category": "专业参数题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_process",
+    "question": "制造数字孪生的数据闭环至少包含哪些物理数据、虚拟模型、预测和控制输出？"
+  },
+  {
+    "id": "process-twin-risk-059",
+    "domain": "晶圆制造与前道工艺",
+    "category": "综合分析题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_process",
+    "question": "将数字孪生用于工艺控制时，为什么必须同时考虑 VVUQ、实时数据和物理反馈？"
+  },
+  {
+    "id": "process-twin-cross-062",
+    "domain": "晶圆制造与前道工艺",
+    "category": "跨段落题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_process",
+    "question": "数字孪生如何贯通设备管理、质量控制、预测维护和优化排程？"
+  },
+  {
+    "id": "process-negative-065",
+    "domain": "晶圆制造与前道工艺",
+    "category": "无证据题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_process",
+    "question": "请列出虚构 FDC-Q123 算法保证零误报时使用的官方阈值。"
+  },
+  {
+    "id": "packaging-ecosystem-068",
+    "domain": "封装与测试",
+    "category": "单文档事实题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "NAPMP 所说的 chiplet ecosystem 为什么需要芯粒发现、复用和仓储能力？"
+  },
+  {
+    "id": "packaging-metrology-071",
+    "domain": "封装与测试",
+    "category": "专业参数题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "先进封装材料表征应检查哪些翘曲、空洞、应力和粘附指标？"
+  },
+  {
+    "id": "packaging-domestic-074",
+    "domain": "封装与测试",
+    "category": "综合分析题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "建立国内先进封装能力为什么同时关系到成本效率、供应链安全和制造转化？"
+  },
+  {
+    "id": "packaging-chiplet-cross-077",
+    "domain": "封装与测试",
+    "category": "跨段落题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "Chiplet 系统如何通过2.5D/3D集成、标准互连、供电散热和协同设计形成完整方案？"
+  },
+  {
+    "id": "packaging-negative-080",
+    "domain": "封装与测试",
+    "category": "无证据题",
+    "split": "hidden",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "请列出虚构 TSV-Z0001 工艺保证100%良率的官方参数。"
+  }
+]

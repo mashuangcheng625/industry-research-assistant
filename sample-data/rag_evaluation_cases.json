@@ -1,0 +1,194 @@
+[
+  {
+    "id": "design-ppa-001",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "DSP_CTRL 的 PPA 退化表现是什么，优先怎么查？",
+    "expected_retrieval": true,
+    "expected_terms": ["WNS", "面积", "基线", "RTL", "选择逻辑"],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "materials-trace-001",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "ETCH-M12 更换聚焦环后终点时间漂移，要联合哪些数据？",
+    "expected_retrieval": true,
+    "expected_terms": ["FDC", "CoA", "批次", "Chamber-1", "CD"],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "process-etch-001",
+    "knowledge_base": "semiconductor_process",
+    "question": "ETCH-07 腔体压力异常时应优先关联哪些数据？",
+    "expected_retrieval": true,
+    "expected_terms": ["FDC", "真空阀", "气体流量", "射频功率", "Recipe", "CD"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "packaging-yield-001",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "PKG-DEMO-X2 开路 bin 上升时应如何建立证据链？",
+    "expected_retrieval": true,
+    "expected_terms": ["假失效", "unit ID", "AOI", "X-ray", "基板批次", "split"],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "design-no-evidence-001",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "DSP_CTRL 采用哪家晶圆代工厂、什么制程节点，流片成本是多少？",
+    "expected_retrieval": false,
+    "expected_terms": [],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "materials-no-evidence-001",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "FR-DEMO-2407 的真实供应商名称、采购单价和交货周期是多少？",
+    "expected_retrieval": true,
+    "expected_terms": ["FR-DEMO-2407", "供应商", "交期"],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "process-limit-not-provided-001",
+    "knowledge_base": "semiconductor_process",
+    "question": "ETCH-07 腔体压力的控制上下限具体是多少 Pa？",
+    "expected_retrieval": true,
+    "expected_terms": ["不提供真实阈值"],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "packaging-no-evidence-001",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "PKG-DEMO-X2 的封装尺寸、额定功耗和最大结温是多少？",
+    "expected_retrieval": false,
+    "expected_terms": [],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "design-keyword-001",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "demo-b17",
+    "expected_retrieval": true,
+    "expected_terms": ["demo-b17", "WNS"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "materials-keyword-001",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "FR-DEMO-2407",
+    "expected_retrieval": true,
+    "expected_terms": ["FR-DEMO-2407", "聚焦环"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "process-keyword-001",
+    "knowledge_base": "semiconductor_process",
+    "question": "DEMO-OCAP-ETCH-01",
+    "expected_retrieval": true,
+    "expected_terms": ["DEMO-OCAP-ETCH-01", "FDC"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "packaging-keyword-001",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "PKG-DEMO-X2",
+    "expected_retrieval": true,
+    "expected_terms": ["PKG-DEMO-X2", "开路 bin"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "materials-out-of-domain-001",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "某医院 HIS 系统的门诊挂号流程是什么？",
+    "expected_retrieval": false,
+    "expected_terms": [],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "design-baseline-002",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "对比两次 PPA 结果之前，需要先对齐哪些基线？",
+    "expected_retrieval": true,
+    "expected_terms": ["RTL commit", "工具版本", "时序约束", "PVT corner", "寄生参数"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "design-metrics-003",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "PPA 回归中性能、功耗和面积分别要看哪些指标？",
+    "expected_retrieval": true,
+    "expected_terms": ["WNS", "TNS", "动态功耗", "漏电功耗", "标准单元", "利用率"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "design-verification-004",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "DSP_CTRL 的优化建议可以直接合并到产品分支吗？",
+    "expected_retrieval": true,
+    "expected_terms": ["功能等价性验证", "回归仿真", "不能", "产品分支"],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "materials-reference-002",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "为什么 ETCH-M12 调查要对比 Chamber-1？",
+    "expected_retrieval": true,
+    "expected_terms": ["Chamber-1", "同 Recipe", "没有同步漂移", "参照"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "materials-causality-003",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "更换 FR-DEMO-2407 后出现漂移，能否直接认定聚焦环批次是根因？",
+    "expected_retrieval": true,
+    "expected_terms": ["时间相关", "传感器", "安装", "腔体状态", "待验证假设"],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "process-data-groups-002",
+    "knowledge_base": "semiconductor_process",
+    "question": "工艺异常分析需要关联哪三类数据？",
+    "expected_retrieval": true,
+    "expected_terms": ["FDC", "SPC", "MES", "设备与工艺时序", "质量与检测", "生产上下文"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "process-ocap-sequence-003",
+    "knowledge_base": "semiconductor_process",
+    "question": "DEMO-OCAP-ETCH-01 规则下，从隔离批次到查看产品量测的排查顺序是什么？",
+    "expected_retrieval": true,
+    "expected_terms": ["暂停", "30 分钟", "传感器", "Chamber-A", "真空阀", "CD"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "process-control-safety-004",
+    "knowledge_base": "semiconductor_process",
+    "question": "根据这份文档可以直接自动调整 ETCH-07 的真空阀和压力参数吗？",
+    "expected_retrieval": true,
+    "expected_terms": ["不提供真实阈值", "不授权自动调整设备参数", "OCAP", "责任工程师"],
+    "must_express_uncertainty": true
+  },
+  {
+    "id": "packaging-trace-002",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "2.5D/3D 封装如何建立从裸片到成品测试的追溯链？",
+    "expected_retrieval": true,
+    "expected_terms": ["die ID", "wafer/lot", "晶圆测试 bin", "组装设备", "基板", "AOI", "X-ray", "SAM"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "packaging-pattern-003",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "PKG-DEMO-X2 开路 bin 异常的幅度和时空分布是什么？",
+    "expected_retrieval": true,
+    "expected_terms": ["0.7%", "3.1%", "Assembly-B", "两个生产日", "多个晶圆测试 lot", "边缘区"],
+    "must_express_uncertainty": false
+  },
+  {
+    "id": "packaging-causality-004",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "现有证据能否确认新基板批次是 PKG-DEMO-X2 开路的根因？",
+    "expected_retrieval": true,
+    "expected_terms": ["不足以", "贴装机校准", "回流曲线", "split", "候选因素"],
+    "must_express_uncertainty": true
+  }
+]

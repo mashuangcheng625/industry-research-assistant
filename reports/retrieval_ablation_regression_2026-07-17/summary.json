@@ -1,0 +1,80 @@
+{
+  "generated_at": "2026-07-17T08:05:56+00:00",
+  "dataset": "../sample-data/semiconductor_rag_eval_regression.json",
+  "top_k": 3,
+  "first_scenario_is_baseline": "hybrid_multi",
+  "note": "hybrid scenarios use deterministic weighted dense/lexical/facet fusion; they do not use a cross-encoder reranker",
+  "scenarios": {
+    "hybrid_multi": {
+      "configuration": {
+        "RAG_HYBRID_ENABLED": "true",
+        "RAG_MULTI_QUERY_ENABLED": "true",
+        "RAG_NEIGHBOR_ENABLED": "false"
+      },
+      "return_code": 1,
+      "summary": {
+        "passed": 19,
+        "total": 20,
+        "positive_hits": 16,
+        "positive_total": 16,
+        "negative_rejections": 4,
+        "negative_total": 4,
+        "gold_source_hits": 16,
+        "gold_source_total": 16,
+        "mrr": 0.78125,
+        "ndcg_at_k": 0.838532,
+        "mean_group_coverage": 0.984375,
+        "average_latency_ms": 1125.4,
+        "first_case_latency_ms": 1503.6,
+        "p50_latency_ms": 1020.9,
+        "p95_latency_ms": 2757.7,
+        "max_latency_ms": 3234.1,
+        "total_neighbors": 0,
+        "average_query_variants": 3.4
+      },
+      "report": "hybrid_multi.json",
+      "delta_vs_first": {
+        "passed": 0,
+        "mrr": 0.0,
+        "ndcg_at_k": 0.0,
+        "p95_latency_ms": 0.0
+      }
+    },
+    "hybrid_multi_neighbor": {
+      "configuration": {
+        "RAG_HYBRID_ENABLED": "true",
+        "RAG_MULTI_QUERY_ENABLED": "true",
+        "RAG_NEIGHBOR_ENABLED": "true"
+      },
+      "return_code": 0,
+      "summary": {
+        "passed": 20,
+        "total": 20,
+        "positive_hits": 16,
+        "positive_total": 16,
+        "negative_rejections": 4,
+        "negative_total": 4,
+        "gold_source_hits": 16,
+        "gold_source_total": 16,
+        "mrr": 0.78125,
+        "ndcg_at_k": 0.838532,
+        "mean_group_coverage": 0.984375,
+        "average_latency_ms": 1127.4,
+        "first_case_latency_ms": 1493.6,
+        "p50_latency_ms": 1051.1,
+        "p95_latency_ms": 2902.3,
+        "max_latency_ms": 3124.5,
+        "total_neighbors": 21,
+        "average_query_variants": 3.4
+      },
+      "report": "hybrid_multi_neighbor.json",
+      "delta_vs_first": {
+        "passed": 1,
+        "mrr": 0.0,
+        "ndcg_at_k": 0.0,
+        "p95_latency_ms": 144.6
+      }
+    }
+  },
+  "execution_errors": []
+}

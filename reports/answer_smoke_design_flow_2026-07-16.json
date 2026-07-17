@@ -1,0 +1,43 @@
+{
+  "summary": {
+    "passed": 1,
+    "total": 1,
+    "pass_rate": 1.0,
+    "average_latency_seconds": 12.456,
+    "p95_latency_seconds": 12.456
+  },
+  "results": [
+    {
+      "id": "design-flow-001",
+      "domain": "芯片设计与EDA/IP",
+      "category": "单文档事实题",
+      "passed": true,
+      "latency_seconds": 12.456,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ],
+      "citation_ok": true,
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "OpenROAD 从 RTL 到 GDSII 的物理设计流程主要包括以下阶段：  \nSynthesis、Floorplan、Placement、CTS（Clock Tree Synthesis）、Routing 和 Finishing。  \n\n具体阶段如下：  \n- Synthesis：输入为 RTL、SDC、.lib、.lef，使用 Yosys 进行逻辑综合，输出为网表和 SDC 文件 [[1]]。  \n- Floorplan：包括初始布局、IO 布局（随机）、基于时序的混合尺寸布局、宏放置、Tapcell 和 welltie 插入、PDN 生成 [[1]]。  \n- Placement：包括无 IO 放置的全局布局、优化的 IO 布置、带有已放置 IO 的全局布局、尺寸调整与缓冲、详细布局 [[1]]。  \n- CTS：进行时序优化和填充单元插入 [[1]]。  \n- Routing：包括全局布线和详细布线 [[1]]。  \n- Finishing：包括金属填充插入、时序签核报告、生成 GDSII（使用 KLayout）、DRC/LVS 检查（使用 KLayout）[[1]]。  \n\n这些阶段共同构成了从 RTL 到 GDSII 的完整物理设计流程。[[1]]"
+    }
+  ]
+}

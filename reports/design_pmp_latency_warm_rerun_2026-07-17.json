@@ -1,0 +1,67 @@
+{
+  "summary": {
+    "passed": 0,
+    "total": 1,
+    "pass_rate": 0.0,
+    "average_latency_seconds": 20.684,
+    "p95_latency_seconds": 20.684,
+    "gold_source_retrieval_hits": 1,
+    "gold_source_total": 1,
+    "gold_citation_hits": 1
+  },
+  "results": [
+    {
+      "id": "design-pmp-004",
+      "domain": "芯片设计与EDA/IP",
+      "category": "跨段落题",
+      "passed": false,
+      "latency_seconds": 20.684,
+      "latency_ok": false,
+      "retrieval_ok": true,
+      "document_count": 8,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        7,
+        6,
+        8,
+        5,
+        5,
+        1,
+        2,
+        5,
+        6,
+        7,
+        8
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "document_names": [
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md"
+      ],
+      "cited_document_names": [
+        "riscv-privileged-20260120.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "RISC-V Physical Memory Protection（PMP）通过PMP CSR、地址匹配和锁定机制限制访存，具体如下：\n\n1. **PMP CSR 机制**：  \n   PMP配置由配置寄存器（pmpcfg0–pmpcfg15）和地址寄存器（pmpaddr0–pmpaddr63）组成。对于RV32，共16个pmpcfg寄存器（pmpcfg0至pmpcfg15）用于配置64个PMP条目；对于RV64，仅使用偶数编号的pmpcfg寄存器（如pmpcfg0、pmpcfg2等），其中pmpcfg2用于存储PMP条目8–15的配置，奇数编号的pmpcfg寄存器为非法[[1]]。每个PMP条目的配置寄存器包含R（读）、W（写）、X（执行）权限位，当这些位被设置时，分别允许读、写和指令执行访问；若某一位为0，则对应访问类型被拒绝。R、W、X字段构成一个WARL（Write-All-Reads-Locked）字段，其中R=0且W=1的组合被保留未使用[[7]]。\n\n2. **地址匹配机制**：  \n   地址匹配由PMP条目配置寄存器中的A字段控制，支持三种模式：  \n   - A=0：禁用该条目，不匹配任何地址；  \n   - A=2：自然对齐的2的幂次区域（NAPOT），包括自然对齐的4字节区域（NA4）；  \n   - A=3：任意范围的顶部边界（TOR）。  \n   这些模式均支持四字节粒度，用于定义物理地址的匹配范围[[6]]。A字段的编码如表23所示[[8]]。\n\n3. **锁定机制**：  \n   通过设置L位可锁定PMP条目。当L位被置为1时，即使A字段设为OFF，该条目仍被锁定，且其R/W/X权限对所有特权模式生效（包括M模式）；当L位清零时，M模式访问将成功，但R/W/X权限仅在S和U模式下生效[[5]]。若PMP条目被锁定，则写入pmpicfg或pmpaddri寄存器的操作将被忽略，且若A字段设置为TOR，则写入pmpaddri-1的地址寄存器操作也将被忽略[[5]]。\n\n综上，PMP通过配置寄存器定义访问权限、地址匹配机制确定物理地址范围、锁定机制控制权限生效范围与模式，从而实现对访存行为的细粒度限制[[1]][[2]][[5]][[6]][[7]][[8]]。"
+    }
+  ]
+}

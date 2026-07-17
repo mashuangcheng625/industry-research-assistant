@@ -1,0 +1,62 @@
+/**
+ * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
+ */
+
+.base-layout {
+  padding-left: 94px;
+}
+
+.base-layout__sidebar {
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 94px;
+  background-color: #fbfbfb;
+  display: flex;
+  flex-direction: column;
+
+  .base-layout__sidebar-main {
+    flex-grow: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 18px;
+  }
+}
+
+.base-layout__content {
+  min-height: 100vh;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .base-layout {
+    padding-left: 0;
+    padding-bottom: 72px;
+  }
+
+  .base-layout__sidebar {
+    top: auto;
+    right: 0;
+    width: auto;
+    height: 72px;
+    border-top: 1px solid #e7ebf2;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 -8px 24px rgba(16, 24, 40, 0.06);
+    backdrop-filter: blur(12px);
+
+    .base-layout__sidebar-main {
+      flex-direction: row;
+      align-items: center;
+      overflow: hidden;
+      padding: 0 8px;
+    }
+  }
+
+  .base-layout__content {
+    min-width: 0;
+  }
+}

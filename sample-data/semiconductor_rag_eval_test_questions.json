@@ -1,0 +1,162 @@
+[
+  {
+    "id": "design-debug-022",
+    "domain": "芯片设计与EDA/IP",
+    "category": "单文档事实题",
+    "split": "test",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V 外部调试中的 Abstract Commands 和 Program Buffer 分别用于什么？"
+  },
+  {
+    "id": "design-dmcontrol-025",
+    "domain": "芯片设计与EDA/IP",
+    "category": "专业参数题",
+    "split": "test",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V Debug Module 的 dmcontrol 中 haltreq 与 resumereq 分别触发什么状态变化？"
+  },
+  {
+    "id": "design-sba-028",
+    "domain": "芯片设计与EDA/IP",
+    "category": "综合分析题",
+    "split": "test",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "为什么 RISC-V System Bus Access 能用于低侵入式内存调试，它与让 hart 执行指令有何不同？"
+  },
+  {
+    "id": "design-halt-cycle-031",
+    "domain": "芯片设计与EDA/IP",
+    "category": "跨段落题",
+    "split": "test",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "调试器如何依次让 RISC-V hart 停止、访问寄存器或内存并恢复运行？"
+  },
+  {
+    "id": "design-negative-034",
+    "domain": "芯片设计与EDA/IP",
+    "category": "无证据题",
+    "split": "test",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "请列出虚构 RISC-V ZQV-99 扩展已经批准的全部指令编码。"
+  },
+  {
+    "id": "materials-reference-037",
+    "domain": "半导体材料与设备",
+    "category": "单文档事实题",
+    "split": "test",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "NIST 为什么强调用标准参考材料支持半导体材料表征？"
+  },
+  {
+    "id": "materials-nano-040",
+    "domain": "半导体材料与设备",
+    "category": "专业参数题",
+    "split": "test",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "纳米结构材料表征为什么要求更高的分辨率、灵敏度、准确度和吞吐量？"
+  },
+  {
+    "id": "materials-srm-043",
+    "domain": "半导体材料与设备",
+    "category": "综合分析题",
+    "split": "test",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "标准参考材料、测量方法和跨供应商数据关联如何共同提高材料质量判断可信度？"
+  },
+  {
+    "id": "materials-workforce-cross-046",
+    "domain": "半导体材料与设备",
+    "category": "跨段落题",
+    "split": "test",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "建设材料与设备产业能力时，设施投资、人才培养和供应链韧性为什么必须同步推进？"
+  },
+  {
+    "id": "materials-negative-049",
+    "domain": "半导体材料与设备",
+    "category": "无证据题",
+    "split": "test",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "请提供虚构 EUV-Mirror-0007 反射镜的厂商保密镀层比例。"
+  },
+  {
+    "id": "process-automation-052",
+    "domain": "晶圆制造与前道工艺",
+    "category": "单文档事实题",
+    "split": "test",
+    "knowledge_base": "semiconductor_process",
+    "question": "半导体制造自动化标准主要要解决设备、软件和数据之间的什么问题？"
+  },
+  {
+    "id": "process-3d-defects-055",
+    "domain": "晶圆制造与前道工艺",
+    "category": "专业参数题",
+    "split": "test",
+    "knowledge_base": "semiconductor_process",
+    "question": "三维器件无损计量需要识别哪些埋藏结构、空洞和界面信息？"
+  },
+  {
+    "id": "process-interoperate-058",
+    "domain": "晶圆制造与前道工艺",
+    "category": "综合分析题",
+    "split": "test",
+    "knowledge_base": "semiconductor_process",
+    "question": "设备互操作标准如何减少晶圆厂数据孤岛并支持跨工具自动化？"
+  },
+  {
+    "id": "process-standard-cross-061",
+    "domain": "晶圆制造与前道工艺",
+    "category": "跨段落题",
+    "split": "test",
+    "knowledge_base": "semiconductor_process",
+    "question": "晶圆厂的设备软件互操作、制造数据和网络安全标准如何共同支撑自动化？"
+  },
+  {
+    "id": "process-negative-064",
+    "domain": "晶圆制造与前道工艺",
+    "category": "无证据题",
+    "split": "test",
+    "knowledge_base": "semiconductor_process",
+    "question": "请给出虚构 LITHO-Z999 扫描机的保密曝光剂量和量产良率。"
+  },
+  {
+    "id": "packaging-photonics-067",
+    "domain": "封装与测试",
+    "category": "单文档事实题",
+    "split": "test",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "先进封装中的光子与连接器为什么强调低误码、高密度和低损耗？"
+  },
+  {
+    "id": "packaging-power-070",
+    "domain": "封装与测试",
+    "category": "专业参数题",
+    "split": "test",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "高功率密度先进封装为什么需要同时优化供电、散热材料和电路拓扑？"
+  },
+  {
+    "id": "packaging-standard-073",
+    "domain": "封装与测试",
+    "category": "综合分析题",
+    "split": "test",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "为什么芯粒生态不能只制定 die-to-die 通信标准，还要覆盖封装、测试和热管理？"
+  },
+  {
+    "id": "packaging-validation-076",
+    "domain": "封装与测试",
+    "category": "跨段落题",
+    "split": "test",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "先进封装从研发到量产为什么需要测试载具、计量工具、性能验证和标准？"
+  },
+  {
+    "id": "packaging-negative-079",
+    "domain": "封装与测试",
+    "category": "无证据题",
+    "split": "test",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "请提供虚构 UCIe-Quantum-77 芯粒协议的秘密引脚定义。"
+  }
+]

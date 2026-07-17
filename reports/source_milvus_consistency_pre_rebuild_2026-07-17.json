@@ -1,0 +1,82 @@
+{
+  "audited_at": "2026-07-17T07:55:48+00:00",
+  "username": "source_pipeline",
+  "read_only": true,
+  "knowledge_bases": {
+    "semiconductor_chip_design_eda_ip": {
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "postgres_status_counts": {
+        "completed": 12
+      },
+      "postgres_completed_documents": 12,
+      "postgres_chunks": 3258,
+      "milvus_documents": 12,
+      "milvus_queried_chunks": 3396,
+      "milvus_num_entities": 3397,
+      "duplicate_chunk_ids": 0,
+      "duplicate_doc_chunk_keys": 138,
+      "invalid_doc_ids": 0,
+      "per_document_mismatch": [
+        {
+          "filename": "nist-ir-8577.md",
+          "postgres_chunks": 149,
+          "milvus_chunks": 287
+        }
+      ],
+      "limit_reached": false,
+      "passed": false
+    },
+    "semiconductor_materials_equipment": {
+      "collection": "kb_semiconductor_materials_equipment",
+      "postgres_status_counts": {
+        "completed": 8
+      },
+      "postgres_completed_documents": 8,
+      "postgres_chunks": 627,
+      "milvus_documents": 8,
+      "milvus_queried_chunks": 627,
+      "milvus_num_entities": 627,
+      "duplicate_chunk_ids": 0,
+      "duplicate_doc_chunk_keys": 0,
+      "invalid_doc_ids": 0,
+      "per_document_mismatch": [],
+      "limit_reached": false,
+      "passed": true
+    },
+    "semiconductor_process": {
+      "collection": "kb_semiconductor_process",
+      "postgres_status_counts": {
+        "completed": 8
+      },
+      "postgres_completed_documents": 8,
+      "postgres_chunks": 692,
+      "milvus_documents": 8,
+      "milvus_queried_chunks": 692,
+      "milvus_num_entities": 692,
+      "duplicate_chunk_ids": 0,
+      "duplicate_doc_chunk_keys": 0,
+      "invalid_doc_ids": 0,
+      "per_document_mismatch": [],
+      "limit_reached": false,
+      "passed": true
+    },
+    "semiconductor_packaging_testing": {
+      "collection": "kb_semiconductor_packaging_testing",
+      "postgres_status_counts": {
+        "completed": 8
+      },
+      "postgres_completed_documents": 8,
+      "postgres_chunks": 679,
+      "milvus_documents": 8,
+      "milvus_queried_chunks": 679,
+      "milvus_num_entities": 679,
+      "duplicate_chunk_ids": 0,
+      "duplicate_doc_chunk_keys": 0,
+      "invalid_doc_ids": 0,
+      "per_document_mismatch": [],
+      "limit_reached": false,
+      "passed": true
+    }
+  },
+  "passed": false
+}

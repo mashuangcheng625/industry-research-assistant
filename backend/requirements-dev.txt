@@ -1,0 +1,11 @@
+-r requirements.txt
+
+# Keep the test toolchain on a stable major line; pytest.ini contains the
+# execution-environment-specific capture setting.
+pytest>=8.3.0,<9.0.0
+
+# Real vector-store integration tests without a Docker daemon.
+milvus-lite==2.5.1
+
+# Milvus Lite 2.5.1 still imports pkg_resources, removed in setuptools 81+.
+setuptools==80.9.0

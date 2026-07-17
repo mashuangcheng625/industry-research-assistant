@@ -1,0 +1,19 @@
+{
+  "source_root": ".",
+  "output_dir": "normalized-v2",
+  "processed": 1,
+  "failed": 0,
+  "documents": [
+    {
+      "document": "riscv-unprivileged-20260120.md",
+      "pages": 695,
+      "raw_characters": 1384057,
+      "normalized_characters": 1209294,
+      "character_ratio": 0.874,
+      "markdown_headings": 498,
+      "remaining_form_feeds": 0,
+      "extraction_mode": "raw"
+    }
+  ],
+  "failures": []
+}

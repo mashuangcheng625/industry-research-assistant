@@ -1,0 +1,146 @@
+{
+  "metadata": {
+    "generated_at": "2026-07-17T08:28:31+00:00",
+    "dataset": "../sample-data/semiconductor_rag_eval_regression.json",
+    "dataset_sha256": "8f363f7dc590e9a15c4fb9d77a4562ee5d834dda1d58f531b81eb5e2797a8aea",
+    "api_url": "http://127.0.0.1:8001/chat/completion",
+    "model_mode": "local",
+    "timeout_seconds": 120.0,
+    "max_latency_seconds": 20.0
+  },
+  "summary": {
+    "passed": 0,
+    "strict_passed": 0,
+    "quality_passed": 0,
+    "sla_passed": 1,
+    "total": 1,
+    "pass_rate": 0.0,
+    "quality_pass_rate": 0.0,
+    "sla_pass_rate": 1.0,
+    "average_latency_seconds": 11.769,
+    "p95_latency_seconds": 11.769,
+    "first_case_latency_seconds": 11.769,
+    "p50_latency_seconds": 11.769,
+    "max_latency_seconds": 11.769,
+    "gold_source_retrieval_hits": 1,
+    "gold_source_total": 1,
+    "gold_citation_hits": 0,
+    "citation_support_passed": 0,
+    "citation_support_total": 1,
+    "average_citation_completeness": 0.0,
+    "average_citation_support_coverage": 0.0,
+    "refusal_hits": 0,
+    "refusal_total": 0,
+    "error_cases": 0
+  },
+  "results": [
+    {
+      "id": "materials-neon-007",
+      "domain": "半导体材料与设备",
+      "category": "专业参数题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 11.769,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 0.0,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "氖气",
+          "neon"
+        ],
+        [
+          "地理集中",
+          "geographic concentration"
+        ],
+        [
+          "供应中断",
+          "disruption",
+          "shortage"
+        ]
+      ],
+      "citations": [],
+      "citation_ok": false,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": false,
+      "gold_citation_required": false,
+      "citation_completeness": 0.0,
+      "citation_support_coverage": 0.0,
+      "minimum_citation_support_coverage": 0.67,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "氖气",
+            "neon"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "地理集中",
+            "geographic concentration"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "供应中断",
+            "disruption",
+            "shortage"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "document_names": [
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-chips-1000.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-chips-1000.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "insufficient",
+          "accepted_claims": [],
+          "rejected_claims": [
+            {
+              "claim_index": 0,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "4": 0.0
+              }
+            }
+          ],
+          "candidate_claim_count": 1,
+          "accepted_claim_count": 0,
+          "rejected_claim_count": 1,
+          "minimum_support_score": 0.12,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "当前候选回答未通过逐论断证据校验，无法基于可追溯证据给出结论。请补充资料或缩小问题范围后重试。"
+    }
+  ]
+}

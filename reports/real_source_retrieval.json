@@ -1,0 +1,60 @@
+{
+  "summary": {
+    "passed": 4,
+    "total": 4,
+    "positive_hits": 4,
+    "positive_total": 4,
+    "negative_rejections": 0,
+    "negative_total": 0
+  },
+  "results": [
+    {
+      "id": "real-design-riscv-001",
+      "knowledge_base": "semiconductor_chip_design_eda_ip",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "result_count": 5,
+      "top_score": 0.5033520311117172,
+      "top_document": "riscv-unprivileged-20260120.md",
+      "missing_terms": []
+    },
+    {
+      "id": "real-materials-nist-001",
+      "knowledge_base": "semiconductor_materials_equipment",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "result_count": 5,
+      "top_score": 0.5412515855970836,
+      "top_document": "nist-chips-1000.md",
+      "missing_terms": []
+    },
+    {
+      "id": "real-process-digital-twin-001",
+      "knowledge_base": "semiconductor_process",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "result_count": 5,
+      "top_score": 0.4583333730697632,
+      "top_document": "nist-chips-1400-2.md",
+      "missing_terms": []
+    },
+    {
+      "id": "real-packaging-chiplet-001",
+      "knowledge_base": "semiconductor_packaging_testing",
+      "expected_retrieval": true,
+      "passed": true,
+      "retrieval_ok": true,
+      "terms_ok": true,
+      "result_count": 5,
+      "top_score": 0.5219847977161407,
+      "top_document": "nist-chips-1400-2.md",
+      "missing_terms": []
+    }
+  ]
+}

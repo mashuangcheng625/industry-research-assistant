@@ -1,0 +1,357 @@
+/**
+ * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
+ */
+
+.index-page {
+  margin: 0 auto;
+  min-height: 100%;
+  padding: 56px 40px 80px;
+  box-sizing: border-box;
+  max-width: 1110px + 80px;
+  min-width: 600px;
+  width: 100%;
+
+  .header {
+    position: relative;
+    overflow: hidden;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding-left: 168px;
+
+    .bg {
+      width: 224px;
+      height: 182px;
+      position: absolute;
+      z-index: -1;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .eyebrow {
+      margin-bottom: 9px;
+      color: var(--ant-color-primary);
+      font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.45;
+      letter-spacing: 1.45px;
+    }
+
+    .title {
+      margin: 0;
+      font-weight: 700;
+      font-size: 36px;
+      line-height: 1.24;
+      letter-spacing: -0.7px;
+    }
+    .desc {
+      max-width: 720px;
+      margin: 10px 0 0;
+      font-size: 15px;
+      line-height: 1.75;
+      color: #667085;
+      text-wrap: balance;
+    }
+
+    .capabilities {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+
+      span {
+        padding: 5px 11px;
+        border: 1px solid #e5eaf2;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        color: #667085;
+        font-size: 12px;
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .search-bar {
+    margin-top: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .section-heading {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+
+      span {
+        color: #98a2b3;
+        font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.5;
+        letter-spacing: 1.15px;
+      }
+
+      strong {
+        color: #1d2939;
+        font-size: 21px;
+        line-height: 1.4;
+      }
+    }
+
+    .search-bar__input {
+      img {
+        width: 24px;
+        height: 24px;
+      }
+      :global {
+        .ant-input-affix-wrapper {
+          width: 300px;
+          border: 1px solid #e5eaf2;
+          border-radius: 10px;
+          background-color: #fff;
+          box-shadow: 0 8px 24px rgba(16, 24, 40, 0.04);
+        }
+        .ant-input {
+          font-size: 14px;
+        }
+        .ant-input-prefix {
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+
+  .card-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+
+    .card-item {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(16, 24, 40, 0.06);
+      border-radius: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      box-sizing: border-box;
+      min-height: 300px;
+      padding: 28px;
+      cursor: pointer;
+      font: inherit;
+      text-align: left;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 40px rgba(16, 24, 40, 0.1);
+      }
+
+      &:focus-visible {
+        outline: 3px solid rgba(40, 97, 231, 0.28);
+        outline-offset: 3px;
+      }
+
+      .card-item__top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .card-item__icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.68);
+        box-shadow: 0 8px 18px rgba(16, 24, 40, 0.08);
+        font-size: 24px;
+      }
+
+      .card-item__code {
+        max-width: 180px;
+        padding: 5px 8px;
+        border: 1px solid rgba(52, 64, 84, 0.1);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.52);
+        color: rgba(52, 64, 84, 0.62);
+        font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.4;
+        letter-spacing: 0.45px;
+        text-align: right;
+      }
+
+      .card-item__title {
+        margin-top: 26px;
+        color: #1d2939;
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.38;
+        letter-spacing: -0.2px;
+      }
+
+      .card-item__desc {
+        min-height: 48px;
+        max-width: 46em;
+        margin-top: 9px;
+        color: #667085;
+        font-size: 14px;
+        line-height: 1.72;
+        text-wrap: pretty;
+      }
+
+      .card-item__tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-top: 18px;
+
+        span {
+          padding: 5px 9px;
+          border-radius: 6px;
+          background: rgba(255, 255, 255, 0.6);
+          color: #475467;
+          font-size: 12px;
+          line-height: 1.35;
+        }
+      }
+
+      .card-item__action {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: auto;
+        padding-top: 22px;
+        color: #344054;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.5;
+      }
+    }
+  }
+
+  .empty-state {
+    grid-column: 1 / -1;
+    width: 100%;
+    padding: 56px 24px;
+    box-sizing: border-box;
+    border: 1px dashed #d7deea;
+    border-radius: 16px;
+    color: #667085;
+    background: #fbfcfe;
+    font-size: 14px;
+    line-height: 1.7;
+    text-align: center;
+  }
+
+  @media (max-width: 860px) {
+    min-width: 0;
+
+    .header {
+      padding-left: 0;
+
+      .bg {
+        opacity: 0.18;
+      }
+    }
+
+    .card-list {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    padding: 32px 18px 40px;
+
+    .header {
+      min-height: 0;
+      padding: 8px 0 12px;
+
+      .bg {
+        width: 154px;
+        height: auto;
+        left: auto;
+        right: -20px;
+        opacity: 0.12;
+      }
+
+      .eyebrow {
+        max-width: 240px;
+        font-size: 10px;
+        line-height: 1.6;
+      }
+
+      .title {
+        max-width: 310px;
+        font-size: 28px;
+        line-height: 1.25;
+      }
+
+      .desc {
+        max-width: 330px;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .capabilities {
+        flex-wrap: wrap;
+        max-width: 330px;
+      }
+    }
+
+    .search-bar {
+      margin-top: 38px;
+      align-items: stretch;
+      flex-direction: column;
+      gap: 16px;
+
+      .search-bar__input {
+        width: 100%;
+
+        :global {
+          .ant-input-affix-wrapper {
+            width: 100%;
+            box-sizing: border-box;
+          }
+        }
+      }
+    }
+
+    .card-list {
+      gap: 16px;
+      margin-top: 20px;
+
+      .card-item {
+        min-height: 280px;
+        padding: 22px;
+        border-radius: 16px;
+
+        .card-item__title {
+          margin-top: 22px;
+          font-size: 21px;
+        }
+
+        .card-item__code {
+          max-width: 172px;
+          font-size: 9px;
+        }
+
+        .card-item__desc {
+          min-height: 0;
+          font-size: 14px;
+        }
+      }
+    }
+  }
+}

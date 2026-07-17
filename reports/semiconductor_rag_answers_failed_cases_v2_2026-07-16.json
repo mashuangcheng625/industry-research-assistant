@@ -1,0 +1,89 @@
+{
+  "summary": {
+    "passed": 2,
+    "total": 2,
+    "pass_rate": 1.0,
+    "average_latency_seconds": 7.84,
+    "p95_latency_seconds": 9.239
+  },
+  "results": [
+    {
+      "id": "materials-facility-008",
+      "domain": "半导体材料与设备",
+      "category": "综合分析题",
+      "passed": true,
+      "latency_seconds": 9.239,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 0.75,
+      "coverage_ok": true,
+      "missing_term_groups": [
+        [
+          "运营安全",
+          "operational security"
+        ]
+      ],
+      "citations": [
+        8,
+        9,
+        7,
+        9,
+        8,
+        1,
+        4,
+        4,
+        7,
+        8,
+        9,
+        1,
+        4
+      ],
+      "citation_ok": true,
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "在建设半导体材料与制造设备设施时，除产能外，还应同时规划以下供应链、人才和安全能力：\n\n- 供应链方面：需开展完整的供应链映射，涵盖一级及二级甚至更远层级的供应商，并进行供应链压力测试分析，以识别和管理潜在短缺风险[[8]]；同时，应建立本地材料生产设施，实现关键材料的国内 sourcing，以降低运输成本和延迟风险[[9]]；此外，需提升对关键制造输入（如沉积、刻蚀、检测、计量等）设备的供应能力[[7]]。\n\n- 人才方面：需支持产业集群发展，包括协助社区和企业获取与集群成长相关的资源，如许可办理、基础设施建设及劳动力发展支持[[9]]；同时，应推动行业间建立安全的信息共享机制和最佳实践，以提升整体供应链韧性[[8]]。\n\n- 安全能力方面：必须确保整个半导体供应链的完整性、可靠性和可用性，防范假冒组件、漏洞和网络威胁[[1]]；强化硬件层面的安全设计与测试，保障微电子系统的网络安全[[4]]；推动建立可量化的微电子安全保证（Microelectronics Quantifiable Assurance, MQA）指标体系，用于验证部件与系统级别的安全性[[4]]。\n\n这些能力共同支撑美国在半导体供应链中的技术领导力和战略优势[[7]]。[[8]] [[9]] [[1]] [[4]]"
+    },
+    {
+      "id": "process-3d-012",
+      "domain": "晶圆制造与前道工艺",
+      "category": "专业参数题",
+      "passed": true,
+      "latency_seconds": 6.44,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 0.75,
+      "coverage_ok": true,
+      "missing_term_groups": [
+        [
+          "内部互连",
+          "internal 3D"
+        ]
+      ],
+      "citations": [
+        2,
+        2,
+        1,
+        3,
+        3
+      ],
+      "citation_ok": true,
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b"
+      },
+      "errors": [],
+      "answer": "三维器件和内部3D结构需要新的计量方法，是因为随着器件复杂性、集成度和尺寸的不断缩小，传统的测量方法难以满足对性能、可靠性和尺寸公差的严格要求。具体而言，3D结构包含多层材料/薄膜、微小通道孔，且层数越多，计量难度越大[[2]]。现有计量工具无法对所有必要的参数进行充分测量，且缺乏能够穿透多层结构并实现小尺度测量的能力[[2]]。此外，随着先进节点（如3 nm及以下）的发展，每个原子在三维器件中的位置和类型都需要被精确掌握，以满足系统性能持续提升的需求[[1]]。\n\n应重点关注的界面和内部缺陷包括：  \n- 接口（interfaces）之间的物理特性与结合质量；  \n- 3D结构内部的翘曲（warpage）、空洞（voids）、应力（stresses）、附着力（adhesion）以及可靠性问题[[3]]。  \n\n这些缺陷直接影响器件的性能和长期稳定性，因此需要通过新的计量方法实现对这些关键参数的高分辨率、高通量测量与验证[[3]]。"
+    }
+  ]
+}

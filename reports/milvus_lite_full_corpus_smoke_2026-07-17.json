@@ -1,0 +1,384 @@
+{
+  "mode": "credential-free full-corpus Milvus Lite smoke",
+  "embedding": "deterministic non-semantic 1024-dimensional test vectors",
+  "started_at": "2026-07-17T07:54:01+00:00",
+  "elapsed_seconds": 6.136,
+  "queue": "data/semiconductor_sources/review/candidates-v2.jsonl",
+  "chunk_size": 1200,
+  "approved_candidates": 15,
+  "document_domain_jobs": 36,
+  "total_chunks": 5256,
+  "failures": [],
+  "collection_audit": {
+    "kb_semiconductor_chip_design_eda_ip": {
+      "expected_chunks": 3258,
+      "queried_chunks": 3258,
+      "num_entities": 3258,
+      "expected_documents": 12,
+      "queried_documents": 12,
+      "duplicate_chunk_ids": 0,
+      "passed": true
+    },
+    "kb_semiconductor_materials_equipment": {
+      "expected_chunks": 627,
+      "queried_chunks": 627,
+      "num_entities": 627,
+      "expected_documents": 8,
+      "queried_documents": 8,
+      "duplicate_chunk_ids": 0,
+      "passed": true
+    },
+    "kb_semiconductor_packaging_testing": {
+      "expected_chunks": 679,
+      "queried_chunks": 679,
+      "num_entities": 679,
+      "expected_documents": 8,
+      "queried_documents": 8,
+      "duplicate_chunk_ids": 0,
+      "passed": true
+    },
+    "kb_semiconductor_process": {
+      "expected_chunks": 692,
+      "queried_chunks": 692,
+      "num_entities": 692,
+      "expected_documents": 8,
+      "queried_documents": 8,
+      "duplicate_chunk_ids": 0,
+      "passed": true
+    }
+  },
+  "retrieval_probe": {
+    "collection": "kb_semiconductor_chip_design_eda_ip",
+    "expected_chunk_id": "0016ca4f10785e114d8e337e4be32604",
+    "returned_chunk_id": "0016ca4f10785e114d8e337e4be32604",
+    "returned": true,
+    "exact_top1": true
+  },
+  "passed": true,
+  "results": [
+    {
+      "candidate_id": "nist-chips-1400-4",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 70,
+      "elapsed_ms": 627.3,
+      "message": "成功处理 70 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-4",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "status": "completed",
+      "chunk_count": 70,
+      "elapsed_ms": 643.1,
+      "message": "成功处理 70 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-4",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "status": "completed",
+      "chunk_count": 70,
+      "elapsed_ms": 662.9,
+      "message": "成功处理 70 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-4",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "status": "completed",
+      "chunk_count": 70,
+      "elapsed_ms": 662.6,
+      "message": "成功处理 70 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-3",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "status": "completed",
+      "chunk_count": 96,
+      "elapsed_ms": 36.6,
+      "message": "成功处理 96 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-3",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "status": "completed",
+      "chunk_count": 96,
+      "elapsed_ms": 36.1,
+      "message": "成功处理 96 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-3",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "status": "completed",
+      "chunk_count": 96,
+      "elapsed_ms": 35.3,
+      "message": "成功处理 96 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-2",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 89,
+      "elapsed_ms": 37.2,
+      "message": "成功处理 89 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-2",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "status": "completed",
+      "chunk_count": 89,
+      "elapsed_ms": 35.9,
+      "message": "成功处理 89 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1400-2",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "status": "completed",
+      "chunk_count": 89,
+      "elapsed_ms": 40.8,
+      "message": "成功处理 89 个切片"
+    },
+    {
+      "candidate_id": "nist-metrology-gaps-2023",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 86,
+      "elapsed_ms": 35.8,
+      "message": "成功处理 86 个切片"
+    },
+    {
+      "candidate_id": "nist-metrology-gaps-2023",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "status": "completed",
+      "chunk_count": 86,
+      "elapsed_ms": 36.5,
+      "message": "成功处理 86 个切片"
+    },
+    {
+      "candidate_id": "nist-metrology-gaps-2023",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "status": "completed",
+      "chunk_count": 86,
+      "elapsed_ms": 31.7,
+      "message": "成功处理 86 个切片"
+    },
+    {
+      "candidate_id": "nist-metrology-gaps-2023",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "status": "completed",
+      "chunk_count": 86,
+      "elapsed_ms": 32.9,
+      "message": "成功处理 86 个切片"
+    },
+    {
+      "candidate_id": "nist-ir-8501",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 93,
+      "elapsed_ms": 32.5,
+      "message": "成功处理 93 个切片"
+    },
+    {
+      "candidate_id": "nist-ir-8501",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "status": "completed",
+      "chunk_count": 93,
+      "elapsed_ms": 33.4,
+      "message": "成功处理 93 个切片"
+    },
+    {
+      "candidate_id": "nist-ir-8501",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "status": "completed",
+      "chunk_count": 93,
+      "elapsed_ms": 32.1,
+      "message": "成功处理 93 个切片"
+    },
+    {
+      "candidate_id": "nist-ir-8501",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "status": "completed",
+      "chunk_count": 93,
+      "elapsed_ms": 31.7,
+      "message": "成功处理 93 个切片"
+    },
+    {
+      "candidate_id": "nist-ir-8577",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 149,
+      "elapsed_ms": 48.1,
+      "message": "成功处理 149 个切片"
+    },
+    {
+      "candidate_id": "nist-ir-8577",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "status": "completed",
+      "chunk_count": 149,
+      "elapsed_ms": 50.7,
+      "message": "成功处理 149 个切片"
+    },
+    {
+      "candidate_id": "nist-ir-8577",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "status": "completed",
+      "chunk_count": 149,
+      "elapsed_ms": 53.6,
+      "message": "成功处理 149 个切片"
+    },
+    {
+      "candidate_id": "nist-ir-8577",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "status": "completed",
+      "chunk_count": 149,
+      "elapsed_ms": 48.9,
+      "message": "成功处理 149 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1000",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "status": "completed",
+      "chunk_count": 72,
+      "elapsed_ms": 30.5,
+      "message": "成功处理 72 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1000",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "status": "completed",
+      "chunk_count": 72,
+      "elapsed_ms": 30.8,
+      "message": "成功处理 72 个切片"
+    },
+    {
+      "candidate_id": "nist-chips-1000",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "status": "completed",
+      "chunk_count": 72,
+      "elapsed_ms": 31.2,
+      "message": "成功处理 72 个切片"
+    },
+    {
+      "candidate_id": "nist-napmp-vision-2023",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 24,
+      "elapsed_ms": 17.8,
+      "message": "成功处理 24 个切片"
+    },
+    {
+      "candidate_id": "nist-napmp-vision-2023",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "status": "completed",
+      "chunk_count": 24,
+      "elapsed_ms": 17.1,
+      "message": "成功处理 24 个切片"
+    },
+    {
+      "candidate_id": "nist-napmp-vision-2023",
+      "domain": "packaging_testing",
+      "collection": "kb_semiconductor_packaging_testing",
+      "status": "completed",
+      "chunk_count": 24,
+      "elapsed_ms": 18.3,
+      "message": "成功处理 24 个切片"
+    },
+    {
+      "candidate_id": "nist-materials-equipment-vision-2023",
+      "domain": "materials_equipment",
+      "collection": "kb_semiconductor_materials_equipment",
+      "status": "completed",
+      "chunk_count": 37,
+      "elapsed_ms": 20.8,
+      "message": "成功处理 37 个切片"
+    },
+    {
+      "candidate_id": "nist-materials-equipment-vision-2023",
+      "domain": "wafer_fabrication",
+      "collection": "kb_semiconductor_process",
+      "status": "completed",
+      "chunk_count": 37,
+      "elapsed_ms": 21.4,
+      "message": "成功处理 37 个切片"
+    },
+    {
+      "candidate_id": "riscv-privileged-20260120",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 750,
+      "elapsed_ms": 450.2,
+      "message": "成功处理 750 个切片"
+    },
+    {
+      "candidate_id": "riscv-unprivileged-20260120",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 1501,
+      "elapsed_ms": 1238.2,
+      "message": "成功处理 1501 个切片"
+    },
+    {
+      "candidate_id": "openroad-orfs-flow-variables-bea7dcd7",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 74,
+      "elapsed_ms": 30.7,
+      "message": "成功处理 74 个切片"
+    },
+    {
+      "candidate_id": "openroad-orfs-overview-bea7dcd7",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 15,
+      "elapsed_ms": 17.0,
+      "message": "成功处理 15 个切片"
+    },
+    {
+      "candidate_id": "openroad-orfs-flow-tutorial-bea7dcd7",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 102,
+      "elapsed_ms": 39.8,
+      "message": "成功处理 102 个切片"
+    },
+    {
+      "candidate_id": "riscv-debug-v1.0",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "status": "completed",
+      "chunk_count": 305,
+      "elapsed_ms": 107.3,
+      "message": "成功处理 305 个切片"
+    }
+  ]
+}

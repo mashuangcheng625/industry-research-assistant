@@ -1,0 +1,35 @@
+groups:
+  - name: industry-research-agent
+    rules:
+      - alert: ResearchAgentTimeoutDetected
+        expr: increase(industry_research_agent_timeouts_total[15m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Research Agent timed out in the last 15 minutes
+
+      - alert: ResearchRunErrorDetected
+        expr: increase(industry_research_runs_total{outcome="error"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: A research run ended with an infrastructure or execution error
+
+      - alert: ResearchCheckpointFailureDetected
+        expr: increase(industry_research_checkpoint_operations_total{outcome="failure"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: A research checkpoint could not be persisted
+
+      - alert: ResearchRunLockUnavailable
+        expr: increase(industry_research_run_lock_operations_total{outcome="unavailable"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Redis could not guarantee exclusive research execution
+

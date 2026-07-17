@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "case_count": 80,
+  "split_counts": {
+    "development": 20,
+    "hidden": 20,
+    "regression": 20,
+    "test": 20
+  },
+  "label_visibility": {
+    "regression": "public",
+    "development": "public",
+    "test": "private",
+    "hidden": "private"
+  },
+  "public_artifacts": {
+    "sample-data/semiconductor_rag_eval_development.json": {
+      "sha256": "f4dc11349ef02705d6ddef845b2304d35316163a12566ce4ba121caab037921b"
+    },
+    "sample-data/semiconductor_rag_eval_regression.json": {
+      "sha256": "8f363f7dc590e9a15c4fb9d77a4562ee5d834dda1d58f531b81eb5e2797a8aea"
+    },
+    "sample-data/semiconductor_rag_eval_hidden_questions.json": {
+      "sha256": "38f0f2c1f9facee9183421fb16db6c8db7b98bf2c931150cafe9a0b0df3eb84b"
+    },
+    "sample-data/semiconductor_rag_eval_test_questions.json": {
+      "sha256": "87ae64399bb67a220c1331b3f3ea480c2148e415df86db678357b1ccbadf8102"
+    }
+  },
+  "private_key_directory": "data/evaluation-private (gitignored)"
+}

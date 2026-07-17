@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "generated_at": "2026-07-17T10:20:49+00:00",
+    "method": "synthetic_deterministic_context_boundary",
+    "documents": 200,
+    "repetitions_per_document": 500,
+    "context_token_budget": 6000
+  },
+  "result": {
+    "input_tokens": 600400,
+    "selected_documents": 1,
+    "selected_tokens": 3002,
+    "elapsed_seconds": 0.286742,
+    "checks": {
+      "token_budget_respected": true,
+      "document_limit_respected": true,
+      "input_was_larger_than_budget": true
+    },
+    "passed": true
+  }
+}

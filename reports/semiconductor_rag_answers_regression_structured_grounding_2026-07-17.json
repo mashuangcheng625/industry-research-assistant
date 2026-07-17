@@ -1,0 +1,2777 @@
+{
+  "metadata": {
+    "generated_at": "2026-07-17T08:36:05+00:00",
+    "dataset": "../sample-data/semiconductor_rag_eval_regression.json",
+    "dataset_sha256": "8f363f7dc590e9a15c4fb9d77a4562ee5d834dda1d58f531b81eb5e2797a8aea",
+    "api_url": "http://127.0.0.1:8001/chat/completion",
+    "model_mode": "local",
+    "timeout_seconds": 120.0,
+    "max_latency_seconds": 20.0
+  },
+  "summary": {
+    "passed": 12,
+    "strict_passed": 12,
+    "quality_passed": 12,
+    "sla_passed": 19,
+    "total": 20,
+    "pass_rate": 0.6,
+    "quality_pass_rate": 0.6,
+    "sla_pass_rate": 0.95,
+    "average_latency_seconds": 8.545,
+    "p95_latency_seconds": 14.599,
+    "first_case_latency_seconds": 8.048,
+    "p50_latency_seconds": 8.195,
+    "max_latency_seconds": 23.911,
+    "gold_source_retrieval_hits": 16,
+    "gold_source_total": 16,
+    "gold_citation_hits": 12,
+    "citation_support_passed": 8,
+    "citation_support_total": 16,
+    "average_citation_completeness": 0.656,
+    "average_citation_support_coverage": 0.557,
+    "refusal_hits": 4,
+    "refusal_total": 4,
+    "error_cases": 0,
+    "structured_grounding_cases": 16,
+    "structured_grounding_passed": 14,
+    "structured_candidate_claims": 47,
+    "structured_accepted_claims": 35,
+    "structured_rejected_claims": 12,
+    "verified_evidence_quotes": 36
+  },
+  "results": [
+    {
+      "id": "design-flow-001",
+      "domain": "芯片设计与EDA/IP",
+      "category": "单文档事实题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 8.048,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 0.0,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "synthesis",
+          "综合"
+        ],
+        [
+          "floorplan",
+          "布图规划"
+        ],
+        [
+          "placement",
+          "布局"
+        ],
+        [
+          "routing",
+          "布线"
+        ]
+      ],
+      "citations": [],
+      "citation_ok": false,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": false,
+      "gold_citation_required": false,
+      "citation_completeness": 0.0,
+      "citation_support_coverage": 0.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "synthesis",
+            "综合"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "floorplan",
+            "布图规划"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "placement",
+            "布局"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "routing",
+            "布线"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": false,
+      "structured_candidate_claims": 1,
+      "structured_accepted_claims": 0,
+      "structured_rejected_claims": 1,
+      "verified_evidence_quotes": 0,
+      "document_names": [
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-overview-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md"
+      ],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "insufficient",
+          "accepted_claims": [],
+          "rejected_claims": [
+            {
+              "claim_index": 0,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "1": 0.0694
+              },
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 1,
+          "accepted_claim_count": 0,
+          "rejected_claim_count": 1,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 0,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "当前候选回答未通过逐论断证据校验，无法基于可追溯证据给出结论。请补充资料或缩小问题范围后重试。"
+    },
+    {
+      "id": "design-ppa-002",
+      "domain": "芯片设计与EDA/IP",
+      "category": "专业参数题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 12.556,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 0.5,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "命令行",
+          "command line"
+        ],
+        [
+          "环境变量",
+          "environment variable"
+        ]
+      ],
+      "citations": [
+        3,
+        7
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 0.5,
+      "citation_support_coverage": 0.25,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "PLACE_DENSITY"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            3
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "CORE_UTILIZATION"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            7
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "命令行",
+            "command line"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "环境变量",
+            "environment variable"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 3,
+      "structured_accepted_claims": 2,
+      "structured_rejected_claims": 1,
+      "verified_evidence_quotes": 2,
+      "document_names": [
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md"
+      ],
+      "cited_document_names": [
+        "openroad-orfs-flow-tutorial-bea7dcd7.md",
+        "openroad-orfs-flow-variables-bea7dcd7.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "PLACE_DENSITY 表示标准单元放置密度，其值范围在 0 到 1 之间，用于控制布局中单元的分布密集程度",
+              "citation_ids": [
+                3
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "3": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 3,
+                  "quote": "So from above, GUI understood that change in `CORE_UTILIZATION` from 20 to 40 and placement density default 0.60 to 0.50 changes standard cell placement became widely spread."
+                }
+              ]
+            },
+            {
+              "text": "CORE_UTILIZATION 表示核心利用率百分比，范围为 0 到 100，用于定义设计中核心区域的使用程度",
+              "citation_ids": [
+                7
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "7": 0.0385
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 7,
+                  "quote": "CORE_UTILIZATION| The core utilization percentage (0-100)."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [
+            {
+              "claim_index": 2,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "1": 0.04
+              },
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 3,
+          "accepted_claim_count": 2,
+          "rejected_claim_count": 1,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 2,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 根据当前证据，PLACE_DENSITY 表示标准单元放置密度，其值范围在 0 到 1 之间，用于控制布局中单元的分布密集程度。[[3]]\n- 根据当前证据，CORE_UTILIZATION 表示核心利用率百分比，范围为 0 到 100，用于定义设计中核心区域的使用程度。[[7]]\n\n> 部分候选论断因未通过证据支持校验而未展示。"
+    },
+    {
+      "id": "design-debug-003",
+      "domain": "芯片设计与EDA/IP",
+      "category": "综合分析题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 14.599,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        2,
+        7,
+        2,
+        3
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 1.0,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "DMI",
+            "Debug Module Interface"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            2,
+            7,
+            3
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "DTM",
+            "Debug Transport Module"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            2
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "JTAG"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            2
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 4,
+      "structured_accepted_claims": 4,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 3,
+      "document_names": [
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-debug-v1.0.md",
+        "riscv-unprivileged-20260120.md",
+        "riscv-unprivileged-20260120.md"
+      ],
+      "cited_document_names": [
+        "riscv-debug-v1.0.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "JTAG Debug Transport Module 通过 JTAG Test Access Port (TAP) 提供对 Debug Module Interface (DMI) 的访问，其中 TAP 需要至少 5 位的指令寄存器（IR）来支持 DTM 功能",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.3704
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "JTAG TAPs used as a DTM must have an IR of at least 5 bits."
+                }
+              ]
+            },
+            {
+              "text": "Debug Module Interface (DMI) 通过地址和操作字段（address and op）与调试硬件交互，其中操作字段（op）在写入时定义了 DMI 操作的类型，例如 '0 (nop)' 表示忽略数据和地址，'1 (read)' 表示从指定地址读取数据",
+              "citation_ids": [
+                7
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "7": 0.1522
+              },
+              "verified_evidence_quotes": []
+            },
+            {
+              "text": "JTAG Debug Transport Module 的实现必须明确标识为符合 'RISC-V Debug Specification, with JTAG DTM'，以表明其支持通过 JTAG 进行调试",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.28
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "If the JTAG DTM described here is implemented, it must be advertised as conforming to the \"RISC-V Debug Specification, with JTAG DTM.\""
+                }
+              ]
+            },
+            {
+              "text": "Debug Module Interface (DMI) 的访问通过 DMI 寄存器（位于地址 0x11）实现，该寄存器允许调试器在 Update-DR 操作中指定操作指令，并在 Capture-DR 中获取结果",
+              "citation_ids": [
+                3
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "3": 0.2059
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 3,
+                  "quote": "This register allows access to the Debug Module Interface (DMI). In Update-DR, the DTM starts the operation specified in op unless the current status reported in op is sticky. In Capture-DR, the DTM updates data with the result from that operation, updating op if the current op isn’t sticky."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 4,
+          "accepted_claim_count": 4,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 3,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- JTAG Debug Transport Module 通过 JTAG Test Access Port (TAP) 提供对 Debug Module Interface (DMI) 的访问，其中 TAP 需要至少 5 位的指令寄存器（IR）来支持 DTM 功能。[[2]]\n- Debug Module Interface (DMI) 通过地址和操作字段（address and op）与调试硬件交互，其中操作字段（op）在写入时定义了 DMI 操作的类型，例如 '0 (nop)' 表示忽略数据和地址，'1 (read)' 表示从指定地址读取数据。[[7]]\n- JTAG Debug Transport Module 的实现必须明确标识为符合 'RISC-V Debug Specification, with JTAG DTM'，以表明其支持通过 JTAG 进行调试。[[2]]\n- Debug Module Interface (DMI) 的访问通过 DMI 寄存器（位于地址 0x11）实现，该寄存器允许调试器在 Update-DR 操作中指定操作指令，并在 Capture-DR 中获取结果。[[3]]"
+    },
+    {
+      "id": "design-pmp-004",
+      "domain": "芯片设计与EDA/IP",
+      "category": "跨段落题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 23.911,
+      "latency_ok": false,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 0.5,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "CSR"
+        ],
+        [
+          "地址匹配",
+          "Address Matching"
+        ]
+      ],
+      "citations": [
+        4,
+        7,
+        5
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 0.5,
+      "citation_support_coverage": 0.5,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "PMP",
+            "Physical Memory Protection"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            4,
+            7,
+            5
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "CSR"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "地址匹配",
+            "Address Matching"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "锁定",
+            "Locking"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            5
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 5,
+      "structured_accepted_claims": 3,
+      "structured_rejected_claims": 2,
+      "verified_evidence_quotes": 3,
+      "document_names": [
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md",
+        "riscv-privileged-20260120.md"
+      ],
+      "cited_document_names": [
+        "riscv-privileged-20260120.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "PMP 检查始终精确地在处理器层面触发，且适用于所有有效特权模式为 S 或 U 的访问，包括指令获取和数据访问，在 M 模式下当 MPRV 位在 mstatus 中设置且 MPP 字段包含 S 或 U 时也适用",
+              "citation_ids": [
+                4
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "4": 0.0784
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 4,
+                  "quote": "PMP checks are applied to all accesses whose effective privilege mode is S or U, including instruction fetches and data accesses in S and U mode, and data accesses in M-mode when the MPRV bit in mstatus is set and the MPP field in mstatus contains S or U. PMP checks are also applied to page-table accesses for virtual-address translation, for which the effective privilege mode is S."
+                }
+              ]
+            },
+            {
+              "text": "PMP 配置寄存器（pmpcfg）和地址寄存器（pmpaddr）用于定义物理内存保护区域，其中配置寄存器包含 R、W、X 位以分别表示读、写和指令执行权限，当这些位被设置时允许对应访问类型，若任一为零则拒绝该类型访问",
+              "citation_ids": [
+                7
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "7": 0.0164
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 7,
+                  "quote": "The R, W, and X bits, when set, indicate that the PMP entry permits read, write, and instruction execution, respectively. When one of these bits is clear, the corresponding access type is denied. The R, W, and X fields form a collective WARL field for which the combinations with R=0 and W=1 are reserved."
+                }
+              ]
+            },
+            {
+              "text": "PMP 入口的锁定机制通过设置 L 位实现，当 L 位被设置时，即使 A 字段为 OFF，该入口仍被锁定，且 R/W/X 权限对所有特权模式生效；当 L 位清零时，M 模式访问将成功，权限仅适用于 S 和 U 模式",
+              "citation_ids": [
+                5
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "5": 0.0682
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 5,
+                  "quote": "Setting the L bit locks the PMP entry even when the A field is set to OFF. In addition to locking the PMP entry, the L bit indicates whether the R/W/X permissions are additionally enforced on M-mode accesses. When the L bit is set, these permissions are enforced for all privilege modes. When the L bit is clear, any M-mode access matching the PMP entry will succeed; the R/W/X permissions apply only to S and U modes."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [
+            {
+              "claim_index": 2,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "6": 0.0652
+              },
+              "verified_quote_count": 0
+            },
+            {
+              "claim_index": 4,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "1": 0.2
+              },
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 5,
+          "accepted_claim_count": 3,
+          "rejected_claim_count": 2,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 3,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- PMP 检查始终精确地在处理器层面触发，且适用于所有有效特权模式为 S 或 U 的访问，包括指令获取和数据访问，在 M 模式下当 MPRV 位在 mstatus 中设置且 MPP 字段包含 S 或 U 时也适用。[[4]]\n- PMP 配置寄存器（pmpcfg）和地址寄存器（pmpaddr）用于定义物理内存保护区域，其中配置寄存器包含 R、W、X 位以分别表示读、写和指令执行权限，当这些位被设置时允许对应访问类型，若任一为零则拒绝该类型访问。[[7]]\n- PMP 入口的锁定机制通过设置 L 位实现，当 L 位被设置时，即使 A 字段为 OFF，该入口仍被锁定，且 R/W/X 权限对所有特权模式生效；当 L 位清零时，M 模式访问将成功，权限仅适用于 S 和 U 模式。[[5]]\n\n> 部分候选论断因未通过证据支持校验而未展示。"
+    },
+    {
+      "id": "design-negative-005",
+      "domain": "芯片设计与EDA/IP",
+      "category": "无证据题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 0.846,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 0,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 1.0,
+      "citation_support_ok": true,
+      "citation_support_details": [],
+      "structured_grounding_used": false,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 0,
+      "structured_accepted_claims": 0,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 0,
+      "document_names": [],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": null,
+      "errors": [],
+      "answer": "当前知识库未检索到足够相关的资料，无法基于可追溯证据回答该问题。请补充相关文档，或调整问题的范围后重试。"
+    },
+    {
+      "id": "materials-euv-006",
+      "domain": "半导体材料与设备",
+      "category": "单文档事实题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 5.757,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "EUV",
+            "极紫外"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "测试",
+            "testing"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "反馈",
+            "feedback"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "芯片制造商",
+            "chipmakers"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 1,
+      "structured_accepted_claims": 1,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 1,
+      "document_names": [
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md",
+        "nist-chips-1400-3.md"
+      ],
+      "cited_document_names": [
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "开发极紫外（EUV）光刻工具需要芯片制造商与供应商之间的协同优化，包括光罩、光刻胶和电子设计自动化软件的共同优化，以及来自领先芯片制造商多年测试和反馈",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.0185
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "Developing extreme ultraviolet (EUV) photolithography tools, for example, required co-optimization of reticles, photoresists, and electronic design automation software, as well as years of testing and feedback from leading-edge chipmakers."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 1,
+          "accepted_claim_count": 1,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 1,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 开发极紫外（EUV）光刻工具需要芯片制造商与供应商之间的协同优化，包括光罩、光刻胶和电子设计自动化软件的共同优化，以及来自领先芯片制造商多年测试和反馈。[[1]]"
+    },
+    {
+      "id": "materials-neon-007",
+      "domain": "半导体材料与设备",
+      "category": "专业参数题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 3.809,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        4
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 0.667,
+      "minimum_citation_support_coverage": 0.67,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "氖气",
+            "neon"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            4
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "地理集中",
+            "geographic concentration"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            4
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "供应中断",
+            "disruption",
+            "shortage"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            4
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 1,
+      "structured_accepted_claims": 1,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 1,
+      "document_names": [
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-chips-1000.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-chips-1000.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "乌克兰生产了大约全球一半的氖气供应，这种上游输入的地理集中会使美国半导体供应链面临因单一地区供应中断而引发的风险",
+              "citation_ids": [
+                4
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "4": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 4,
+                  "quote": "Ukraine produced roughly half of the global supply of neon in 2022, for example,"
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 1,
+          "accepted_claim_count": 1,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 1,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 根据当前证据，乌克兰生产了大约全球一半的氖气供应，这种上游输入的地理集中会使美国半导体供应链面临因单一地区供应中断而引发的风险。[[4]]"
+    },
+    {
+      "id": "materials-facility-008",
+      "domain": "半导体材料与设备",
+      "category": "综合分析题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 9.778,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        1,
+        3,
+        5,
+        3,
+        5
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "供应链",
+            "supply chain"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1,
+            3,
+            5
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "劳动力",
+            "workforce"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            3,
+            5
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "网络安全",
+            "cybersecurity"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            3,
+            5
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "运营安全",
+            "operational security"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            3,
+            5
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 4,
+      "structured_accepted_claims": 4,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 6,
+      "document_names": [
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-materials-equipment-vision-2023.md",
+        "nist-ir-8501.md"
+      ],
+      "cited_document_names": [
+        "nist-materials-equipment-vision-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "应规划供应链中的关键供应商清单并绘制其供应关系图，以管理短缺风险，包括开展供应链压力测试分析和定期进行第二级及更远层级供应商的供应链映射",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "Applicants to the CHIPS Program Office’s funding opportunity for commercial fabrication facilities and large-scale semiconductor materials and manufacturing equipment facilities must list and map all key suppliers and address techniques used to manage supply chain risk, such as conducting supply chain stress test analyses and regular supply chain mapping into second-tier and further suppliers."
+                }
+              ]
+            },
+            {
+              "text": "应建立安全的跨行业供应链信息共享机制，以提升供应链透明度和韧性",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "Industry stakeholders should also work to establish secure venues and best practices for cross-industry supply chain information sharing."
+                }
+              ]
+            },
+            {
+              "text": "应推动运营安全、供应链安全和网络安全能力的建设，以保障制造过程的完整性与可靠性",
+              "citation_ids": [
+                3,
+                5
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "3": 0.0,
+                "5": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 3,
+                  "quote": "promoting operational security, supply chain security, and cybersecurity;"
+                },
+                {
+                  "citation_id": 5,
+                  "quote": "promoting operational security, supply chain security, and cybersecurity"
+                }
+              ]
+            },
+            {
+              "text": "应建设具备多样化和专业技能的劳动力队伍，以支持半导体制造设施的持续运营与创新",
+              "citation_ids": [
+                3,
+                5
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "3": 0.0,
+                "5": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 3,
+                  "quote": "building a skilled and diverse workforce"
+                },
+                {
+                  "citation_id": 5,
+                  "quote": "building a skilled and diverse workforce"
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 4,
+          "accepted_claim_count": 4,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 6,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 应规划供应链中的关键供应商清单并绘制其供应关系图，以管理短缺风险，包括开展供应链压力测试分析和定期进行第二级及更远层级供应商的供应链映射。[[1]]\n- 应建立安全的跨行业供应链信息共享机制，以提升供应链透明度和韧性。[[1]]\n- 应推动运营安全、供应链安全和网络安全能力的建设，以保障制造过程的完整性与可靠性。[[3]][[5]]\n- 应建设具备多样化和专业技能的劳动力队伍，以支持半导体制造设施的持续运营与创新。[[3]][[5]]"
+    },
+    {
+      "id": "materials-metrology-009",
+      "domain": "半导体材料与设备",
+      "category": "跨段落题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 10.362,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 0.0,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "参考材料",
+          "reference materials"
+        ],
+        [
+          "缺陷",
+          "defects"
+        ],
+        [
+          "污染物",
+          "contaminants"
+        ],
+        [
+          "计量",
+          "metrology"
+        ]
+      ],
+      "citations": [
+        2,
+        6,
+        5
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": false,
+      "gold_citation_required": false,
+      "citation_completeness": 0.0,
+      "citation_support_coverage": 0.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "参考材料",
+            "reference materials"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "缺陷",
+            "defects"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "污染物",
+            "contaminants"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "计量",
+            "metrology"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 4,
+      "structured_accepted_claims": 3,
+      "structured_rejected_claims": 1,
+      "verified_evidence_quotes": 3,
+      "document_names": [
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md"
+      ],
+      "cited_document_names": [
+        "nist-chips-1000.md",
+        "nist-ir-8577.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "通过开发新的测量技术和标准，可以支持材料纯度、物理性能和来源的一致性，从而确保材料质量的可追溯性和可靠性",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "Develop measurement technologies, properties data, and standards focused on defect and contaminant identification to support uniform materials quality and traceability across the supply chain."
+                }
+              ]
+            },
+            {
+              "text": "需要建立标准的测量方法和数据交换协议，以解决当前半导体制造生态系统中缺乏标准化导致的一致性和效率问题",
+              "citation_ids": [
+                6
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "6": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 6,
+                  "quote": "There is a lack of standardized measurement methods and data exchange protocols across the semiconductor manufacturing ecosystem, leading to inconsistencies and inefficiencies."
+                }
+              ]
+            },
+            {
+              "text": "材料性能的评估需要结合物理性质和可预测性建模，特别是在先进封装中温度、压力和机械应力对长期可靠性和潜在电路损伤的影响仍不明确",
+              "citation_ids": [
+                5
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "5": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 5,
+                  "quote": "The effects of temperature, pressure, and mechanical stress during epoxy molding on long-term reliability and potential damage to circuits and components remain relatively unknown."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [
+            {
+              "claim_index": 2,
+              "reason": "citation_out_of_range",
+              "support_scores": {},
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 4,
+          "accepted_claim_count": 3,
+          "rejected_claim_count": 1,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 3,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 通过开发新的测量技术和标准，可以支持材料纯度、物理性能和来源的一致性，从而确保材料质量的可追溯性和可靠性。[[2]]\n- 需要建立标准的测量方法和数据交换协议，以解决当前半导体制造生态系统中缺乏标准化导致的一致性和效率问题。[[6]]\n- 根据当前证据，材料性能的评估需要结合物理性质和可预测性建模，特别是在先进封装中温度、压力和机械应力对长期可靠性和潜在电路损伤的影响仍不明确。[[5]]\n\n> 部分候选论断因未通过证据支持校验而未展示。"
+    },
+    {
+      "id": "materials-negative-010",
+      "domain": "半导体材料与设备",
+      "category": "无证据题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 1.036,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 0,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 1.0,
+      "citation_support_ok": true,
+      "citation_support_details": [],
+      "structured_grounding_used": false,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 0,
+      "structured_accepted_claims": 0,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 0,
+      "document_names": [],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": null,
+      "errors": [],
+      "answer": "当前知识库未检索到足够相关的资料，无法基于可追溯证据回答该问题。请补充相关文档，或调整问题的范围后重试。"
+    },
+    {
+      "id": "process-inline-011",
+      "domain": "晶圆制造与前道工艺",
+      "category": "单文档事实题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 8.268,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        2,
+        2
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": false,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 0.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "在线计量",
+            "in-line metrology"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1,
+            2
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "高吞吐量",
+            "high-throughput"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "过程控制",
+            "process control"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            2
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "质量保证",
+            "quality assurance"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            2
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 3,
+      "structured_accepted_claims": 3,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 3,
+      "document_names": [
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-chips-1000.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "高吞吐量晶圆制造需要 in-line metrology，因为它必须适用于在生产线上的高通量生产，并且能够提供实时结果",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.0606
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "in-line high-volume production, be non-destructive, and be able to provide results in real time."
+                }
+              ]
+            },
+            {
+              "text": "in-line metrology 对过程控制的作用是帮助识别、表征和缓解影响性能和质量的缺陷及其他问题",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.0303
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "Metrology is required to identify, characterize, and mitigate defects and other issues that impact performance and quality and provides product assurance at many stages of manufacturing."
+                }
+              ]
+            },
+            {
+              "text": "in-line metrology 对质量保证的作用是确保在制造过程的多个阶段提供产品保障",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.0357
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "provides product assurance at many stages of manufacturing."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 3,
+          "accepted_claim_count": 3,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 3,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 高吞吐量晶圆制造需要 in-line metrology，因为它必须适用于在生产线上的高通量生产，并且能够提供实时结果。[[1]]\n- in-line metrology 对过程控制的作用是帮助识别、表征和缓解影响性能和质量的缺陷及其他问题。[[2]]\n- in-line metrology 对质量保证的作用是确保在制造过程的多个阶段提供产品保障。[[2]]"
+    },
+    {
+      "id": "process-3d-012",
+      "domain": "晶圆制造与前道工艺",
+      "category": "专业参数题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 11.639,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 0.25,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "3D 结构",
+          "3D structures"
+        ],
+        [
+          "界面",
+          "interfaces"
+        ],
+        [
+          "内部互连",
+          "internal 3D"
+        ]
+      ],
+      "citations": [
+        1,
+        3
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 0.25,
+      "citation_support_coverage": 0.25,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "3D 结构",
+            "3D structures"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "界面",
+            "interfaces"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "空洞",
+            "voids"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            3
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "内部互连",
+            "internal 3D"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 4,
+      "structured_accepted_claims": 2,
+      "structured_rejected_claims": 2,
+      "verified_evidence_quotes": 2,
+      "document_names": [
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-chips-1000.md",
+        "nist-chips-1000.md",
+        "nist-chips-1400-3.md"
+      ],
+      "cited_document_names": [
+        "nist-chips-1000.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "当应用于三维结构时，计量工具更昂贵，并且在能力上存在显著差距，因此需要新的计量方法来满足先进器件对系统性能持续提升的要求",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "1": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "when applied to 3D structures, metrology tools are more expensive and often exhibit significant gaps in capabilities."
+                }
+              ]
+            },
+            {
+              "text": "应关注内部缺陷如应力、附着力、空洞、翘曲、基板良率以及子系统间接口的在位快速测量和验证方法",
+              "citation_ids": [
+                3
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "3": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 3,
+                  "quote": "measurements for in situ, rapid measurements and verification methods for interfaces and subsurface interconnects, and internal 3D structures including warpage, voids, substrate yield, stresses, adhesion, and reliability with improved throughput and resolution."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [
+            {
+              "claim_index": 1,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "2": 0.0244
+              },
+              "verified_quote_count": 0
+            },
+            {
+              "claim_index": 3,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "4": 0.0
+              },
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 4,
+          "accepted_claim_count": 2,
+          "rejected_claim_count": 2,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 2,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 根据当前证据，当应用于三维结构时，计量工具更昂贵，并且在能力上存在显著差距，因此需要新的计量方法来满足先进器件对系统性能持续提升的要求。[[1]]\n- 根据当前证据，应关注内部缺陷如应力、附着力、空洞、翘曲、基板良率以及子系统间接口的在位快速测量和验证方法。[[3]]\n\n> 部分候选论断因未通过证据支持校验而未展示。"
+    },
+    {
+      "id": "process-digital-twin-013",
+      "domain": "晶圆制造与前道工艺",
+      "category": "综合分析题",
+      "passed": false,
+      "quality_passed": false,
+      "latency_seconds": 10.352,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 0.0,
+      "coverage_ok": false,
+      "missing_term_groups": [
+        [
+          "数字孪生",
+          "digital twin"
+        ],
+        [
+          "真实世界数据",
+          "真实世界",
+          "real world"
+        ],
+        [
+          "物理世界",
+          "physical world"
+        ],
+        [
+          "控制",
+          "优化",
+          "control",
+          "optimization"
+        ]
+      ],
+      "citations": [],
+      "citation_ok": false,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": false,
+      "gold_citation_required": false,
+      "citation_completeness": 0.0,
+      "citation_support_coverage": 0.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": false,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "数字孪生",
+            "digital twin"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "真实世界数据",
+            "真实世界",
+            "real world"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "物理世界",
+            "physical world"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "控制",
+            "优化",
+            "control",
+            "optimization"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": false,
+      "structured_candidate_claims": 3,
+      "structured_accepted_claims": 0,
+      "structured_rejected_claims": 3,
+      "verified_evidence_quotes": 0,
+      "document_names": [
+        "nist-ir-8577.md",
+        "nist-ir-8501.md",
+        "nist-ir-8577.md",
+        "nist-chips-1400-3.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md",
+        "nist-ir-8501.md",
+        "nist-ir-8501.md"
+      ],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "insufficient",
+          "accepted_claims": [],
+          "rejected_claims": [
+            {
+              "claim_index": 0,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "1": 0.0
+              },
+              "verified_quote_count": 0
+            },
+            {
+              "claim_index": 1,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "3": 0.0
+              },
+              "verified_quote_count": 0
+            },
+            {
+              "claim_index": 2,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "4": 0.0
+              },
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 3,
+          "accepted_claim_count": 0,
+          "rejected_claim_count": 3,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 0,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "当前候选回答未通过逐论断证据校验，无法基于可追溯证据给出结论。请补充资料或缩小问题范围后重试。"
+    },
+    {
+      "id": "process-interoperability-014",
+      "domain": "晶圆制造与前道工艺",
+      "category": "跨段落题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 12.634,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 0.75,
+      "coverage_ok": true,
+      "missing_term_groups": [
+        [
+          "设备和软件",
+          "equipment and software"
+        ]
+      ],
+      "citations": [
+        1,
+        2,
+        4,
+        7
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 0.75,
+      "citation_support_coverage": 0.75,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "互操作",
+            "interoperability"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1,
+            2,
+            4,
+            7
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "设备和软件",
+            "equipment and software"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "数据",
+            "data"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1,
+            2,
+            4,
+            7
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "制造",
+            "manufacturing"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1,
+            2,
+            4,
+            7
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 4,
+      "structured_accepted_claims": 4,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 4,
+      "document_names": [
+        "nist-ir-8577.md",
+        "nist-chips-1400-2.md",
+        "nist-chips-1400-3.md",
+        "nist-ir-8577.md",
+        "nist-chips-1400-2.md",
+        "nist-chips-1400-2.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-ir-8577.md",
+        "nist-chips-1400-2.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "晶圆厂需要设备与软件互操作标准，以确保在制造过程中实现安全、可靠的数据交换，并支持跨平台和设备的工业自动化",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "A machine-to-machine communication protocol for industrial automation that ensures secure and reliable data exchange across diverse platforms and devices."
+                }
+              ]
+            },
+            {
+              "text": "设备与软件互操作标准通过定义统一的数据模型和接口，促进制造自动化中不同系统之间的数据共享与协同运行",
+              "citation_ids": [
+                2
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "2": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 2,
+                  "quote": "An interest here is on cultivating an ecosystem where third-party entities can leverage standardized tools and software, promoting a more integrated and efficient semiconductor landscape. As noted in a recent publication8 , the existing Open Platform Communications Unified Architecture (OPC UA)9 standard should be considered to solve the problem of interoperability in digital twins. OPC UA supports more than just data transmission through its semantic capabilities; it also contains an informatio"
+                }
+              ]
+            },
+            {
+              "text": "在制造自动化中，设备与软件互操作标准支持双向通信，使物理世界的数据能够实时输入到数字模型中，并将优化建议反馈至实际系统，从而实现动态调整和持续优化",
+              "citation_ids": [
+                4
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "4": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 4,
+                  "quote": "This comprehensive approach ensures that manufacturing processes are not only efficient but also adaptive to changing conditions and requirements."
+                }
+              ]
+            },
+            {
+              "text": "设备与软件互操作标准有助于保护知识产权、数据完整性和可追溯性，是实现制造自动化过程中安全与合规运行的关键基础",
+              "citation_ids": [
+                7
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "7": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 7,
+                  "quote": "Standards for interoperable equipment and software from different vendors that ensure the protection of intellectual property, data integrity, and provenance across the supply chain."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 4,
+          "accepted_claim_count": 4,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 4,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 晶圆厂需要设备与软件互操作标准，以确保在制造过程中实现安全、可靠的数据交换，并支持跨平台和设备的工业自动化。[[1]]\n- 设备与软件互操作标准通过定义统一的数据模型和接口，促进制造自动化中不同系统之间的数据共享与协同运行。[[2]]\n- 在制造自动化中，设备与软件互操作标准支持双向通信，使物理世界的数据能够实时输入到数字模型中，并将优化建议反馈至实际系统，从而实现动态调整和持续优化。[[4]]\n- 设备与软件互操作标准有助于保护知识产权、数据完整性和可追溯性，是实现制造自动化过程中安全与合规运行的关键基础。[[7]]"
+    },
+    {
+      "id": "process-negative-015",
+      "domain": "晶圆制造与前道工艺",
+      "category": "无证据题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 0.499,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 0,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 1.0,
+      "citation_support_ok": true,
+      "citation_support_details": [],
+      "structured_grounding_used": false,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 0,
+      "structured_accepted_claims": 0,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 0,
+      "document_names": [],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": null,
+      "errors": [],
+      "answer": "当前知识库未检索到足够相关的资料，无法基于可追溯证据回答该问题。请补充相关文档，或调整问题的范围后重试。"
+    },
+    {
+      "id": "packaging-scaling-016",
+      "domain": "封装与测试",
+      "category": "单文档事实题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 7.121,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 9,
+      "term_group_coverage": 0.75,
+      "coverage_ok": true,
+      "missing_term_groups": [
+        [
+          "基板",
+          "substrate"
+        ]
+      ],
+      "citations": [
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 0.75,
+      "citation_support_coverage": 0.75,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "scale-down",
+            "特征尺寸缩小"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "scale-out",
+            "芯片数量增加"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "基板",
+            "substrate"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        },
+        {
+          "term_group": [
+            "协同",
+            "interdependencies"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 2,
+      "structured_accepted_claims": 1,
+      "structured_rejected_claims": 1,
+      "verified_evidence_quotes": 1,
+      "document_names": [
+        "nist-napmp-vision-2023.md",
+        "nist-napmp-vision-2023.md",
+        "nist-napmp-vision-2023.md",
+        "nist-ir-8577.md",
+        "nist-chips-1000.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md"
+      ],
+      "cited_document_names": [
+        "nist-napmp-vision-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "scale-down 和 scale-out 需要协同，因为先进封装的集成过程具有高度的跨学科依赖性，且性能提升依赖于两者在物理尺寸和功能密度上的平衡",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "1": 0.0444
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "This scaling is highly interdisciplinary with many interdependencies."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [
+            {
+              "claim_index": 0,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "1": 0.0714
+              },
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 2,
+          "accepted_claim_count": 1,
+          "rejected_claim_count": 1,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 1,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 根据当前证据，scale-down 和 scale-out 需要协同，因为先进封装的集成过程具有高度的跨学科依赖性，且性能提升依赖于两者在物理尺寸和功能密度上的平衡。[[1]]\n\n> 部分候选论断因未通过证据支持校验而未展示。"
+    },
+    {
+      "id": "packaging-thermal-017",
+      "domain": "封装与测试",
+      "category": "专业参数题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 8.195,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        1,
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "低翘曲",
+            "low warpage"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "供电",
+            "power delivery"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "热管理",
+            "thermal management"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "基板",
+            "substrate"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 2,
+      "structured_accepted_claims": 2,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 2,
+      "document_names": [
+        "nist-napmp-vision-2023.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md"
+      ],
+      "cited_document_names": [
+        "nist-napmp-vision-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "多芯粒先进封装的基板需要低翘曲，以确保在制造和装配过程中保持结构稳定性，避免因机械应力导致的可靠性问题",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "The key requirements of new substrates include multiple levels of fine wiring and via pitches, low warpage, large area, and the ability to integrate active and passive components."
+                }
+              ]
+            },
+            {
+              "text": "多芯粒先进封装的基板需要同时关注供电和热管理，因为先进封装对功率密度和散热提出了更高要求，必须通过创新材料和解决方案实现高效供电与热管理以确保性能和可靠性",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "Advanced packaging is demanding in terms of power density and heat dissipation. Advances in power delivery and efficient thermal management must be solved for advanced packaging to succeed. They require innovative materials and solutions that are compatible with the substrate and assembly processes used."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 2,
+          "accepted_claim_count": 2,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 2,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 多芯粒先进封装的基板需要低翘曲，以确保在制造和装配过程中保持结构稳定性，避免因机械应力导致的可靠性问题。[[1]]\n- 多芯粒先进封装的基板需要同时关注供电和热管理，因为先进封装对功率密度和散热提出了更高要求，必须通过创新材料和解决方案实现高效供电与热管理以确保性能和可靠性。[[1]]"
+    },
+    {
+      "id": "packaging-ucie-018",
+      "domain": "封装与测试",
+      "category": "综合分析题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 8.099,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 0.75,
+      "coverage_ok": true,
+      "missing_term_groups": [
+        [
+          "不同厂商",
+          "different manufacturers"
+        ]
+      ],
+      "citations": [
+        1
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 0.75,
+      "citation_support_coverage": 0.75,
+      "minimum_citation_support_coverage": 0.75,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "UCIe",
+            "Universal Chiplet Interconnect Express"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "die-to-die",
+            "模粒间互连"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "互操作",
+            "interoperability"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            1
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "不同厂商",
+            "different manufacturers"
+          ],
+          "answer_matched": false,
+          "citation_numbers": [],
+          "citation_present": false,
+          "supported_by_cited_chunk": false
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 2,
+      "structured_accepted_claims": 1,
+      "structured_rejected_claims": 1,
+      "verified_evidence_quotes": 1,
+      "document_names": [
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-ir-8577.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "Universal Chiplet Interconnect Express (UCIe) 等 die-to-die 互连标准通过建立开放的互连规范，确保来自不同制造商的芯粒之间在芯片间连接层面的互操作性",
+              "citation_ids": [
+                1
+              ],
+              "uncertainty": "certain",
+              "support_scores": {
+                "1": 0.1395
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 1,
+                  "quote": "Universal Chiplet Interconnect Express (UCIe) – Focuses on developing open standards for chiplets with an emphasis on die-to-die interconnects, enabling interoperability between chiplets from different manufacturers."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [
+            {
+              "claim_index": 1,
+              "reason": "insufficient_lexical_support",
+              "support_scores": {
+                "2": 0.025
+              },
+              "verified_quote_count": 0
+            }
+          ],
+          "candidate_claim_count": 2,
+          "accepted_claim_count": 1,
+          "rejected_claim_count": 1,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 1,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- Universal Chiplet Interconnect Express (UCIe) 等 die-to-die 互连标准通过建立开放的互连规范，确保来自不同制造商的芯粒之间在芯片间连接层面的互操作性。[[1]]\n\n> 部分候选论断因未通过证据支持校验而未展示。"
+    },
+    {
+      "id": "packaging-metrology-019",
+      "domain": "封装与测试",
+      "category": "跨段落题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 12.914,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 7,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [
+        7,
+        7,
+        7,
+        7
+      ],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 1.0,
+      "citation_support_ok": true,
+      "citation_support_details": [
+        {
+          "term_group": [
+            "翘曲",
+            "warpage"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            7
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "空洞",
+            "voids"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            7
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "应力",
+            "stresses"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            7
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        },
+        {
+          "term_group": [
+            "粘附",
+            "adhesion"
+          ],
+          "answer_matched": true,
+          "citation_numbers": [
+            7
+          ],
+          "citation_present": true,
+          "supported_by_cited_chunk": true
+        }
+      ],
+      "structured_grounding_used": true,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 4,
+      "structured_accepted_claims": 4,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 4,
+      "document_names": [
+        "nist-metrology-gaps-2023.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-ir-8577.md",
+        "nist-chips-1400-3.md",
+        "nist-metrology-gaps-2023.md"
+      ],
+      "cited_document_names": [
+        "nist-metrology-gaps-2023.md"
+      ],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": {
+        "mode": "local",
+        "provider": "ollama",
+        "model": "industry-qwen3:4b",
+        "grounding": {
+          "requested_status": "grounded",
+          "status": "grounded",
+          "accepted_claims": [
+            {
+              "text": "检查翘曲是因为先进封装内部互连的结构完整性依赖于各层之间的精确对齐，翘曲会导致层间错位和机械应力集中，从而影响电气性能和可靠性",
+              "citation_ids": [
+                7
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "7": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 7,
+                  "quote": "12. Measurements for in situ, rapid measurements and verification methods for interfaces and subsurface interconnects, and internal 3D structures including warpage, voids, substrate yield, stresses, adhesion, and reliability with improved throughput and resolution."
+                }
+              ]
+            },
+            {
+              "text": "检查空洞是因为空洞会形成电学绝缘缺陷，导致局部短路或漏电流，从而降低互连的电气性能和可靠性",
+              "citation_ids": [
+                7
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "7": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 7,
+                  "quote": "12. Measurements for in situ, rapid measurements and verification methods for interfaces and subsurface interconnects, and internal 3D structures including warpage, voids, substrate yield, stresses, adhesion, and reliability with improved throughput and resolution."
+                }
+              ]
+            },
+            {
+              "text": "检查应力是因为内部应力会导致材料变形、裂纹扩展和界面脱粘，从而影响封装结构的长期稳定性和互连的可靠性",
+              "citation_ids": [
+                7
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "7": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 7,
+                  "quote": "12. Measurements for in situ, rapid measurements and verification methods for interfaces and subsurface interconnects, and internal 3D structures including warpage, voids, substrate yield, stresses, adhesion, and reliability with improved throughput and resolution."
+                }
+              ]
+            },
+            {
+              "text": "检查粘附是因为互连层之间的界面粘附力不足会导致分层、脱粘和电气断路，从而破坏封装的整体结构完整性",
+              "citation_ids": [
+                7
+              ],
+              "uncertainty": "limited",
+              "support_scores": {
+                "7": 0.0
+              },
+              "verified_evidence_quotes": [
+                {
+                  "citation_id": 7,
+                  "quote": "12. Measurements for in situ, rapid measurements and verification methods for interfaces and subsurface interconnects, and internal 3D structures including warpage, voids, substrate yield, stresses, adhesion, and reliability with improved throughput and resolution."
+                }
+              ]
+            }
+          ],
+          "rejected_claims": [],
+          "candidate_claim_count": 4,
+          "accepted_claim_count": 4,
+          "rejected_claim_count": 0,
+          "minimum_support_score": 0.12,
+          "verified_quote_count": 4,
+          "limitations": []
+        }
+      },
+      "errors": [],
+      "answer": "- 根据当前证据，检查翘曲是因为先进封装内部互连的结构完整性依赖于各层之间的精确对齐，翘曲会导致层间错位和机械应力集中，从而影响电气性能和可靠性。[[7]]\n- 根据当前证据，检查空洞是因为空洞会形成电学绝缘缺陷，导致局部短路或漏电流，从而降低互连的电气性能和可靠性。[[7]]\n- 根据当前证据，检查应力是因为内部应力会导致材料变形、裂纹扩展和界面脱粘，从而影响封装结构的长期稳定性和互连的可靠性。[[7]]\n- 根据当前证据，检查粘附是因为互连层之间的界面粘附力不足会导致分层、脱粘和电气断路，从而破坏封装的整体结构完整性。[[7]]"
+    },
+    {
+      "id": "packaging-negative-020",
+      "domain": "封装与测试",
+      "category": "无证据题",
+      "passed": true,
+      "quality_passed": true,
+      "latency_seconds": 0.472,
+      "latency_ok": true,
+      "retrieval_ok": true,
+      "document_count": 0,
+      "term_group_coverage": 1.0,
+      "coverage_ok": true,
+      "missing_term_groups": [],
+      "citations": [],
+      "citation_ok": true,
+      "gold_source_retrieved": true,
+      "gold_citation_ok": true,
+      "gold_citation_required": false,
+      "citation_completeness": 1.0,
+      "citation_support_coverage": 1.0,
+      "minimum_citation_support_coverage": 1.0,
+      "citation_support_ok": true,
+      "citation_support_details": [],
+      "structured_grounding_used": false,
+      "structured_grounding_ok": true,
+      "structured_candidate_claims": 0,
+      "structured_accepted_claims": 0,
+      "structured_rejected_claims": 0,
+      "verified_evidence_quotes": 0,
+      "document_names": [],
+      "cited_document_names": [],
+      "refusal_ok": true,
+      "forbidden_hits": [],
+      "model_info": null,
+      "errors": [],
+      "answer": "当前知识库未检索到足够相关的资料，无法基于可追溯证据回答该问题。请补充相关文档，或调整问题的范围后重试。"
+    }
+  ]
+}
