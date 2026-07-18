@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from enum import Enum
 from openai import OpenAI
 
-from app.core.text2sql_guard import SQLGuard, GUARD_OK, GuardResult
+from core.text2sql_guard import SQLGuard, GUARD_OK, GuardResult
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
