@@ -58,7 +58,7 @@ make validate-sources
 
 | 检查项 | 结果 |
 | --- | ---: |
-| 后端单元 + Milvus Lite 集成测试 | 154/154 通过（153 unit + 1 integration） |
+| 后端单元 + Milvus Lite 集成测试 | 162/162 通过（161 unit + 1 integration） |
 | 全语料 Milvus Lite smoke | 15 份资料 / 36 任务 / 5256 切片，4/4 库对账通过 |
 | Python 编译检查 | 通过 |
 | Python 依赖一致性 | `pip check` 通过 |
@@ -94,4 +94,4 @@ Milvus 2.6.17 + PyMilvus 2.6.14。Compose 使用独立的 v2.6 etcd/MinIO/Milvus
 原始 PDF 不进 Git 不代表数据来源不可追溯：版本库保留来源 URL、许可信息、
 内容哈希、本地路径和处理状态，下载后通过哈希校验再进入解析流程。
 
-在确认公司版权代码、原始研报与测试数据的公开授权前，只维护本地仓库，不推送远端。
+在确认代码、原始研报与测试数据的公开授权前，仅维护私有远端，不开放公开访问。

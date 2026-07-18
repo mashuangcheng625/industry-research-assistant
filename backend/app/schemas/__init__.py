@@ -1,14 +1,3 @@
-# Document schemas package
-
-from .document import (
-    DeleteDocumentsRequest,
-    RetrieveDocumentsRequest,
-    DocumentResponse,
-    UploadDocumentResponse,
-    DocumentListResponse,
-    DeleteDocumentsResponse
-)
-
 from .search import (
     WebSearchRequest,
     SearchResultItem,
@@ -43,14 +32,6 @@ from .knowledge import (
 
 
 __all__ = [
-    # Document schemas
-    'DeleteDocumentsRequest',
-    'RetrieveDocumentsRequest',
-    'DocumentResponse',
-    'UploadDocumentResponse',
-    'DocumentListResponse',
-    'DeleteDocumentsResponse',
-
     # Search schemas
     'WebSearchRequest',
     'SearchResultItem',

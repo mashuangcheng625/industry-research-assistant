@@ -1,8 +1,8 @@
 {
   "report_title": "先进封装多源联合研究评测报告",
   "generated_at": "2026-07-18T09:22:20.595667+00:00",
-  "fixture_path": "/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/sample-data/multi_source_advanced_packaging_fixture.json",
-  "eval_path": "/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/sample-data/multi_source_advanced_packaging_eval.json",
+  "fixture_path": "sample-data/multi_source_advanced_packaging_fixture.json",
+  "eval_path": "sample-data/multi_source_advanced_packaging_eval.json",
   "overall_pass": true,
   "gates": {
     "adapter_conversion": {

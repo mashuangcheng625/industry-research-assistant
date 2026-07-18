@@ -11,6 +11,12 @@ import re
 from typing import List, Dict, Any, Optional
 from service.milvus_service import get_milvus_service
 from service.embedding_service import generate_embedding
+from service.embedding_router import (
+    EmbeddingRoute,
+    collection_name_for_route,
+    routes_for_mode,
+)
+from service.rerank_service import rerank_scores
 
 
 ASCII_TOKEN_PATTERN = re.compile(r"[a-z0-9]+(?:[._/-][a-z0-9]+)*", re.IGNORECASE)
@@ -353,12 +359,14 @@ def _select_facet_diverse_results(
     return selected[:top_k]
 
 
-def retrieve_content(
+def _retrieve_content_single(
     indexNames: str,
     question: str,
     top_k: int = 5,
     kb_id: Optional[str] = None,
     min_score: Optional[float] = None,
+    embedding_route: EmbeddingRoute | None = None,
+    diagnostics: Optional[Dict[str, Any]] = None,
 ) -> List[Dict[str, Any]]:
     """
     检索相关内容
@@ -372,6 +380,8 @@ def retrieve_content(
     Returns:
         检索结果列表
     """
+    if diagnostics is not None:
+        diagnostics.update({"status": "running", "error_type": None})
     try:
         # 1. 生成原问题和领域子查询的向量。批量调用只产生一次 HTTP 往返。
         multi_query_enabled = _is_enabled(os.getenv("RAG_MULTI_QUERY_ENABLED", "true"))
@@ -382,13 +392,32 @@ def retrieve_content(
         )
         query_variants = [variant for variant, _ in query_plan]
         query_focus_terms = [focus_terms for _, focus_terms in query_plan]
-        query_vectors = generate_embedding(query_variants)
+        route = embedding_route or routes_for_mode("cloud")[0]
+        query_vectors = generate_embedding(
+            query_variants,
+            api_key=route.api_key,
+            base_url=route.base_url,
+            model_name=route.model,
+            dimensions=route.dimensions,
+        )
         if not query_vectors or len(query_vectors) == 0:
             print("生成查询向量失败")
+            if diagnostics is not None:
+                diagnostics.update({
+                    "status": "error",
+                    "error_type": "embedding_unavailable",
+                })
             return []
 
         # 2. 执行向量搜索；混合模式使用更大的候选集。
         milvus = get_milvus_service()
+        if not milvus.get_collection_stats(indexNames).get("exists", False):
+            if diagnostics is not None:
+                diagnostics.update({
+                    "status": "error",
+                    "error_type": "collection_missing",
+                })
+            return []
         hybrid_enabled = _is_enabled(os.getenv("RAG_HYBRID_ENABLED", "false"))
         candidate_k = max(top_k * 4, 20) if hybrid_enabled else top_k
         vector_results_by_id: Dict[str, Dict[str, Any]] = {}
@@ -677,6 +706,7 @@ def retrieve_content(
         for i, result in enumerate(filtered_results, start=1):
             message = {
                 "id": i,
+                "chunk_id": result.get("id"),
                 "document_id": result.get("doc_id", "N/A"),
                 "document_name": result.get("filename", "N/A"),
                 "content_with_weight": result.get("content", ""),
@@ -691,16 +721,138 @@ def retrieve_content(
                 "query_hit_count": len(result.get("query_hits", set())),
                 "document_coverage_score": result.get("document_coverage_score", 0.0),
                 "query_variant_count": len(query_variants),
+                "retrieval_route": route.name,
+                "embedding_model": route.model,
             }
             extracted_data.append(message)
 
+        if diagnostics is not None:
+            diagnostics.update({"status": "ok", "result_count": len(extracted_data)})
         return extracted_data
 
     except Exception as e:
+        if diagnostics is not None:
+            diagnostics.update({
+                "status": "error",
+                "error_type": type(e).__name__,
+            })
         print(f"检索错误: {str(e)}")
         import traceback
         traceback.print_exc()
         return []
+
+
+def _hybrid_result_key(result: Dict[str, Any]) -> str:
+    return str(
+        result.get("chunk_id")
+        or f"{result.get('document_id', '')}:{result.get('chunk_index', '')}"
+    )
+
+
+def _fuse_hybrid_results(
+    question: str,
+    results_by_route: Dict[str, List[Dict[str, Any]]],
+    top_k: int,
+) -> List[Dict[str, Any]]:
+    """Fuse route rankings with RRF, then apply the shared qwen3 reranker."""
+    rrf_k = max(1, int(os.getenv("HYBRID_RRF_K", "60")))
+    merged: Dict[str, Dict[str, Any]] = {}
+    for route_name, results in results_by_route.items():
+        for rank, result in enumerate(results, start=1):
+            key = _hybrid_result_key(result)
+            existing = merged.get(key, {})
+            route_scores = dict(existing.get("route_scores", {}))
+            route_scores[route_name] = float(result.get("score", 0))
+            retrieval_routes = set(existing.get("retrieval_routes", []))
+            retrieval_routes.add(route_name)
+            merged[key] = {
+                **result,
+                "rrf_score": float(existing.get("rrf_score", 0))
+                + 1.0 / (rrf_k + rank),
+                "route_scores": route_scores,
+                "retrieval_routes": sorted(retrieval_routes),
+            }
+
+    candidates = sorted(
+        merged.values(),
+        key=lambda item: float(item.get("rrf_score", 0)),
+        reverse=True,
+    )
+    rerank_limit = max(top_k, int(os.getenv("HYBRID_RERANK_TOP_K", "20")))
+    candidates = candidates[:rerank_limit]
+    scores = rerank_scores(
+        question,
+        [str(item.get("content_with_weight", "")) for item in candidates],
+        [float(item.get("rrf_score", 0)) for item in candidates],
+    )
+    for candidate, score in zip(candidates, scores):
+        candidate["rerank_score"] = float(score)
+        candidate["score"] = float(score)
+    candidates.sort(key=lambda item: float(item.get("score", 0)), reverse=True)
+    for index, candidate in enumerate(candidates[:top_k], start=1):
+        candidate["id"] = index
+    return candidates[:top_k]
+
+
+def retrieve_content(
+    indexNames: str,
+    question: str,
+    top_k: int = 5,
+    kb_id: Optional[str] = None,
+    min_score: Optional[float] = None,
+) -> List[Dict[str, Any]]:
+    """Route retrieval to cloud, local, or dual-index Hybrid mode."""
+    routes = routes_for_mode()
+    if len(routes) == 1:
+        route = routes[0]
+        collection_name = collection_name_for_route(indexNames, route)
+        results = _retrieve_content_single(
+            collection_name,
+            question,
+            top_k=top_k,
+            kb_id=kb_id,
+            min_score=min_score,
+            embedding_route=route,
+        )
+        for result in results:
+            result["retrieval_routes"] = [route.name]
+            result["degraded_route"] = None
+        return results
+
+    candidate_k = max(
+        top_k,
+        int(os.getenv("HYBRID_CLOUD_TOP_K", "20")),
+        int(os.getenv("HYBRID_LOCAL_TOP_K", "20")),
+    )
+    results_by_route: Dict[str, List[Dict[str, Any]]] = {}
+    failed_routes: list[str] = []
+    for route in routes:
+        route_top_k = int(os.getenv(
+            f"HYBRID_{route.name.upper()}_TOP_K",
+            str(candidate_k),
+        ))
+        diagnostics: Dict[str, Any] = {}
+        results = _retrieve_content_single(
+            collection_name_for_route(indexNames, route),
+            question,
+            top_k=route_top_k,
+            kb_id=kb_id,
+            min_score=min_score,
+            embedding_route=route,
+            diagnostics=diagnostics,
+        )
+        if results:
+            results_by_route[route.name] = results
+        if diagnostics.get("status") == "error":
+            failed_routes.append(route.name)
+
+    if not results_by_route:
+        return []
+    fused = _fuse_hybrid_results(question, results_by_route, top_k)
+    degraded = failed_routes or None
+    for result in fused:
+        result["degraded_route"] = degraded
+    return fused
 
 
 def retrieve_from_knowledge_base(
@@ -720,7 +872,7 @@ def retrieve_from_knowledge_base(
     Returns:
         检索结果列表
     """
-    # 将知识库名称转换为集合名称
+    # 只传递业务基名，具体 Collection 由 Embedding 路由统一决定。
     collection_name = f"kb_{kb_name}".lower().replace(" ", "_")
     return retrieve_content(
         collection_name,

@@ -6,11 +6,11 @@ import uuid
 from openai import OpenAI
 import tiktoken
 
-from .document_service import DocumentService
 from .web_search_service import WebSearchService
 from .session_service import SessionService
 from .memory_service import get_memory_service
 from .llm_router import resolve_llm_endpoint
+from .rerank_service import rerank_scores
 from .grounding_service import (
     GroundingValidationError,
     apply_semantic_entailment_judgments,
@@ -50,21 +50,16 @@ def normalize_identifier_question(question: str) -> str:
 class ChatService:
     """Chat service that combines document retrieval and LLM generation"""
     
-    def __init__(self, document_service: DocumentService, web_search_service: WebSearchService, session_service: SessionService):
+    def __init__(self, web_search_service: WebSearchService, session_service: SessionService):
         """
         Initialize the ChatService.
         
         Args:
-            document_service: Document service for knowledge base retrieval
             web_search_service: Web search service for internet search
             session_service: Session service for chat history management
         """
-        self.document_service = document_service
         self.web_search_service = web_search_service
         self.session_service = session_service
-        self.openai_api_key = os.environ.get("DASHSCOPE_API_KEY", "")
-        self.openai_base_url = os.environ.get("OPENAI_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-        self.openai_model = os.environ.get("OPENAI_MODEL", "deepseek-r1")
         self.mock_mode = os.environ.get("LLM_MOCK_MODE", "false").lower() in {"1", "true", "yes"}
         self.encoding = tiktoken.get_encoding("cl100k_base")  # OpenAI通用编码
         # 项目本地模型默认使用 8192 上下文；为提示词、历史和回答预留空间。
@@ -151,48 +146,6 @@ class ChatService:
                 error=str(exc),
             )
     
-    def retrieve_from_knowledge_base(self, question: str, dataset_id: str) -> List[Dict[str, Any]]:
-        """
-        Retrieve documents from knowledge base.
-        
-        Args:
-            question: User question
-            dataset_id: Dataset ID
-            
-        Returns:
-            List of retrieved documents
-        """
-        try:
-            response = self.document_service.retrieve_documents(
-                question=question,
-                dataset_ids=[dataset_id]
-            )
-            
-            if response.get("code") != 0:
-                return []
-                
-            # 从响应中提取文档
-            documents = []
-            if "data" in response and "chunks" in response["data"]:
-                for i, chunk in enumerate(response["data"]["chunks"]):
-                    # 使用document_keyword作为title
-                    title = chunk.get("document_keyword", None)
-                    
-                    doc = {
-                        "id": i+1,
-                        "content": chunk.get("content", ""),
-                        "content_with_weight": f"{chunk.get('content', '')} (相关度: {chunk.get('score', 0):.2f})",
-                        "source": "knowledge",
-                        "title": title,
-                        "weight": chunk.get("score", 1.0)
-                    }
-                    documents.append(doc)
-            
-            return documents
-        except Exception as e:
-            print(f"Error retrieving from knowledge base: {str(e)}")
-            return []
-    
     def retrieve_from_web(self, question: str) -> List[Dict[str, Any]]:
         """
         Retrieve information from web search.
@@ -250,75 +203,16 @@ class ChatService:
     
     def rerank_similarity(self, query: str, documents: List[Dict[str, Any]]) -> List[float]:
         """
-        对文档进行重排序评分。
+        使用百炼 qwen3-rerank 一次性为候选文档打分。
 
-        当前使用云端生成模型进行 cross-encoding 打分：将每个文档与 query
-        配对，让 LLM 判断相关性并输出 0-1 分数。
-
-        本地 embedding 模式时直接返回 Milvus 余弦相似度作为初始排序。
-        可通过 RERANK_ENABLED=true 强制开启云端 rerank。
+        服务返回的 index 映射回原始文档位置；请求失败或未开启时，
+        保留检索阶段已有的 weight，不丢失上下文。
         """
-        try:
-            embedding_base_url = os.getenv("EMBEDDING_BASE_URL", "")
-            rerank_enabled = os.getenv("RERANK_ENABLED", "false").lower() in {
-                "1", "true", "yes", "on",
-            }
-
-            if not rerank_enabled and embedding_base_url.startswith(
-                ("http://127.0.0.1", "http://localhost")
-            ):
-                return [doc.get("weight", 1.0) for doc in documents]
-
-            texts = [doc["content"] for doc in documents]
-            if not texts:
-                return []
-
-            # 使用当前模型路由进行 cross-encoding 打分
-            endpoint = resolve_llm_endpoint()
-            client = OpenAI(
-                api_key=endpoint.api_key,
-                base_url=endpoint.base_url,
-                timeout=30,
-            )
-
-            rerank_model = os.getenv("RERANK_MODEL", endpoint.model)
-
-            scores: list[float] = []
-            for idx, text in enumerate(texts):
-                try:
-                    completion = client.chat.completions.create(
-                        model=rerank_model,
-                        messages=[{
-                            "role": "system",
-                            "content": (
-                                "You are a relevance judge. Given a query and a document, "
-                                "rate how relevant the document is to answering the query. "
-                                "Score from 0.0 (completely irrelevant) to 1.0 (directly "
-                                "answers the query with specific facts). Consider: does it "
-                                "contain the specific concepts, data, or technical details "
-                                "the query asks about? Output ONLY a single float number, "
-                                "nothing else."
-                            ),
-                        }, {
-                            "role": "user",
-                            "content": (
-                                f"Query: {query}\n\n"
-                                f"Document [{idx}]: {text[:600]}"
-                            ),
-                        }],
-                        max_tokens=10,
-                        temperature=0,
-                    )
-                    raw = (completion.choices[0].message.content or "").strip()
-                    score = float(raw)
-                    scores.append(max(0.0, min(1.0, score)))
-                except Exception:
-                    scores.append(documents[idx].get("weight", 0.5))
-
-            return scores
-        except Exception as e:
-            print(f"Error in rerank_similarity: {e}")
-            return [doc.get("weight", 1.0) for doc in documents]
+        return rerank_scores(
+            query,
+            [str(doc.get("content", "")) for doc in documents],
+            [float(doc.get("weight", 1.0)) for doc in documents],
+        )
     
     def rerank_documents(self, question: str, documents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """

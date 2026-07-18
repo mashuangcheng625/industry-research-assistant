@@ -1,4 +1,3 @@
-from .document_service import DocumentService
 from .config import ServiceConfig
 from .web_search_service import WebSearchService
 from .chat_service import ChatService
@@ -14,7 +13,6 @@ from .smart_analyzer import SmartDataAnalyzer, create_smart_analyzer
 from .chart_generator import ChartGenerator, create_chart_generator
 
 __all__ = [
-    'DocumentService',
     'ServiceConfig',
     'WebSearchService',
     'ChatService',
@@ -32,4 +30,4 @@ __all__ = [
     'create_smart_analyzer',
     'ChartGenerator',
     'create_chart_generator',
-] 
+]

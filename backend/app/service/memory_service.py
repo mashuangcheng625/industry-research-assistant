@@ -21,6 +21,7 @@ load_dotenv()
 
 from models.chat import ChatSession, ChatMessage, LongTermMemory
 from service.embedding_service import generate_embedding
+from service.llm_router import resolve_llm_endpoint
 from service.milvus_service import get_milvus_service, MilvusService
 
 # 记忆触发阈值
@@ -32,10 +33,9 @@ class MemoryService:
     """长期记忆服务"""
 
     def __init__(self):
-        self.api_key = os.getenv("DASHSCOPE_API_KEY")
-        self.base_url = os.getenv("DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
-        self.model = os.getenv("DASHSCOPE_MODEL", "qwen-plus")
-        self.client = OpenAI(api_key=self.api_key, base_url=self.base_url)
+        endpoint = resolve_llm_endpoint()
+        self.model = endpoint.model
+        self.client = OpenAI(api_key=endpoint.api_key, base_url=endpoint.base_url)
         self._milvus: Optional[MilvusService] = None
 
     @property

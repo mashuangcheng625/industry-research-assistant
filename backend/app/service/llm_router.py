@@ -35,12 +35,9 @@ def _local_endpoint() -> LLMEndpoint:
     return LLMEndpoint(
         mode="local",
         provider=os.getenv("LOCAL_LLM_PROVIDER", "ollama"),
-        api_key=os.getenv("LOCAL_LLM_API_KEY", os.getenv("DASHSCOPE_API_KEY", "ollama")),
-        base_url=os.getenv(
-            "LOCAL_LLM_BASE_URL",
-            os.getenv("OPENAI_BASE_URL", "http://127.0.0.1:11434/v1"),
-        ),
-        model=os.getenv("LOCAL_LLM_MODEL", os.getenv("OPENAI_MODEL", "qwen3:0.6b")),
+        api_key=os.getenv("LOCAL_LLM_API_KEY", "ollama"),
+        base_url=os.getenv("LOCAL_LLM_BASE_URL", "http://127.0.0.1:11434/v1"),
+        model=os.getenv("LOCAL_LLM_MODEL", "qwen3:0.6b"),
     )
 
 
@@ -48,7 +45,7 @@ def _cloud_endpoint() -> LLMEndpoint:
     return LLMEndpoint(
         mode="cloud",
         provider=os.getenv("CLOUD_LLM_PROVIDER", "openai-compatible"),
-        api_key=os.getenv("CLOUD_LLM_API_KEY", ""),
+        api_key=os.getenv("CLOUD_LLM_API_KEY") or os.getenv("DASHSCOPE_API_KEY", ""),
         base_url=os.getenv("CLOUD_LLM_BASE_URL", ""),
         model=os.getenv("CLOUD_LLM_MODEL", ""),
     )

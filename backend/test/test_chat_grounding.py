@@ -5,7 +5,7 @@ import os
 import sys
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 APP_DIR = Path(__file__).resolve().parents[1] / "app"
 if str(APP_DIR) not in sys.path:
@@ -16,42 +16,41 @@ from service.chat_service import ChatService, sanitize_citations  # noqa: E402
 
 class ChatGroundingTests(unittest.TestCase):
     def make_service(self):
-        return ChatService(SimpleNamespace(), SimpleNamespace(), SimpleNamespace())
+        return ChatService(SimpleNamespace(), SimpleNamespace())
 
     def test_reranker_scores_are_mapped_back_by_source_identity(self):
-        """Cross-encoding reranker correctly maps scores back to original documents.
+        """Bailian batch reranker maps scores back to original documents.
 
-        The LLM-based cross-encoding reranker reads doc content and returns a
-        0-1 score.  This test verifies that the returned scores are stored at
-        the correct source indices, not just appended in positional order.
+        qwen3-rerank returns results in score order rather than input order.
+        Scores must therefore be stored using each result's source index.
         """
         documents = [
             {"content": "first", "weight": 0.5},
             {"content": "second", "weight": 0.4},
         ]
 
-        fake_response = MagicMock()
-        fake_response.choices = [
-            SimpleNamespace(message=SimpleNamespace(content="0.12")),
-        ]
-
         class FakeClient:
-            chat = SimpleNamespace(
-                completions=SimpleNamespace(create=lambda **kwargs: fake_response),
-            )
+            def post(self, path, body, cast_to):
+                self.path = path
+                self.body = body
+                self.cast_to = cast_to
+                return {
+                    "results": [
+                        {"index": 1, "relevance_score": 0.91},
+                        {"index": 0, "relevance_score": 0.12},
+                    ],
+                }
 
-        with patch.dict(os.environ, {"EMBEDDING_BASE_URL": "https://example.test",
-                                      "RERANK_ENABLED": "true"}), \
-             patch("service.chat_service.resolve_llm_endpoint",
-                   return_value=SimpleNamespace(
-                       api_key="test", base_url="https://test",
-                       model="test-model",
-                   )), \
-             patch("service.chat_service.OpenAI", return_value=FakeClient()):
+        with patch.dict(os.environ, {
+                 "DASHSCOPE_API_KEY": "test-key",
+                 "RERANK_ENABLED": "true",
+                 "RERANK_BASE_URL": "https://example.test/compatible-api/v1",
+             }), \
+             patch("service.rerank_service.OpenAI", return_value=FakeClient()):
             scores = self.make_service().rerank_similarity("query", documents)
         self.assertEqual(len(scores), 2)
         self.assertAlmostEqual(scores[0], 0.12)
-        self.assertAlmostEqual(scores[1], 0.12)
+        self.assertAlmostEqual(scores[1], 0.91)
 
     def test_out_of_range_citations_are_removed(self):
         self.assertEqual(

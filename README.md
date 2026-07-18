@@ -79,7 +79,7 @@ Runner 已完成 12/12 确定性端到端门禁，但真实在线数据源仍未
 | 并发压力 | 并发 4 时 8/8，P95 10.217 秒 | 并发 8 时 P95 19.919 秒，已接近饱和 |
 | 上下文压力 | 600,400 输入 token 中选取 3,002/6,000 | 证据预算生效；尚非统一总上下文预算 |
 | 多源联合研究 | 冻结脱敏 fixture 12/12 | 确定性 Runner 逐题执行，不代表线上数据质量 |
-| 自动化验证 | 后端 154/154，前端 lint/build 通过 | 153 个 unit + 1 个 Milvus Lite integration |
+| 自动化验证 | 后端 162/162，前端 lint/build 通过 | 161 个 unit + 1 个 Milvus Lite integration |
 
 对应报告见 [`reports/`](reports/)，评测口径见
 [`docs/RAG_EVALUATION_PROTOCOL.md`](docs/RAG_EVALUATION_PROTOCOL.md)。简历与项目介绍中的
@@ -131,6 +131,27 @@ readiness 和 Prometheus 指标；readiness 可选择校验生成模型与 embed
 ./start-services.sh app
 ```
 
+启动脚本会读取 Git 忽略的 `backend/.env`。`MODEL_ROUTING_MODE` 支持：
+
+- `local`：生成与 Agent 固定使用宿主机 Ollama 的 `industry-qwen3:4b`；
+- `cloud`：固定使用 `CLOUD_LLM_*` 指定的云端模型；
+- `auto`：云端 API Key、Base URL 和模型名完整时使用云端，否则回退本地模型。
+
+云端模型统一通过百炼 OpenAI 兼容接口调用，并只使用一个 `DASHSCOPE_API_KEY`。
+默认分层为：普通问答、检索和代码节点使用 `deepseek-v4-flash`，研究规划、
+数据分析、质量审核和最终写作使用 `deepseek-v4-pro`。向量召回后使用百炼
+`qwen3-rerank` 对候选片段做一次批量重排，失败时保留原检索分数降级。
+
+Embedding 支持 `cloud` / `local` / `hybrid` 三种路由。云端使用百炼
+`text-embedding-v4`，本地使用 Ollama `bge-m3`，均为 1024 维但写入独立
+Collection。`hybrid` 模式双路召回后使用 RRF 融合，再交给 `qwen3-rerank`
+精排；任一路失败时会在结果中显示 `degraded_route`。默认查询路由为
+`cloud`，入库同时构建两套索引。详细契约见
+[`docs/EMBEDDING_ROUTING_DESIGN.md`](docs/EMBEDDING_ROUTING_DESIGN.md)。
+
+云端密钥只放在 `backend/.env` 的 `DASHSCOPE_API_KEY`，不要写入 Compose
+或提交到 Git。
+
 启动脚本会构建前后端并等待 PostgreSQL、Redis、Milvus、模型和应用 readiness。入口：
 
 - Web：<http://localhost:5173>
@@ -172,7 +193,7 @@ docker compose --profile app exec backend \
 ## 验证命令
 
 ```bash
-make check                       # 依赖、154 个后端测试、前端、Compose、数据与评测隔离
+make check                       # 依赖、162 个后端测试、前端、Compose、数据与评测隔离
 make validate-observability      # Prometheus 配置与 4 条告警规则
 make build-images                # 构建非 root 后端镜像与 Nginx 前端镜像
 make demo-rag                    # 正例、跨环节问题与无证据拒答

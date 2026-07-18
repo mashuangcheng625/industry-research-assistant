@@ -6,6 +6,13 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
 
+COMPOSE=(docker compose)
+if [[ -f "$SCRIPT_DIR/backend/.env" ]]; then
+    # Compose interpolation normally only reads a root .env. Reuse the backend
+    # runtime configuration without copying secrets into docker-compose.yml.
+    COMPOSE+=(--env-file "$SCRIPT_DIR/backend/.env")
+fi
+
 info() { printf '[INFO] %s\n' "$1"; }
 success() { printf '[OK] %s\n' "$1"; }
 error() { printf '[ERROR] %s\n' "$1" >&2; }
@@ -15,39 +22,39 @@ check_docker() {
         error "Docker 未运行，请先启动 Docker Desktop/Engine"
         exit 1
     fi
-    docker compose version >/dev/null
+    "${COMPOSE[@]}" version >/dev/null
 }
 
 start_core() {
     check_docker
     info "启动 PostgreSQL、Redis、etcd、MinIO 和 Milvus，并等待健康检查"
-    docker compose up -d --wait --wait-timeout 240 postgres redis etcd minio milvus
+    "${COMPOSE[@]}" up -d --wait --wait-timeout 240 postgres redis etcd minio milvus
     success "核心中间件已就绪"
 }
 
 start_app() {
     check_docker
-    info "构建并启动完整应用；需要宿主机 Ollama 已提供 industry-qwen3:4b 和 bge-m3"
-    docker compose --profile app up -d --build --wait --wait-timeout 600
+    info "构建并启动完整应用；生成与 Embedding 统一读取百炼 DASHSCOPE_API_KEY"
+    "${COMPOSE[@]}" --profile app up -d --build --wait --wait-timeout 600
     success "完整应用已就绪: http://localhost:5173，API: http://localhost:8000/docs"
 }
 
 start_observability() {
     check_docker
     info "启动 Prometheus"
-    docker compose --profile observability up -d --wait --wait-timeout 120 prometheus
+    "${COMPOSE[@]}" --profile observability up -d --wait --wait-timeout 120 prometheus
     success "Prometheus 已就绪: http://localhost:9090"
 }
 
 show_status() {
-    docker compose --profile app --profile search --profile observability ps
+    "${COMPOSE[@]}" --profile app --profile search --profile observability ps
 }
 
 show_logs() {
     if [[ $# -gt 0 ]]; then
-        docker compose --profile app --profile search --profile observability logs -f --tail=100 "$@"
+        "${COMPOSE[@]}" --profile app --profile search --profile observability logs -f --tail=100 "$@"
     else
-        docker compose --profile app --profile search --profile observability logs -f --tail=100
+        "${COMPOSE[@]}" --profile app --profile search --profile observability logs -f --tail=100
     fi
 }
 
@@ -58,7 +65,7 @@ clean_data() {
         info "已取消"
         return
     fi
-    docker compose --profile app --profile search --profile observability down --volumes
+    "${COMPOSE[@]}" --profile app --profile search --profile observability down --volumes
     success "数据卷已删除"
 }
 
@@ -80,7 +87,7 @@ case "${1:-help}" in
     core) start_core ;;
     app) start_app ;;
     observability) start_observability ;;
-    stop) docker compose --profile app --profile search --profile observability down ;;
+    stop) "${COMPOSE[@]}" --profile app --profile search --profile observability down ;;
     status) show_status ;;
     logs) shift; show_logs "$@" ;;
     clean) clean_data ;;

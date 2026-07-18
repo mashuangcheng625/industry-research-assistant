@@ -74,6 +74,10 @@ class MilvusService:
             FieldSchema(name="filename", dtype=DataType.VARCHAR, max_length=512),
             FieldSchema(name="content", dtype=DataType.VARCHAR, max_length=65535),
             FieldSchema(name="chunk_index", dtype=DataType.INT64),
+            FieldSchema(name="content_hash", dtype=DataType.VARCHAR, max_length=64),
+            FieldSchema(name="embedding_provider", dtype=DataType.VARCHAR, max_length=32),
+            FieldSchema(name="embedding_model", dtype=DataType.VARCHAR, max_length=128),
+            FieldSchema(name="embedding_version", dtype=DataType.VARCHAR, max_length=32),
             FieldSchema(name="vector", dtype=DataType.FLOAT_VECTOR, dim=self.vector_dim),
         ]
 
@@ -118,18 +122,29 @@ class MilvusService:
         """
         collection = self.create_collection(collection_name)
 
-        # 准备数据
-        ids = [doc["id"] for doc in documents]
-        doc_ids = [doc["doc_id"] for doc in documents]
-        kb_ids = [doc["kb_id"] for doc in documents]
-        filenames = [doc["filename"] for doc in documents]
-        contents = [doc["content"][:65535] for doc in documents]  # 截断过长内容
-        chunk_indices = [doc["chunk_index"] for doc in documents]
-        vectors = [doc["vector"] for doc in documents]
-
-        # 插入数据
-        data = [ids, doc_ids, kb_ids, filenames, contents, chunk_indices, vectors]
-        collection.insert(data)
+        # 按实际 schema 构造行，既兼容旧 Collection，也支持带模型指纹的新 Collection。
+        field_names = {
+            field.name
+            for field in collection.schema.fields
+            if not getattr(field, "auto_id", False)
+        }
+        rows = []
+        for document in documents:
+            row = {
+                "id": document["id"],
+                "doc_id": document["doc_id"],
+                "kb_id": document["kb_id"],
+                "filename": document["filename"],
+                "content": document["content"][:65535],
+                "chunk_index": document["chunk_index"],
+                "content_hash": document.get("content_hash", ""),
+                "embedding_provider": document.get("embedding_provider", "legacy"),
+                "embedding_model": document.get("embedding_model", "legacy"),
+                "embedding_version": document.get("embedding_version", "legacy"),
+                "vector": document["vector"],
+            }
+            rows.append({key: value for key, value in row.items() if key in field_names})
+        collection.insert(rows)
         collection.flush()
         self._invalidate_chunk_cache(collection_name)
 

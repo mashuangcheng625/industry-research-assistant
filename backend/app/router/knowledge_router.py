@@ -1,13 +1,13 @@
 """知识库管理路由"""
 import os
-import shutil
 from datetime import datetime
 from typing import List
-from uuid import UUID
+from uuid import UUID, uuid4
 from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
 from sqlalchemy.orm import Session
 
 from core.database import get_db
+from core.upload_security import file_signature_matches, safe_upload_filename
 from models.knowledge import KnowledgeBase, Document
 from models.user import User
 from router.auth_router import get_current_user_required
@@ -41,6 +41,7 @@ ALLOWED_AUTHORITY_LEVELS = {
     "official", "industry_standard", "enterprise", "academic",
     "media", "synthetic", "unknown",
 }
+MAX_UPLOAD_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(20 * 1024 * 1024)))
 
 
 def get_file_extension(filename: str) -> str:
@@ -343,7 +344,8 @@ async def upload_document(
         )
 
     # 验证文件类型
-    ext = get_file_extension(file.filename)
+    safe_filename = safe_upload_filename(file.filename)
+    ext = get_file_extension(safe_filename)
     if ext not in ALLOWED_EXTENSIONS:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -357,24 +359,48 @@ async def upload_document(
         )
 
     # 保存文件到临时目录
-    file_path = os.path.join(UPLOAD_DIR, f"{kb_uuid}_{file.filename}")
+    file_path = os.path.join(UPLOAD_DIR, f"{kb_uuid}_{uuid4().hex}{ext}")
     try:
+        total_bytes = 0
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            while chunk := await file.read(1024 * 1024):
+                total_bytes += len(chunk)
+                if total_bytes > MAX_UPLOAD_BYTES:
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=f"文件超过 {MAX_UPLOAD_BYTES} 字节限制",
+                    )
+                buffer.write(chunk)
+        if total_bytes == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="不允许上传空文件",
+            )
+        if not file_signature_matches(file_path, ext):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="文件内容与扩展名不匹配",
+            )
+    except HTTPException:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise
     except Exception as e:
+        if os.path.exists(file_path):
+            os.remove(file_path)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"文件保存失败: {str(e)}"
         )
 
     # 获取文件大小
-    file_size = os.path.getsize(file_path)
+    file_size = total_bytes
 
     # 创建文档记录
     doc = Document(
         knowledge_base_id=kb_uuid,
         user_id=current_user.id,
-        filename=file.filename,
+        filename=safe_filename,
         file_type=ext[1:] if ext else None,  # 去掉点
         file_size=file_size,
         file_path=file_path,
@@ -392,8 +418,17 @@ async def upload_document(
     # 更新知识库文档计数
     kb.document_count = (kb.document_count or 0) + 1
 
-    db.commit()
-    db.refresh(doc)
+    try:
+        db.commit()
+        db.refresh(doc)
+    except Exception:
+        db.rollback()
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="文档记录创建失败",
+        )
 
     # 获取数据库会话工厂
     from core.database import SessionLocal
@@ -487,6 +522,7 @@ async def get_document_chunks(
     db: Session = Depends(get_db),
 ):
     """获取文档的所有切片"""
+    from service.embedding_router import collection_name_for_route, routes_for_mode
     from service.milvus_service import get_milvus_service
 
     try:
@@ -529,12 +565,20 @@ async def get_document_chunks(
         )
 
     # 从 Milvus 获取切片
-    collection_name = f"kb_{kb.name}".lower().replace(" ", "_")
-    print(f"[get_document_chunks] 查询切片: collection={collection_name}, filename={doc.filename}")
+    collection_base = f"kb_{kb.name}".lower().replace(" ", "_")
 
     try:
         milvus = get_milvus_service()
-        chunks = milvus.get_chunks_by_filename(collection_name, doc.filename)
+        chunks = []
+        for route in routes_for_mode():
+            collection_name = collection_name_for_route(collection_base, route)
+            print(
+                f"[get_document_chunks] 查询切片: "
+                f"collection={collection_name}, filename={doc.filename}"
+            )
+            chunks = milvus.get_chunks_by_filename(collection_name, doc.filename)
+            if chunks:
+                break
         print(f"[get_document_chunks] 找到 {len(chunks)} 个切片")
     except Exception as e:
         print(f"[get_document_chunks] Milvus 查询失败: {e}")

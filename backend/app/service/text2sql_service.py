@@ -72,29 +72,29 @@ class Text2SQLService:
         'WAITFOR', 'DELAY', 'BENCHMARK', 'SLEEP'
     ]
 
-    # 数据库 Schema 定义
+    # 数据库 Schema 定义。默认 seed 为合成演示数据，不得将其当作市场事实。
     SCHEMA_DEFINITION = """
 可查询的数据表：
 
 1. industry_stats (行业统计数据表)
    - id: UUID, 主键
-   - industry_name: VARCHAR(100), 行业名称 (当前数据: 智慧交通)
-   - metric_name: VARCHAR(100), 指标名称 (如: 市场规模、同比增长率、智能公交市场规模、智慧高速市场规模、车路协同市场规模、智慧停车市场规模、交通大脑市场规模、固定资产投资、研发投入、从业人员数量、企业数量、专利申请数、营收)
+   - industry_name: VARCHAR(100), 产业链方向（芯片设计、材料与设备、晶圆制造、封装与测试）
+   - metric_name: VARCHAR(100), 指标名称（默认夹具为“演示需求指数”）
    - metric_value: FLOAT, 指标值
    - unit: VARCHAR(50), 单位 (如: 亿元、%、万人、家、件)
    - year: INTEGER, 年份 (2023-2025)
    - quarter: INTEGER, 季度 (1-4, 可为空表示年度数据)
    - month: INTEGER, 月份 (1-12, 可为空)
-   - region: VARCHAR(50), 地区 (如: 全国、华东地区、华南地区、华北地区)
+   - region: VARCHAR(50), 地区或数据集口径
    - source: VARCHAR(200), 数据来源
    - created_at: TIMESTAMP, 创建时间
 
 2. company_data (企业数据表)
    - id: UUID, 主键
-   - company_name: VARCHAR(200), 企业名称 (如: 海康威视、大华股份、千方科技、易华录、银江技术、金溢科技、万集科技、皖通科技、中远海科、四维图新、蘑菇车联、希迪智驾)
-   - stock_code: VARCHAR(20), 股票代码 (如: 002415.SZ、002236.SZ、未上市)
-   - industry: VARCHAR(100), 所属行业 (当前数据: 智慧交通)
-   - sub_industry: VARCHAR(100), 细分行业 (如: 智能监控、交通信息化、数据存储、智慧城市、ETC、高速公路信息化、港口信息化、高精地图、车路协同、自动驾驶)
+   - company_name: VARCHAR(200), 企业名称（如寒武纪、北方华创、中微公司、中芯国际、长电科技）
+   - stock_code: VARCHAR(20), 股票代码
+   - industry: VARCHAR(100), 所属半导体产业链方向
+   - sub_industry: VARCHAR(100), 细分环节（如 AI 加速芯片、刻蚀设备、晶圆代工、集成电路封测）
    - revenue: FLOAT, 营收 (亿元)
    - net_profit: FLOAT, 净利润 (亿元)
    - gross_margin: FLOAT, 毛利率 (%)
@@ -106,26 +106,19 @@ class Text2SQLService:
 
 3. policy_data (政策数据表)
    - id: UUID, 主键
-   - policy_name: VARCHAR(500), 政策名称 (如: 交通强国建设纲要、智能汽车创新发展战略、数字交通发展规划纲要、北京市自动驾驶汽车条例)
+   - policy_name: VARCHAR(500), 政策或公共计划名称
    - policy_number: VARCHAR(100), 政策文号
-   - department: VARCHAR(200), 发布部门 (如: 中共中央、国务院、交通运输部、工业和信息化部、住建部)
+   - department: VARCHAR(200), 发布机构
    - level: VARCHAR(50), 政策级别 (国家级/省级/市级)
    - publish_date: DATE, 发布日期
    - effective_date: DATE, 生效日期
    - category: VARCHAR(100), 政策类别 (如: 发展规划、发展战略、技术规范、指导意见、实施方案、试点通知、行动计划、地方法规)
-   - industry: VARCHAR(100), 相关行业 (当前数据: 智慧交通)
+   - industry: VARCHAR(100), 相关半导体产业链方向
    - summary: TEXT, 政策摘要
    - impact_level: VARCHAR(20), 影响程度 (重大/一般/轻微)
 
-当前数据库示例数据:
-- 智慧交通2024年市场规模: 3200亿元
-- 智慧交通2025年市场规模预测: 3680亿元
-- 智慧交通2024年同比增长率: 12.3%
-- 海康威视2024年Q3营收: 893.5亿元，市场份额15.2%
-- 大华股份2024年Q3营收: 328.6亿元
-- 千方科技2024年Q3营收: 85.2亿元
-- 智慧高速市场规模2024年: 720亿元
-- 车路协同市场规模2024年: 450亿元
+默认演示夹具只适合验证 SQL 生成、聚合、排序和证据转换。
+其中的“演示需求指数”是合成值，不是市场规模或投资建议。
 """
 
     TEXT2SQL_PROMPT = """你是一个专业的 SQL 专家。请根据用户的自然语言问题生成安全的 PostgreSQL 查询语句。

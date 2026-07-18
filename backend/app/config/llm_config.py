@@ -19,21 +19,35 @@ from dataclasses import dataclass, field
 from typing import Optional, Dict, Any
 
 
+def _uses_cloud_route() -> bool:
+    mode = os.getenv("MODEL_ROUTING_MODE", "local").lower()
+    cloud_key = os.getenv("CLOUD_LLM_API_KEY") or os.getenv("DASHSCOPE_API_KEY")
+    cloud_ready = bool(
+        cloud_key
+        and os.getenv("CLOUD_LLM_BASE_URL")
+        and os.getenv("CLOUD_LLM_MODEL")
+    )
+    return mode == "cloud" or (mode == "auto" and cloud_ready)
+
+
 def _resolved_model_value(field_name: str, fallback: str) -> str:
     """使 Agent 与聊天链路共用本地/云端路由环境变量。"""
-    mode = os.getenv("MODEL_ROUTING_MODE", "local").lower()
-    cloud_ready = all(os.getenv(name) for name in (
-        "CLOUD_LLM_API_KEY", "CLOUD_LLM_BASE_URL", "CLOUD_LLM_MODEL"
-    ))
-    use_cloud = mode == "cloud" or (mode == "auto" and cloud_ready)
-    prefix = "CLOUD_LLM" if use_cloud else "LOCAL_LLM"
+    prefix = "CLOUD_LLM" if _uses_cloud_route() else "LOCAL_LLM"
+    if prefix == "CLOUD_LLM" and field_name == "API_KEY":
+        return os.getenv("CLOUD_LLM_API_KEY") or os.getenv("DASHSCOPE_API_KEY", fallback)
     return os.getenv(f"{prefix}_{field_name}", fallback)
 
 
 def _agent_model(role: str, fallback: str) -> str:
+    role = role.upper()
+    routed_override = (
+        os.getenv(f"CLOUD_AGENT_{role}_MODEL")
+        if _uses_cloud_route()
+        else os.getenv(f"LOCAL_AGENT_{role}_MODEL")
+    )
     return os.getenv(
-        f"AGENT_{role.upper()}_MODEL",
-        _resolved_model_value("MODEL", fallback),
+        f"AGENT_{role}_MODEL",
+        routed_override or _resolved_model_value("MODEL", fallback),
     )
 
 

@@ -13,9 +13,6 @@ class ServiceConfig:
             Dictionary with API configuration
         """
         return {
-            'base_url': os.environ.get('API_BASE_URL', 'http://localhost:9380'),
-            'api_key': os.environ.get('API_KEY', ''),
-            'default_dataset_id': os.environ.get('DEFAULT_DATASET_ID', '5299f1501c5a11f0a5ea56e92569c6d7'),
             'serper_api_key': os.environ.get('SERPER_API_KEY', ''),
             'milvus_host': os.environ.get('MILVUS_HOST', 'localhost'),
             'milvus_port': int(os.environ.get('MILVUS_PORT', '19530')),

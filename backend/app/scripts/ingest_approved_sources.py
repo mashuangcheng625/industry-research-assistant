@@ -19,6 +19,10 @@ from core.database import SessionLocal  # noqa: E402
 from models.knowledge import Document, KnowledgeBase  # noqa: E402
 from models.user import User  # noqa: E402
 from service.docmind_service import process_document_with_docmind  # noqa: E402
+from service.embedding_router import (  # noqa: E402
+    collection_name_for_route,
+    routes_for_ingestion,
+)
 from service.milvus_service import get_milvus_service  # noqa: E402
 from service.source_governance import read_jsonl, resolve_managed_path  # noqa: E402
 
@@ -118,9 +122,13 @@ def ingest_candidate(
         # before retrying so a rerun cannot silently duplicate chunks.
         if existing_document:
             doc_id = hashlib.md5(filename.encode()).hexdigest()
-            deleted = get_milvus_service().delete_by_doc_id(collection_name, doc_id)
-            if not deleted:
-                raise RuntimeError("旧向量删除失败，为避免重复切片已中止重建")
+            for route in routes_for_ingestion():
+                target = collection_name_for_route(collection_name, route)
+                deleted = get_milvus_service().delete_by_doc_id(target, doc_id)
+                if not deleted:
+                    raise RuntimeError(
+                        f"{route.name} 旧向量删除失败，为避免重复切片已中止重建"
+                    )
 
         result = process_document_with_docmind(
             file_path=str(file_path),

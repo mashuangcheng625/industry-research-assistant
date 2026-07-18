@@ -34,7 +34,7 @@ class ChatInputBoundaryTests(unittest.TestCase):
             self.assertEqual(len(accepted.question), CHAT_QUESTION_MAX_CHARS)
 
     def test_context_budget_skips_oversized_document_and_keeps_smaller_evidence(self):
-        service = ChatService(Mock(), Mock(), Mock())
+        service = ChatService(Mock(), Mock())
         oversized = "超长文档 " * 100
         small = "UCIe 提供芯粒间互连标准。"
         service.max_tokens = len(service.encoding.encode(small))
@@ -54,7 +54,7 @@ class ChatInputBoundaryTests(unittest.TestCase):
         )
 
     def test_rerank_failure_still_enforces_context_budget(self):
-        service = ChatService(Mock(), Mock(), Mock())
+        service = ChatService(Mock(), Mock())
         service.max_tokens = 20
         service.rerank_similarity = Mock(side_effect=RuntimeError("reranker unavailable"))
         documents = [

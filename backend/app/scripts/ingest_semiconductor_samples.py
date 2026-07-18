@@ -9,6 +9,7 @@ from core.database import SessionLocal
 from models.knowledge import Document, KnowledgeBase
 from models.user import User
 from service.docmind_service import process_document_with_docmind
+from service.embedding_router import collection_name_for_route, routes_for_ingestion
 from service.milvus_service import get_milvus_service
 
 
@@ -81,10 +82,12 @@ def ingest_sample(username: str, sample_dir: Path, direction_id: str, force: boo
 
         if force:
             document_hash = hashlib.md5(file_path.name.encode()).hexdigest()
-            get_milvus_service().delete_by_doc_id(
-                f"kb_{config.knowledge_base_name}",
-                document_hash,
-            )
+            base_collection = f"kb_{config.knowledge_base_name}"
+            for route in routes_for_ingestion():
+                get_milvus_service().delete_by_doc_id(
+                    collection_name_for_route(base_collection, route),
+                    document_hash,
+                )
 
         result = process_document_with_docmind(
             file_path=str(file_path),

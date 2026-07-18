@@ -10,6 +10,10 @@ from alibabacloud_tea_openapi import models as open_api_models
 from alibabacloud_tea_util import models as util_models
 
 from service.embedding_service import generate_embedding
+from service.embedding_router import (
+    collection_name_for_route,
+    routes_for_ingestion,
+)
 from service.milvus_service import get_milvus_service
 
 
@@ -405,54 +409,71 @@ def process_document_with_docmind(
 
         print(f"文档切分完成，共 {len(chunks)} 个切片")
 
-        # 5. 生成向量嵌入
-        print("开始生成向量嵌入...")
-        embeddings = (embedding_fn or generate_embedding)(chunks)
-
-        if not embeddings:
-            result["message"] = "向量生成失败: 返回为空"
-            print(result["message"])
-            return result
-
-        if len(embeddings) != len(chunks):
-            result["message"] = f"向量生成失败: 数量不匹配 ({len(embeddings)} vs {len(chunks)})"
-            print(result["message"])
-            return result
-
-        if any(embedding is None for embedding in embeddings):
-            failed_count = sum(embedding is None for embedding in embeddings)
-            result["message"] = f"向量生成失败: {failed_count} 个切片在重试后仍失败"
-            print(result["message"])
-            return result
-
-        print(f"向量生成完成，维度: {len(embeddings[0])}")
-
-        # 6. 构建 Milvus 文档
+        # 5. 为所有路由生成向量。测试注入 embedding_fn 时保持单索引兼容。
+        routes = routes_for_ingestion() if embedding_fn is None else ()
         doc_id = hashlib.md5(file_name.encode()).hexdigest()
-        documents = []
-
-        for i, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
-            chunk_id = hashlib.md5(f"{file_name}_{i}_{chunk[:50]}".encode()).hexdigest()
-
-            doc = {
-                "id": chunk_id,
-                "doc_id": doc_id,
-                "kb_id": index_name,
-                "filename": file_name,
-                "content": chunk,
-                "chunk_index": i,
-                "vector": embedding,
-            }
-            documents.append(doc)
-
-        # 7. 插入 Milvus
-        print(f"开始插入 Milvus，集合: {index_name}")
         milvus = milvus_service or get_milvus_service()
-        milvus.insert_documents(index_name, documents)
+        inserted_routes: list[str] = []
+
+        if embedding_fn is not None:
+            route_jobs = [(None, index_name, embedding_fn(chunks))]
+        else:
+            route_jobs = []
+            for route in routes:
+                print(f"开始生成 {route.name} 向量: {route.model}")
+                embeddings = generate_embedding(
+                    chunks,
+                    api_key=route.api_key,
+                    base_url=route.base_url,
+                    model_name=route.model,
+                    dimensions=route.dimensions,
+                )
+                route_jobs.append((
+                    route,
+                    collection_name_for_route(index_name, route),
+                    embeddings,
+                ))
+
+        for route, target_collection, embeddings in route_jobs:
+            if not embeddings or len(embeddings) != len(chunks):
+                raise RuntimeError(
+                    f"{getattr(route, 'name', 'legacy')} 向量生成失败或数量不匹配"
+                )
+            if any(embedding is None for embedding in embeddings):
+                failed_count = sum(embedding is None for embedding in embeddings)
+                raise RuntimeError(
+                    f"{getattr(route, 'name', 'legacy')} 有 {failed_count} 个切片向量生成失败"
+                )
+
+            documents = []
+            for index, (chunk, embedding) in enumerate(zip(chunks, embeddings)):
+                chunk_id = hashlib.md5(
+                    f"{file_name}_{index}_{chunk[:50]}".encode()
+                ).hexdigest()
+                documents.append({
+                    "id": chunk_id,
+                    "doc_id": doc_id,
+                    "kb_id": index_name,
+                    "filename": file_name,
+                    "content": chunk,
+                    "chunk_index": index,
+                    "content_hash": hashlib.sha256(chunk.encode()).hexdigest(),
+                    "embedding_provider": getattr(route, "provider", "legacy"),
+                    "embedding_model": getattr(route, "model", "legacy"),
+                    "embedding_version": getattr(route, "version", "legacy"),
+                    "vector": embedding,
+                })
+            print(f"开始插入 Milvus，集合: {target_collection}")
+            milvus.insert_documents(target_collection, documents)
+            inserted_routes.append(getattr(route, "name", "legacy"))
 
         result["success"] = True
-        result["message"] = f"成功处理 {len(documents)} 个切片"
-        result["document_count"] = len(documents)
+        result["message"] = (
+            f"成功处理 {len(chunks)} 个切片，"
+            f"写入路由: {', '.join(inserted_routes)}"
+        )
+        result["document_count"] = len(chunks)
+        result["embedding_routes"] = inserted_routes
 
         print(f"文档处理完成: {result['message']}")
 

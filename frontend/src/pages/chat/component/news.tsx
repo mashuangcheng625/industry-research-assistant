@@ -17,8 +17,7 @@ export default function News() {
   return (
     <div className={styles['news-list']}>
       <div className={styles['news-list__total']}>
-        近24小时新增：政策 <b>286</b> · 纪要 <b>73</b> · 研报 <b>371</b> · 新闻{' '}
-        <b>4044</b>
+        离线演示来源 <b>{data?.list.length ?? 0}</b> · 在线模式以后端采集结果为准
       </div>
 
       <div className={styles['news-list__content']}>
@@ -37,7 +36,7 @@ export default function News() {
 
                 <div className={styles['views']}>
                   <img src={IconViews} />
-                  2600
+                  可回溯
                 </div>
 
                 <div className={styles['tag']}>{item.source}</div>

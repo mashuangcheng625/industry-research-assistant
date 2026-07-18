@@ -523,5 +523,5 @@ unsupported claim 和 SLA failure。
 | regression answer 16/20 | 严格概念-引用-切片门槛通过 16 题 | “问答准确率 80%” |
 | refusal 4/4 | 四道冻结无证据题全部拒答 | “对任意幻觉都能 100% 拦截” |
 | 并发 4 P95 10.217s | 本机、本地 4B、两题闭环压测结果 | “生产 SLA 为 10 秒” |
-| 154 tests | 本地工程门禁 153 unit + 1 Milvus Lite integration 通过 | “系统没有 bug” |
+| 162 tests | 本地工程门禁 161 unit + 1 Milvus Lite integration 通过 | “系统没有 bug” |
 | 干净镜像 smoke | Python 3.12/Node 22 容器可构建并就绪 | “已完成生产部署” |

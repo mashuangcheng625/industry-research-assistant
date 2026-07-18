@@ -11,7 +11,7 @@ if str(APP_DIR) not in sys.path:
 
 from core.rate_limit import SlidingWindowRateLimiter  # noqa: E402
 from core.security import validate_security_config  # noqa: E402
-from router.document_router import _file_signature_matches  # noqa: E402
+from core.upload_security import file_signature_matches, safe_upload_filename  # noqa: E402
 
 
 def test_sliding_window_rate_limiter_releases_expired_events():
@@ -41,7 +41,9 @@ def test_explicit_local_demo_override_allows_demo_secret():
 
 def test_expensive_routers_require_authentication():
     import app_main
-    protected_prefixes = ("/chat", "/research", "/documents", "/search")
+    protected_prefixes = (
+        "/chat", "/research", "/knowledge-bases", "/attachments", "/search"
+    )
     for route in app_main.app.routes:
         path = getattr(route, "path", "")
         if not path.startswith(protected_prefixes):
@@ -59,5 +61,18 @@ def test_upload_signature_check_rejects_extension_spoofing(tmp_path):
     fake_pdf.write_bytes(b"not a pdf")
     real_pdf = tmp_path / "real.pdf"
     real_pdf.write_bytes(b"%PDF-1.7\n")
-    assert _file_signature_matches(str(fake_pdf), ".pdf") is False
-    assert _file_signature_matches(str(real_pdf), ".pdf") is True
+    assert file_signature_matches(str(fake_pdf), ".pdf") is False
+    assert file_signature_matches(str(real_pdf), ".pdf") is True
+
+
+def test_upload_filename_discards_client_path_components():
+    assert safe_upload_filename("../../etc/passwd.pdf") == "passwd.pdf"
+    assert safe_upload_filename(r"..\..\secrets\report.pdf") == "report.pdf"
+    assert safe_upload_filename("report.pdf") == "report.pdf"
+
+
+def test_removed_legacy_document_routes_are_not_registered():
+    import app_main
+    paths = {getattr(route, "path", "") for route in app_main.app.routes}
+    assert not any(path.startswith("/documents") for path in paths)
+    assert "/chat/completion/v1" not in paths

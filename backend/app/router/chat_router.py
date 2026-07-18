@@ -1,4 +1,4 @@
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
@@ -8,8 +8,9 @@ from sqlalchemy.orm import Session
 from core.database import get_db
 from models.chat import ChatAttachment
 from models.user import User
-from service import DocumentService, WebSearchService, ChatService, SessionService, ServiceConfig
+from service import WebSearchService, ChatService, SessionService, ServiceConfig
 from service.retrieval_service import retrieve_content, retrieve_from_knowledge_base
+from service.embedding_router import get_embedding_routing_status
 from service.llm_router import get_model_routing_status
 from schemas import ChatRequest, LegacySessionResponse, ChatWithAttachmentsRequest
 from router.auth_router import get_current_user_required
@@ -28,23 +29,21 @@ router = APIRouter(
 
 @router.get("/models/status")
 async def get_models_status():
-    """获取不含密钥的本地/云端模型配置状态。"""
-    return get_model_routing_status()
+    """获取不含密钥的生成与 Embedding 路由状态。"""
+    return {
+        **get_model_routing_status(),
+        "embedding": get_embedding_routing_status(),
+    }
 
 # Get service instances
 def get_services():
     config = ServiceConfig.get_api_config()
-    doc_service = DocumentService(
-        base_url=config['base_url'],
-        api_key=config['api_key']
-    )
     web_service = WebSearchService(api_key=config.get('serper_api_key'))
     session_service = SessionService()
-    chat_service = ChatService(doc_service, web_service, session_service)
+    chat_service = ChatService(web_service, session_service)
     return {
         "chat_service": chat_service,
         "session_service": session_service,
-        "default_dataset_id": config['default_dataset_id']
     }
 
 
@@ -70,79 +69,6 @@ async def create_session(
             detail=f"创建会话失败: {str(e)}"
         )
 
-@router.post("/completion/v1", status_code=HTTP_200_OK)
-async def chat_completion(
-    request: ChatRequest,
-    services: Dict[str, Any] = Depends(get_services)
-):
-    """
-    聊天补全接口，结合知识库检索和Web搜索，进行问答
-
-    Args:
-        request: 包含用户问题和会话信息的请求体
-
-    Returns:
-        流式响应，包含检索内容和模型生成内容
-    """
-    chat_service = services["chat_service"]
-    default_dataset_id = services["default_dataset_id"]
-    session_service = services["session_service"]
-
-    # 验证会话ID（如果提供）
-    if request.session_id:
-        session = session_service.get_session(request.session_id)
-        if not session:
-            # 如果会话不存在，创建新会话
-            session_data = session_service.create_session()
-            request.session_id = session_data["session_id"]
-
-    # 检索、重排和 OpenAI 兼容客户端都是同步 API。使用同步
-    # iterator 让 StreamingResponse 通过线程池消费，避免阻塞 ASGI 事件循环。
-    def generate_response():
-        try:
-            # 从知识库检索文档
-            knowledge_docs = []
-            if request.search_knowledge:
-                knowledge_docs = chat_service.retrieve_from_knowledge_base(
-                    question=request.question,
-                    dataset_id=default_dataset_id
-                )
-
-            # 从Web搜索检索信息
-            web_docs = []
-            if request.search_web:
-                web_docs = chat_service.retrieve_from_web(
-                    question=request.question
-                )
-
-            # 合并文档并重排
-            all_docs = knowledge_docs + web_docs
-            reranked_docs = chat_service.rerank_documents(
-                question=request.question,
-                documents=all_docs
-            )
-
-            # 生成流式回答
-            for message_chunk in chat_service.get_chat_completion(
-                session_id=request.session_id,
-                question=request.question,
-                retrieved_content=reranked_docs,
-                require_references=request.search_knowledge or request.search_web,
-                model_mode=request.model_mode,
-            ):
-                yield message_chunk
-
-        except Exception as e:
-            # 错误处理
-            error_message = f"event: error\ndata: {str(e)}\n\n"
-            yield error_message
-
-    # 返回流式响应
-    return StreamingResponse(
-        generate_response(),
-        media_type="text/event-stream"
-    )
-
 @router.post("/completion", status_code=HTTP_200_OK)
 async def chat_completion_v2(
     request: ChatRequest,
@@ -158,7 +84,6 @@ async def chat_completion_v2(
         流式响应，包含检索内容和模型生成内容
     """
     chat_service = services["chat_service"]
-    default_dataset_id = services["default_dataset_id"]
     session_service = services["session_service"]
 
     # 验证会话ID（如果提供）

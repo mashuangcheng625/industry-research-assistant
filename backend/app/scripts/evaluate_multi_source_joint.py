@@ -9,6 +9,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from datetime import datetime, timezone
@@ -23,6 +24,14 @@ def load_json(path: str) -> dict[str, Any]:
 
 def _now_utc_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def _display_path(path: Path, root: Path) -> str:
+    """Keep generated reports portable across developer machines."""
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return str(path.resolve())
 
 
 # ---------------------------------------------------------------------------
@@ -387,10 +396,28 @@ def generate_report(
 # ---------------------------------------------------------------------------
 def main() -> int:
     root = Path(__file__).resolve().parents[3]  # up to project root
-
-    fixture_path = root / "sample-data" / "multi_source_advanced_packaging_fixture.json"
-    eval_path = root / "sample-data" / "multi_source_advanced_packaging_eval.json"
-    output_path = root / "reports" / "multi_source_advanced_packaging_latest.json"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--fixture",
+        type=Path,
+        default=root / "sample-data" / "multi_source_advanced_packaging_fixture.json",
+    )
+    parser.add_argument(
+        "--eval",
+        dest="eval_path",
+        type=Path,
+        default=root / "sample-data" / "multi_source_advanced_packaging_eval.json",
+    )
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=Path("/tmp/industry-research-multi-source-report.json"),
+        help="Report destination; defaults outside the repository for a clean quality gate.",
+    )
+    args = parser.parse_args()
+    fixture_path = args.fixture
+    eval_path = args.eval_path
+    output_path = args.output
 
     if not fixture_path.exists():
         print(f"FATAL: fixture 文件不存在: {fixture_path}", file=sys.stderr)
@@ -468,7 +495,7 @@ def main() -> int:
 
     # Step 6: 生成报告
     report = generate_report(
-        str(fixture_path), str(eval_path),
+        _display_path(fixture_path, root), _display_path(eval_path, root),
         conversion_stats, contract_report,
         eval_structure, case_availability, execution_results,
     )

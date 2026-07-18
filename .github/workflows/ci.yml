@@ -38,6 +38,7 @@ jobs:
           make validate-sources PYTHON=python
           make validate-eval PYTHON=python
           make validate-baseline PYTHON=python
+          make evaluate-multi-source PYTHON=python
       - name: Validate Docker Compose
         run: make validate-compose
 

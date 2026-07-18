@@ -17,6 +17,7 @@ from service.deep_research_v2.agents.scout import DeepScout  # noqa: E402
 from service.deep_research_v2.agents.writer import LeadWriter  # noqa: E402
 from service.deep_research_v2.graph import DeepResearchGraph  # noqa: E402
 from service.deep_research_v2.state import ResearchPhase, create_initial_state  # noqa: E402
+from service.llm_router import resolve_llm_endpoint  # noqa: E402
 
 
 class AgentSourceRoutingTests(unittest.TestCase):
@@ -141,6 +142,39 @@ class AgentSourceRoutingTests(unittest.TestCase):
             "LOCAL_LLM_API_KEY": "ollama",
             "LOCAL_LLM_BASE_URL": "http://127.0.0.1:11434/v1",
             "LOCAL_LLM_MODEL": "industry-qwen3:4b",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            config = reload_config()
+        self.assertEqual(config.default_model, "industry-qwen3:4b")
+        self.assertEqual(config.agents.scout.model, "industry-qwen3:4b")
+        self.assertEqual(config.agents.writer.model, "industry-qwen3:4b")
+
+    def test_agent_config_auto_uses_cloud_when_fully_configured(self):
+        environment = {
+            "MODEL_ROUTING_MODE": "auto",
+            "LOCAL_LLM_MODEL": "industry-qwen3:4b",
+            "DASHSCOPE_API_KEY": "test-bailian-key",
+            "CLOUD_LLM_BASE_URL": "https://example.invalid/v1",
+            "CLOUD_LLM_MODEL": "test-cloud-model",
+            "CLOUD_AGENT_SCOUT_MODEL": "test-cloud-scout",
+        }
+        with patch.dict(os.environ, environment, clear=True):
+            config = reload_config()
+            endpoint = resolve_llm_endpoint()
+        self.assertEqual(config.api_key, "test-bailian-key")
+        self.assertEqual(endpoint.api_key, "test-bailian-key")
+        self.assertEqual(endpoint.mode, "cloud")
+        self.assertEqual(config.default_model, "test-cloud-model")
+        self.assertEqual(config.agents.scout.model, "test-cloud-scout")
+        self.assertEqual(config.agents.writer.model, "test-cloud-model")
+
+    def test_agent_config_auto_falls_back_to_local_without_cloud_key(self):
+        environment = {
+            "MODEL_ROUTING_MODE": "auto",
+            "LOCAL_LLM_MODEL": "industry-qwen3:4b",
+            "CLOUD_LLM_BASE_URL": "https://example.invalid/v1",
+            "CLOUD_LLM_MODEL": "test-cloud-model",
+            "CLOUD_AGENT_SCOUT_MODEL": "test-cloud-scout",
         }
         with patch.dict(os.environ, environment, clear=True):
             config = reload_config()

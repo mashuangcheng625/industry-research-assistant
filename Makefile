@@ -1,4 +1,6 @@
 PYTHON ?= .venv/bin/python
+DOCKER ?= docker
+COMPOSE ?= $(DOCKER) compose
 PIP_INDEX_URL ?= https://pypi.org/simple
 API_URL ?= http://127.0.0.1:8000/chat/completion
 MODEL_MODE ?= local
@@ -17,7 +19,7 @@ LOAD_MIN_QUALITY_PASS_RATE ?= 1
 LOAD_REPORT ?= reports/chat_load_regression_latest.json
 MULTI_SOURCE_FIXTURE ?= sample-data/multi_source_advanced_packaging_fixture.json
 MULTI_SOURCE_EVAL ?= sample-data/multi_source_advanced_packaging_eval.json
-MULTI_SOURCE_REPORT ?= reports/multi_source_advanced_packaging_latest.json
+MULTI_SOURCE_REPORT ?= /tmp/industry-research-multi-source-report.json
 
 .PHONY: setup-backend test-backend test-backend-unit test-backend-integration test-evidence-contract check-backend-deps check-backend-import lint-frontend build-frontend build-images validate-compose validate-observability validate-sources validate-baseline smoke-ingest-lite audit-ingestion ablate-retrieval-development evaluate-answers-regression demo-rag load-test-chat stress-context-budget run-backend-structured evaluate-answers-regression-structured run-backend-semantic evaluate-answers-regression-semantic build-eval-public validate-eval validate-eval-private evaluate-multi-source check
 
@@ -53,16 +55,16 @@ build-frontend:
 	cd frontend && npm run build
 
 build-images:
-	docker compose --profile app build backend frontend
+	$(COMPOSE) --profile app build backend frontend
 
 validate-compose:
-	docker compose config --quiet
+	$(COMPOSE) config --quiet
 
 validate-observability:
-	docker run --rm --entrypoint /bin/promtool \
+	$(DOCKER) run --rm --entrypoint /bin/promtool \
 		-v "$(CURDIR)/docker/prometheus:/etc/prometheus:ro" \
 		$(PROMETHEUS_IMAGE) check config /etc/prometheus/prometheus.yml
-	docker run --rm --entrypoint /bin/promtool \
+	$(DOCKER) run --rm --entrypoint /bin/promtool \
 		-v "$(CURDIR)/docker/prometheus:/etc/prometheus:ro" \
 		$(PROMETHEUS_IMAGE) check rules /etc/prometheus/alerts.yml
 
@@ -168,4 +170,5 @@ validate-eval-private:
 check: check-backend-deps test-backend-unit test-backend-integration test-evidence-contract check-backend-import lint-frontend build-frontend validate-compose validate-sources validate-eval validate-baseline evaluate-multi-source
 
 evaluate-multi-source:
-	PYTHONPATH=backend/app $(PYTHON) backend/app/scripts/evaluate_multi_source_joint.py
+	PYTHONPATH=backend/app $(PYTHON) backend/app/scripts/evaluate_multi_source_joint.py \
+		--fixture $(MULTI_SOURCE_FIXTURE) --eval $(MULTI_SOURCE_EVAL) --output $(MULTI_SOURCE_REPORT)

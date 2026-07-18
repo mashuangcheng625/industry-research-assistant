@@ -21,7 +21,7 @@ def main() -> None:
     if args.documents < 1 or args.repetitions_per_document < 1 or args.budget < 1:
         raise SystemExit("参数必须为正整数")
 
-    service = ChatService(None, None, None)
+    service = ChatService(None, None)
     service.max_tokens = args.budget
     documents = [
         {
