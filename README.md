@@ -244,7 +244,11 @@ docker-compose.yml       core / app / search / observability profiles
 - 新闻、招投标、Text2SQL 和股票已通过冻结 fixture 的 12 题联合门禁，但缺少真实在线数据盲测；
 - 多源事实尚未统一 provenance 契约，新闻、SQL 行和行情数据不能复用 PDF 页码式引用；
 - 前端主 bundle 约 2.56 MB，仍需路由级代码分割；
-- 项目尚未获得公开发布确认；GitHub 仓库保持私有。
+- 仓库为公开仓库（MIT License），公开前的 5 项人工复核已于 2026-07-18 由项目负责人确认通过。
 
 完整闭环状态与后续优先级见
 [`docs/PROJECT_CLOSURE_ROADMAP.md`](docs/PROJECT_CLOSURE_ROADMAP.md)。
+
+## License
+
+[MIT](./LICENSE) — Copyright (c) 2026 mashuangcheng625.
