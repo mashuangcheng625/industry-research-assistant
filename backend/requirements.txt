@@ -9,6 +9,12 @@ sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.9
 alembic>=1.12.0
 
+# SQL parsing for the Text2SQL safety guard. sqlglot is the default
+# parser; pglast (libpg_query bindings) is loaded only when the guard
+# falls back to the cross-checker or the dev/debug mode is enabled.
+sqlglot>=30.0.0
+pglast>=8.0.0
+
 # Redis
 redis>=5.0.0
 

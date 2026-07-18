@@ -3,18 +3,21 @@ Text2SQL Service - 自然语言转 SQL 查询服务
 
 功能：
 1. 将自然语言问题转换为 SQL 查询
-2. 安全验证 SQL 语句
+2. 安全验证 SQL 语句（P1-1: 改用 ``app.core.text2sql_guard`` 做 AST 检查）
 3. 执行查询并返回结构化数据
 4. 自动推荐可视化类型
 """
 
 import json
 import logging
+import os
 import re
 from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
 from openai import OpenAI
+
+from app.core.text2sql_guard import SQLGuard, GUARD_OK, GuardResult
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -63,14 +66,9 @@ class Text2SQLService:
         'IS', 'NULL', 'TRUE', 'FALSE'
     ]
 
-    FORBIDDEN_KEYWORDS = [
-        'DROP', 'DELETE', 'UPDATE', 'INSERT', 'TRUNCATE',
-        'ALTER', 'CREATE', 'GRANT', 'REVOKE',
-        'EXEC', 'EXECUTE', 'XP_', 'SP_',
-        '--', '/*', '*/', ';--', 'UNION ALL SELECT',
-        'INFORMATION_SCHEMA', 'SYS.', 'SYSOBJECTS',
-        'WAITFOR', 'DELAY', 'BENCHMARK', 'SLEEP'
-    ]
+    # 注：原 ``FORBIDDEN_KEYWORDS`` 关键字黑名单已删除。自 P1-1 起，SQL 安全性
+    # 通过 ``self._guard``（``app.core.text2sql_guard.SQLGuard``）的 AST 检查
+    # 来保证，正则/关键字匹配被证明可绕过（``UNI/**/ON``、``--\\nDROP`` 等）。
 
     # 数据库 Schema 定义。默认 seed 为合成演示数据，不得将其当作市场事实。
     SCHEMA_DEFINITION = """
@@ -160,7 +158,9 @@ class Text2SQLService:
         llm_api_key: str,
         llm_base_url: str,
         db_connection_string: Optional[str] = None,
-        model: str = "qwen-max"
+        model: str = "qwen-max",
+        max_rows: Optional[int] = None,
+        sql_guard_backend: Optional[str] = None,
     ):
         """
         初始化 Text2SQL 服务
@@ -170,6 +170,9 @@ class Text2SQLService:
             llm_base_url: LLM API 基础 URL
             db_connection_string: 数据库连接字符串
             model: 使用的模型
+            max_rows: 单次查询最大返回行数；缺省取 ``TEXT2SQL_MAX_ROWS`` 环境变量。
+            sql_guard_backend: ``sqlglot`` 或 ``dual``；缺省取
+                ``TEXT2SQL_GUARD_BACKEND`` 环境变量。
         """
         self.llm_api_key = llm_api_key
         self.llm_base_url = llm_base_url
@@ -178,9 +181,40 @@ class Text2SQLService:
         self.client = OpenAI(api_key=llm_api_key, base_url=llm_base_url)
         self.db_engine = None
 
+        # P1-1: AST-based SQL guard with backend/max_rows from env.
+        self._guard = SQLGuard(
+            max_rows=self._resolve_max_rows(max_rows),
+            backend=self._resolve_guard_backend(sql_guard_backend),
+        )
+
         # 初始化数据库连接
         if db_connection_string:
             self._init_db_connection()
+
+    @staticmethod
+    def _resolve_max_rows(max_rows: Optional[int]) -> int:
+        if max_rows is not None:
+            return int(max_rows)
+        env_value = os.environ.get("TEXT2SQL_MAX_ROWS", "100").strip()
+        try:
+            return max(1, int(env_value))
+        except ValueError:
+            logging.warning(
+                "[text2sql] TEXT2SQL_MAX_ROWS=%r 不是合法整数，使用默认 100",
+                env_value,
+            )
+            return 100
+
+    @staticmethod
+    def _resolve_guard_backend(value: Optional[str]) -> str:
+        candidate = (value or os.environ.get("TEXT2SQL_GUARD_BACKEND", "sqlglot")).strip().lower()
+        if candidate not in ("sqlglot", "dual"):
+            logging.warning(
+                "[text2sql] TEXT2SQL_GUARD_BACKEND=%r 不支持，回退到 sqlglot",
+                candidate,
+            )
+            return "sqlglot"
+        return candidate
 
     def _init_db_connection(self):
         """初始化数据库连接"""
@@ -198,38 +232,51 @@ class Text2SQLService:
             self.db_engine = None
 
     def validate_sql(self, sql: str) -> Tuple[bool, str]:
-        """
-        验证 SQL 安全性
+        """Validate a SQL statement using the AST-based guard.
+
+        The legacy keyword-based validator lived here before P1-1; it was
+        replaced by :class:`app.core.text2sql_guard.SQLGuard` to defend
+        against regex bypasses. The two-tuple return shape is preserved
+        for backwards compatibility with callers.
 
         Args:
-            sql: SQL 语句
+            sql: SQL statement to validate.
 
         Returns:
-            (是否安全, 错误信息)
+            ``(ok, error_message)``. On success ``error_message`` is
+            empty. On rejection the message includes the structured
+            guard code so the upstream pipeline can render a useful hint
+            to the caller.
         """
-        if not sql or not sql.strip():
-            return False, "SQL 语句为空"
 
-        sql_upper = sql.upper().strip()
+        ok, detail, _normalized = self._evaluate(sql)
+        return ok, detail
 
-        # 检查禁止关键词
-        for keyword in self.FORBIDDEN_KEYWORDS:
-            if keyword in sql_upper:
-                return False, f"SQL 包含禁止的关键词: {keyword}"
+    @property
+    def sql_guard(self) -> SQLGuard:
+        """Expose the underlying guard for callers that need the
+        normalized SQL or for tests."""
 
-        # 检查是否以 SELECT 开头
-        if not sql_upper.startswith('SELECT'):
-            return False, "SQL 必须以 SELECT 开头"
+        return self._guard
 
-        # 检查是否包含多条语句
-        if ';' in sql[:-1]:  # 允许末尾的分号
-            return False, "不允许多条 SQL 语句"
+    def _evaluate(self, sql: str) -> Tuple[bool, str, Optional[str]]:
+        """Run the SQL guard once and return ``(ok, message, normalized_sql)``.
 
-        # 检查注释
-        if '--' in sql or '/*' in sql:
-            return False, "SQL 中不允许注释"
+        ``normalized_sql`` is the original statement with the row cap
+        appended when needed. When the guard rejects, ``normalized_sql``
+        is ``None``. Centralised here so both ``validate_sql`` and
+        ``execute_sql`` share a single evaluation pass.
+        """
 
-        return True, ""
+        result = self._guard.check(sql)
+        if not result.ok:
+            detail = f"{result.message} [{result.code}]"
+            if result.table_violations:
+                detail += f" tables={list(result.table_violations)}"
+            if result.column_violations:
+                detail += f" columns={list(result.column_violations)}"
+            return False, detail, None
+        return True, "", result.sql_normalized or sql
 
     def _extract_json_from_response(self, content: str) -> Dict[str, Any]:
         """
@@ -362,19 +409,22 @@ class Text2SQLService:
         Returns:
             (数据列表, 列名列表, 错误信息)
         """
-        # 验证 SQL
-        is_valid, error_msg = self.validate_sql(sql)
-        if not is_valid:
+        # Validate the SQL through the AST guard before touching the engine
+        # so that even unsafe mock data is never handed back to a caller.
+        ok, error_msg, normalized_sql = self._evaluate(sql)
+        if not ok:
             return [], [], error_msg
+
+        executable_sql = normalized_sql or sql
 
         if not self.db_engine:
             # 返回模拟数据用于演示
-            return self._get_mock_data(sql)
+            return self._get_mock_data(executable_sql)
 
         try:
             from sqlalchemy import text
             with self.db_engine.connect() as conn:
-                result = conn.execute(text(sql))
+                result = conn.execute(text(executable_sql))
                 columns = list(result.keys())
                 data = [dict(zip(columns, row)) for row in result.fetchall()]
                 return data, columns, None

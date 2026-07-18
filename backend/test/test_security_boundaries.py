@@ -12,6 +12,16 @@ if str(APP_DIR) not in sys.path:
 from core.rate_limit import SlidingWindowRateLimiter  # noqa: E402
 from core.security import validate_security_config  # noqa: E402
 from core.upload_security import file_signature_matches, safe_upload_filename  # noqa: E402
+from core.text2sql_guard import (  # noqa: E402
+    GUARD_COPY_DENIED,
+    GUARD_COMMENT_DENIED,
+    GUARD_DDL_DENIED,
+    GUARD_DML_DENIED,
+    GUARD_MULTI_STATEMENT,
+    GUARD_PARSE_FAIL,
+    GUARD_PROCEDURAL_DENIED,
+    GUARD_SYSTEM_SCHEMA_DENIED,
+)
 
 
 def test_sliding_window_rate_limiter_releases_expired_events():
@@ -76,3 +86,56 @@ def test_removed_legacy_document_routes_are_not_registered():
     paths = {getattr(route, "path", "") for route in app_main.app.routes}
     assert not any(path.startswith("/documents") for path in paths)
     assert "/chat/completion/v1" not in paths
+
+
+# ---------------------------------------------------------------------------
+# Text2SQL safety guard: end-to-end through the service.
+# ---------------------------------------------------------------------------
+
+
+def _make_text2sql_service(max_rows: int = 50):
+    """Build a ``Text2SQLService`` with a dummy LLM client and a guard
+    sized for these tests."""
+
+    from service.text2sql_service import Text2SQLService
+
+    return Text2SQLService(
+        llm_api_key="dummy-key-for-tests",
+        llm_base_url="http://localhost/v1",
+        db_connection_string=None,
+        max_rows=max_rows,
+    )
+
+
+@pytest.mark.parametrize(
+    "sql,expected_code",
+    [
+        ("DROP TABLE industry_stats", GUARD_DDL_DENIED),
+        ("DELETE FROM company_data", GUARD_DML_DENIED),
+        ("SELECT 1; DROP TABLE industry_stats", GUARD_MULTI_STATEMENT),
+        ("SELECT 1 -- comment", GUARD_COMMENT_DENIED),
+        ("SELECT * FROM pg_sleep(1)", GUARD_SYSTEM_SCHEMA_DENIED),
+        ("COPY industry_stats TO '/tmp/x'", GUARD_COPY_DENIED),
+        ("DO $$ BEGIN RAISE NOTICE 'x'; END $$", GUARD_PROCEDURAL_DENIED),
+        ("SELEKT 1", GUARD_PARSE_FAIL),
+    ],
+)
+def test_text2sql_service_rejects_injections(sql: str, expected_code: str) -> None:
+    """The legacy keyword validator is gone. These smoke cases assert that
+    the AST-based guard now sits behind ``Text2SQLService.validate_sql``."""
+
+    svc = _make_text2sql_service()
+    ok, message = svc.validate_sql(sql)
+    assert not ok, f"{sql!r} unexpectedly accepted"
+    assert expected_code in message, f"missing guard code in: {message!r}"
+
+
+def test_text2sql_service_appends_row_cap_to_legitimate_select() -> None:
+    svc = _make_text2sql_service(max_rows=10)
+    ok, _msg = svc.validate_sql("SELECT industry_name FROM industry_stats")
+    assert ok
+    normalized = svc.sql_guard.check("SELECT industry_name FROM industry_stats").sql_normalized
+    assert normalized is not None
+    # the guard's normalized SQL is what ``execute_sql`` would actually run
+    assert normalized.endswith("LIMIT 10")
+

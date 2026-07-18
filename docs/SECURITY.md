@@ -36,6 +36,33 @@ JWT_SECRET_KEY=<随机生成的高强度密钥>
 - 解析失败、超限和签名不符时清理临时文件；
 - 文档解析在线程池执行，避免直接阻塞 ASGI 事件循环。
 
+## Text2SQL 安全（P1-1）
+
+`Text2SQLService.validate_sql` 的旧关键字黑名单已下线，全部改为
+[`SQLGuard`](/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/backend/app/core/text2sql_guard.py)
+AST 检查。守卫的硬性边界是：
+
+- 只允许顶层 `SELECT`，包括合法的 `WITH` / `UNION`，并对 CTE 内部再次校验，禁止 `WITH x AS (DELETE ...) SELECT ...`；
+- 拒绝 `INSERT` / `UPDATE` / `DELETE` / `MERGE` / `DROP` / `CREATE` / `ALTER` / `TRUNCATE` / `COPY` / `EXPLAIN` / `DO` / `CALL`；
+- 拒绝 `pg_catalog` / `information_schema` / `pg_*` 等系统对象，以及 `pg_sleep` / `BENCHMARK` 等时间消耗函数；
+- 拒绝 SQL 注释（含字符串字面量之外的所有 `--` / `/* */`），防止注释绕过；
+- 表、列白名单分别存放在 `text2sql_guard.ALLOWED_TABLES` 中；当前仅允许
+  `industry_stats`、`company_data`、`policy_data` 三个行业研究表；
+- 行数上限默认 100，可通过 `TEXT2SQL_MAX_ROWS` 调整；SQL 中已声明的
+  `LIMIT` 超过该上限会被拒绝，未声明的会被自动追加；
+- `backend='sqlglot'` 为默认；`backend='dual'` 额外调用 `pglast`
+  做 libpg_query 双引擎交叉，仅在调试场景下使用。
+
+白名单目前是代码常量，对应 `backend/app/models/industry_data.py` 的 SQLAlchemy
+模型字段。新增行业研究表时应同时更新 `text2sql_guard.ALLOWED_TABLES`，
+否则表会被默认拒绝。守卫失败的判定作为结构化 `GuardResult` 返回，
+`Text2SQLService.validate_sql` 仍以 `(ok, message)` 两元组对外暴露，
+错误信息末尾追加 `[GUARD_CODE]` 便于上游定位。
+
+相关单元测试在 `backend/test/test_text2sql_guard.py`（72 项）与
+`backend/test/test_security_boundaries.py` 中 `test_text2sql_service_*`
+覆盖。
+
 ## 尚未覆盖的生产能力
 
 - TLS 终止、WAF 和反向代理上传限制；
