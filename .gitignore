@@ -51,14 +51,23 @@ langfuse/
 htmlcov/
 USER_ACTION.md
 
-# Private evaluation keys must never enter the public repository
+# Private evaluation keys must never enter the public repository.
+# Split policy is enforced by sample-data/semiconductor_rag_eval_manifest.json
+# under `label_visibility`: only `development` and `regression` splits are
+# public. `test` and `hidden` answers, plus the 80-question aggregate, stay
+# local. Defensive patterns below catch any future split using these names.
 data/evaluation-private/
+**/evaluation-private/
 
-# Legacy labeled aggregates exposed test/hidden answers; keep them local only
 sample-data/semiconductor_rag_eval_80.json
 sample-data/semiconductor_rag_eval_test.json
+sample-data/*_private_*.json
+sample-data/*_answers_*.json
+sample-data/*_master.json
 reports/*hidden*.json
 reports/*eval_test*.json
+reports/*test_answers*.json
+reports/*hidden_answers*.json
 
 # Public source binaries are downloaded from the reviewed source registry
 data/semiconductor_sources/raw/
