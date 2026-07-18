@@ -1,7 +1,3 @@
-/**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
 import { request } from './request'
 
 // 资讯类型定义

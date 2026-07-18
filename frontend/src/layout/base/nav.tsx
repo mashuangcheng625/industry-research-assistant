@@ -1,7 +1,3 @@
-/**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
 import IconBid from '@/assets/layout/bid.svg'
 import IconDatabase from '@/assets/layout/database.svg'
 import IconHistory from '@/assets/layout/history.svg'

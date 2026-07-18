@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 from typing import Dict, Any, Optional, Literal
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
@@ -20,6 +18,8 @@ from service.dr_g import serialize_event  # 导入序列化函数
 from core.redis_client import cache  # 导入 Redis 缓存
 from core.metrics import CANCEL_REQUESTS, RUN_LOCK_OPERATIONS
 from core.research_control import request_research_cancel
+from core.rate_limit import enforce_research_rate_limit
+from router.auth_router import get_current_user_required
 
 # V2 导入
 from service.deep_research_v2.service import DeepResearchV2Service
@@ -34,7 +34,14 @@ RUN_LOCK_TTL_SECONDS = max(
 )
 
 # 创建路由实例
-router = APIRouter(prefix="/research", tags=["research"])
+router = APIRouter(
+    prefix="/research",
+    tags=["research"],
+    dependencies=[
+        Depends(get_current_user_required),
+        Depends(enforce_research_rate_limit),
+    ],
+)
 
 # 请求模型
 class ResearchRequest(BaseModel):

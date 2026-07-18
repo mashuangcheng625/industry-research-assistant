@@ -1,7 +1,3 @@
-/**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
 import { FileTextOutlined, ShareAltOutlined, BarChartOutlined, CheckOutlined, LoadingOutlined, FileMarkdownOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 import classNames from 'classnames'

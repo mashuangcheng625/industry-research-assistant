@@ -1,7 +1,3 @@
-/**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
 import * as api from '@/api'
 import { authActions } from '@/store/auth'
 import { LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons'
@@ -101,26 +97,26 @@ export default function LoginPage() {
                 />
               </svg>
             </div>
-            <h1 className={styles['brand-title']}>半导体产业研究助手</h1>
+            <h1 className={styles['brand-title']}>证据驱动行业研究平台</h1>
             <p className={styles['brand-subtitle']}>
-              Semiconductor Value Chain Research Copilot
+              Evidence-Driven Industry Research Platform
             </p>
             <div className={styles['brand-features']}>
               <div className={styles['feature-item']}>
                 <span className={styles['feature-icon']} />
-                <span>芯片设计与 EDA/IP</span>
+                <span>专业知识库与公开信息</span>
               </div>
               <div className={styles['feature-item']}>
                 <span className={styles['feature-icon']} />
-                <span>半导体材料与设备</span>
+                <span>新闻、政策与招投标情报</span>
               </div>
               <div className={styles['feature-item']}>
                 <span className={styles['feature-icon']} />
-                <span>晶圆制造与前道工艺</span>
+                <span>产业数据与 Text2SQL</span>
               </div>
               <div className={styles['feature-item']}>
                 <span className={styles['feature-icon']} />
-                <span>封装与测试</span>
+                <span>半导体全产业链垂直示范</span>
               </div>
             </div>
           </div>

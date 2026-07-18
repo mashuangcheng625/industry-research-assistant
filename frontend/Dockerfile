@@ -7,7 +7,7 @@ RUN npm ci --legacy-peer-deps
 COPY . .
 ARG VITE_API_BASE=http://localhost:8000/
 ARG VITE_API_PROXY=http://localhost:8000/
-ARG VITE_TITLE=半导体产业研究助手
+ARG VITE_TITLE=证据驱动行业研究平台
 ENV VITE_TITLE=${VITE_TITLE} \
     VITE_API_BASE=${VITE_API_BASE} \
     VITE_API_PROXY=${VITE_API_PROXY}

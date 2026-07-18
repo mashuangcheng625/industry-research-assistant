@@ -1,8 +1,4 @@
 /**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
-/**
  * 全局行业状态管理
  */
 import { proxy, subscribe } from 'valtio'

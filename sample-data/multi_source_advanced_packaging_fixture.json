@@ -1,0 +1,174 @@
+{
+  "_meta": {
+    "description": "先进封装多源联合研究场景的预授权脱敏数据快照",
+    "scenario": "结合权威技术资料、近期政策、设备招投标和上市公司数据，分析先进封装设备国产化机会、主要受益环节与关键风险",
+    "created_at": "2026-07-18T00:00:00Z",
+    "freeze_date": "2026-07-18",
+    "license": "Fixture 数据为脱敏合成示例，仅用于 CI 验收和契约测试；不包含真实业务数据",
+    "data_sources": {
+      "document": 3,
+      "news": 3,
+      "bidding": 2,
+      "sql_row": 2,
+      "market_quote": 2
+    }
+  },
+  "documents": [
+    {
+      "content": "先进封装技术包括2.5D Interposer、3D TSV堆叠、Fan-Out WLP和混合键合等方案。2.5D封装通过硅中介层连接多个芯片，TSV直径约5-10μm，深宽比10:1。3D封装通过微凸点或混合键合实现芯片垂直堆叠，间距可缩至40μm以下。台积电CoWoS、三星I-Cube和Intel EMIB是当前主流2.5D平台。混合键合（Hybrid Bonding）可实现亚微米级对准精度，是未来高带宽存储（HBM）和芯粒集成的关键使能技术。",
+      "document_name": "Advanced_Packaging_Technology_Overview_2025",
+      "doc_id": "fixture-doc-001",
+      "chunk_index": 3,
+      "page": 12,
+      "kb_name": "semiconductor_packaging_testing",
+      "publisher": "SEMI Industry Research"
+    },
+    {
+      "content": "先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。",
+      "document_name": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+      "doc_id": "fixture-doc-002",
+      "chunk_index": 7,
+      "page": 24,
+      "kb_name": "semiconductor_materials_equipment",
+      "publisher": "中国半导体行业协会"
+    },
+    {
+      "content": "2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。",
+      "document_name": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+      "doc_id": "fixture-doc-003",
+      "chunk_index": 5,
+      "page": 18,
+      "kb_name": "semiconductor_packaging_testing",
+      "publisher": "Yole Intelligence"
+    }
+  ],
+  "news": [
+    {
+      "id": "fixture-news-001",
+      "title": "国务院发布《关于促进集成电路产业高质量发展的若干措施》",
+      "content": "2026年3月，国务院发布集成电路产业扶持新政，明确将先进封装设备纳入重点支持目录。政策提出对先进封装设备研发企业给予最高15%的研发费用加计扣除，并在设备采购环节提供进口替代补贴。",
+      "source": "国务院",
+      "source_url": "https://www.gov.cn/zhengce/content/202603/example_001",
+      "category": "政策",
+      "department": "国务院",
+      "publish_time": "2026-03-20T00:00:00Z",
+      "collected_at": "2026-07-18T09:00:00Z"
+    },
+    {
+      "id": "fixture-news-002",
+      "title": "工信部公示2026年先进封装装备重点专项拟支持项目",
+      "content": "工信部公示了2026年度先进封装装备重点专项拟支持项目名单，涉及键合机、TSV刻蚀设备、混合键合设备和先进检测设备四大方向共15个项目。其中键合设备项目5个、检测设备项目4个、TSV设备项目3个、混合键合设备项目3个。拟安排中央财政资金约12亿元。",
+      "source": "工信部",
+      "source_url": "https://www.miit.gov.cn/example_002",
+      "category": "政策",
+      "department": "工信部",
+      "publish_time": "2026-06-10T00:00:00Z",
+      "collected_at": "2026-07-18T09:00:00Z"
+    },
+    {
+      "id": "fixture-news-003",
+      "title": "国产键合机龙头企业完成28nm先进封装量产验证",
+      "content": "国内半导体设备龙头企业宣布其自主研发的全自动键合机已通过28nm制程先进封装量产验证，良率达到99.5%，产能效率达到进口设备的90%。该设备主要应用于Fan-Out WLP封装工艺，已获得国内3家封装厂订单。",
+      "source": "半导体行业观察",
+      "source_url": "https://www.example-semicon.com/news/003",
+      "category": "新闻",
+      "department": null,
+      "publish_time": "2026-07-05T00:00:00Z",
+      "collected_at": "2026-07-18T09:00:00Z"
+    }
+  ],
+  "bidding": [
+    {
+      "id": "fixture-bid-001",
+      "bid_id": "LN2026-GK-0001",
+      "title": "先进封装产线键合机设备采购招标公告",
+      "notice_type": "招标",
+      "province": "辽宁省",
+      "city": "沈阳市",
+      "content": "采购内容：全自动晶圆级键合机2台，主要技术指标包括对准精度≤1μm、键合温度≤350°C、产能≥40WPH。预算金额：人民币4800万元。",
+      "publish_time": "2026-05-15T00:00:00Z",
+      "source": "81api",
+      "collected_at": "2026-07-18T09:00:00Z"
+    },
+    {
+      "id": "fixture-bid-002",
+      "bid_id": "SH2026-ZB-0002",
+      "title": "12英寸先进封装检测设备采购项目中标结果公告",
+      "notice_type": "中标结果",
+      "province": "上海市",
+      "city": "上海市",
+      "content": "中标供应商：国产厂商A；中标金额：人民币3200万元；采购内容：晶圆级光学检测设备1台、缺陷复检设备1台。项目周期12个月。",
+      "publish_time": "2026-06-20T00:00:00Z",
+      "source": "81api",
+      "collected_at": "2026-07-18T09:00:00Z"
+    }
+  ],
+  "sql_rows": [
+    {
+      "table_name": "company_data",
+      "columns": ["company_name", "stock_code", "revenue", "net_profit", "gross_margin", "sub_industry", "year"],
+      "data": [
+        {
+          "company_name": "长电科技",
+          "stock_code": "600584.SH",
+          "revenue": 359.5,
+          "net_profit": 32.8,
+          "gross_margin": 18.5,
+          "sub_industry": "先进封装",
+          "year": 2024
+        },
+        {
+          "company_name": "通富微电",
+          "stock_code": "002156.SZ",
+          "revenue": 246.3,
+          "net_profit": 18.7,
+          "gross_margin": 22.1,
+          "sub_industry": "先进封装",
+          "year": 2024
+        },
+        {
+          "company_name": "中微公司",
+          "stock_code": "688012.SH",
+          "revenue": 63.8,
+          "net_profit": 14.2,
+          "gross_margin": 45.3,
+          "sub_industry": "半导体设备",
+          "year": 2024
+        }
+      ],
+      "sql": "SELECT company_name, stock_code, revenue, net_profit, gross_margin, sub_industry, year FROM company_data WHERE sub_industry IN ('先进封装', '半导体设备') AND year = 2024"
+    }
+  ],
+  "market_quote": [
+    {
+      "id": "fixture-stock-001",
+      "name": "长电科技",
+      "gid": "sh600584",
+      "nowPri": "38.50",
+      "increase": "1.20",
+      "increPer": "3.22",
+      "todayStartPri": "37.30",
+      "yestodEndPri": "37.30",
+      "todayMax": "39.10",
+      "todayMin": "37.10",
+      "traAmount": "12500000",
+      "traNumber": "480000000",
+      "as_of": "2026-07-18T15:00:00Z"
+    },
+    {
+      "id": "fixture-stock-002",
+      "name": "中微公司",
+      "gid": "sh688012",
+      "nowPri": "168.20",
+      "increase": "-1.80",
+      "increPer": "-1.06",
+      "todayStartPri": "170.50",
+      "yestodEndPri": "170.00",
+      "todayMax": "171.20",
+      "todayMin": "166.80",
+      "traAmount": "8200000",
+      "traNumber": "1380000000",
+      "as_of": "2026-07-18T15:00:00Z"
+    }
+  ]
+}

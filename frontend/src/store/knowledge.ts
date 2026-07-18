@@ -1,7 +1,3 @@
-/**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
 import { proxy } from 'valtio'
 import * as knowledgeApi from '@/api/knowledge'
 import type { KnowledgeBase, KnowledgeBaseWithDocuments, KBDocument } from '@/api/knowledge'

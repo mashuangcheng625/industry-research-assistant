@@ -1,8 +1,6 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 """聊天附件路由"""
 import os
-import shutil
+from pathlib import Path
 from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks, Form
@@ -11,14 +9,20 @@ from sqlalchemy.orm import Session
 from core.database import get_db
 from models.chat import ChatAttachment, ChatSession
 from models.user import User
-from router.auth_router import get_current_user
+from router.auth_router import get_current_user_required
 from schemas.chat import AttachmentResponse, AttachmentListResponse
+from core.rate_limit import enforce_standard_rate_limit
 
-router = APIRouter(prefix="/attachments", tags=["聊天附件"])
+router = APIRouter(
+    prefix="/attachments",
+    tags=["聊天附件"],
+    dependencies=[Depends(enforce_standard_rate_limit)],
+)
 
 # 文件上传目录
 UPLOAD_DIR = "/tmp/chat_attachments"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+MAX_ATTACHMENT_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(20 * 1024 * 1024)))
 
 # 支持的文件类型
 ALLOWED_EXTENSIONS = {
@@ -113,7 +117,7 @@ async def upload_attachment(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     session_id: str = Form(...),
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_required),
     db: Session = Depends(get_db),
 ):
     """上传聊天附件"""
@@ -127,7 +131,10 @@ async def upload_attachment(
         )
 
     # 验证会话存在
-    session = db.query(ChatSession).filter(ChatSession.id == session_uuid).first()
+    session = db.query(ChatSession).filter(
+        ChatSession.id == session_uuid,
+        ChatSession.user_id == current_user.id,
+    ).first()
     if not session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -144,13 +151,31 @@ async def upload_attachment(
 
     # 生成唯一文件名
     import uuid
-    unique_filename = f"{uuid.uuid4()}_{file.filename}"
+    safe_filename = Path(file.filename or "upload").name
+    unique_filename = f"{uuid.uuid4()}_{safe_filename}"
     file_path = os.path.join(UPLOAD_DIR, unique_filename)
 
     # 保存文件
     try:
+        total_bytes = 0
         with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            while chunk := await file.read(1024 * 1024):
+                total_bytes += len(chunk)
+                if total_bytes > MAX_ATTACHMENT_BYTES:
+                    raise HTTPException(
+                        status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                        detail=f"文件超过 {MAX_ATTACHMENT_BYTES} bytes",
+                    )
+                buffer.write(chunk)
+        if total_bytes == 0:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="不允许上传空文件",
+            )
+    except HTTPException:
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -163,8 +188,8 @@ async def upload_attachment(
     # 创建附件记录
     att = ChatAttachment(
         session_id=session_uuid,
-        user_id=current_user.id if current_user else None,
-        filename=file.filename,
+        user_id=current_user.id,
+        filename=safe_filename,
         file_type=ext[1:] if ext else "unknown",
         file_size=file_size,
         file_path=file_path,
@@ -189,7 +214,7 @@ async def upload_attachment(
 @router.get("/{attachment_id}", response_model=AttachmentResponse)
 async def get_attachment(
     attachment_id: str,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_required),
     db: Session = Depends(get_db),
 ):
     """获取附件详情"""
@@ -201,7 +226,10 @@ async def get_attachment(
             detail="无效的附件ID格式"
         )
 
-    att = db.query(ChatAttachment).filter(ChatAttachment.id == att_uuid).first()
+    att = db.query(ChatAttachment).filter(
+        ChatAttachment.id == att_uuid,
+        ChatAttachment.user_id == current_user.id,
+    ).first()
     if not att:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -214,7 +242,7 @@ async def get_attachment(
 @router.get("/session/{session_id}", response_model=AttachmentListResponse)
 async def get_session_attachments(
     session_id: str,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_required),
     db: Session = Depends(get_db),
 ):
     """获取会话的所有附件"""
@@ -227,7 +255,10 @@ async def get_session_attachments(
         )
 
     # 验证会话存在
-    session = db.query(ChatSession).filter(ChatSession.id == session_uuid).first()
+    session = db.query(ChatSession).filter(
+        ChatSession.id == session_uuid,
+        ChatSession.user_id == current_user.id,
+    ).first()
     if not session:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -235,7 +266,8 @@ async def get_session_attachments(
         )
 
     attachments = db.query(ChatAttachment).filter(
-        ChatAttachment.session_id == session_uuid
+        ChatAttachment.session_id == session_uuid,
+        ChatAttachment.user_id == current_user.id,
     ).order_by(ChatAttachment.created_at.desc()).all()
 
     return AttachmentListResponse(
@@ -247,7 +279,7 @@ async def get_session_attachments(
 @router.delete("/{attachment_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_attachment(
     attachment_id: str,
-    current_user: Optional[User] = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_required),
     db: Session = Depends(get_db),
 ):
     """删除附件"""
@@ -259,7 +291,10 @@ async def delete_attachment(
             detail="无效的附件ID格式"
         )
 
-    att = db.query(ChatAttachment).filter(ChatAttachment.id == att_uuid).first()
+    att = db.query(ChatAttachment).filter(
+        ChatAttachment.id == att_uuid,
+        ChatAttachment.user_id == current_user.id,
+    ).first()
     if not att:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,

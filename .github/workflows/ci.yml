@@ -25,13 +25,19 @@ jobs:
         working-directory: backend
         env:
           PYTHONPATH: app
-        run: python -m pytest -q -W error::DeprecationWarning
+        run: timeout 240s python -m pytest -q -m "not integration" -W error::DeprecationWarning
+      - name: Run backend integration tests
+        working-directory: backend
+        env:
+          PYTHONPATH: app
+        run: timeout 120s python -m pytest -q -m integration -W error::DeprecationWarning
       - name: Import backend without external services
         run: make check-backend-import PYTHON=python
       - name: Validate source governance and evaluation data
         run: |
           make validate-sources PYTHON=python
           make validate-eval PYTHON=python
+          make validate-baseline PYTHON=python
       - name: Validate Docker Compose
         run: make validate-compose
 

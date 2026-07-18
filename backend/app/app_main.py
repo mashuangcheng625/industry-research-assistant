@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.concurrency import run_in_threadpool
@@ -10,7 +8,9 @@ import logging
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 # 加载环境变量
-load_dotenv()
+from pathlib import Path as _Path
+_env_file = _Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(dotenv_path=str(_env_file))
 
 # 配置日志
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +27,7 @@ from router.news_router import router as news_router
 from core.database import engine, Base
 from core.health import check_readiness
 from core.runtime_config import cors_origins, env_bool
+from core.security import validate_security_config
 # 导入所有模型以确保它们被注册
 from models import (
     User, ChatSession, ChatMessage, ChatAttachment, LongTermMemory,
@@ -39,6 +40,8 @@ async def lifespan(app: FastAPI):
     """应用生命周期管理"""
     # 启动时执行
     logger.info("应用启动中...")
+
+    validate_security_config()
 
     if env_bool("AUTO_CREATE_TABLES", True):
         Base.metadata.create_all(bind=engine)
@@ -66,8 +69,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="半导体产业研究助手 API",
-    description="覆盖芯片设计、材料设备、晶圆制造与封装测试的 AI 研究系统",
+    title="证据驱动行业研究平台 API",
+    description="统一知识库、产业数据与公开情报，并以半导体全产业链为垂直示范的证据驱动研究系统",
     version="2.0.0",
     lifespan=lifespan
 )

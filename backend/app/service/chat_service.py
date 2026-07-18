@@ -1,14 +1,9 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 import json
 import os
 import re
 from typing import List, Dict, Any, Optional, Generator
 import uuid
 from openai import OpenAI
-from llama_index.core.data_structs import Node
-from llama_index.core.schema import NodeWithScore
-from llama_index.postprocessor.dashscope_rerank import DashScopeRerank
 import tiktoken
 
 from .document_service import DocumentService
@@ -255,58 +250,74 @@ class ChatService:
     
     def rerank_similarity(self, query: str, documents: List[Dict[str, Any]]) -> List[float]:
         """
-        使用DashScope重排对文档进行相似度评分
-        
-        Args:
-            query: 用户查询
-            documents: 要评分的文档列表
-            
-        Returns:
-            文档相似度分数列表
+        对文档进行重排序评分。
+
+        当前使用云端生成模型进行 cross-encoding 打分：将每个文档与 query
+        配对，让 LLM 判断相关性并输出 0-1 分数。
+
+        本地 embedding 模式时直接返回 Milvus 余弦相似度作为初始排序。
+        可通过 RERANK_ENABLED=true 强制开启云端 rerank。
         """
         try:
-            api_key = os.getenv("DASHSCOPE_API_KEY", self.openai_api_key)
-
-            # 本地 Embedding 已经给出 Milvus 余弦相似度；没有本地 Rerank
-            # 服务时保留该排序，避免把请求错误发送到 DashScope。
             embedding_base_url = os.getenv("EMBEDDING_BASE_URL", "")
-            if embedding_base_url.startswith(("http://127.0.0.1", "http://localhost")):
+            rerank_enabled = os.getenv("RERANK_ENABLED", "false").lower() in {
+                "1", "true", "yes", "on",
+            }
+
+            if not rerank_enabled and embedding_base_url.startswith(
+                ("http://127.0.0.1", "http://localhost")
+            ):
                 return [doc.get("weight", 1.0) for doc in documents]
-            
-            # 从文档中提取文本
+
             texts = [doc["content"] for doc in documents]
-            
-            # 创建节点列表
-            nodes = [
-                NodeWithScore(
-                    node=Node(
-                        text=text,
-                        metadata={"source_index": index},
-                        excluded_embed_metadata_keys=["source_index"],
-                        excluded_llm_metadata_keys=["source_index"],
-                    ),
-                    score=1.0,
-                )
-                for index, text in enumerate(texts)
-            ]
-            
-            # 初始化 DashScopeRerank
-            dashscope_rerank = DashScopeRerank(top_n=len(texts), api_key=api_key)
-            
-            # 执行重排序
-            results = dashscope_rerank.postprocess_nodes(nodes, query_str=query)
-            
-            # Reranker 返回的节点已按相关性重排，必须依靠
-            # source_index 写回原文档，不能把排序后的分数按位置硬赋给原列表。
-            scores = [float(doc.get("weight", 1.0)) for doc in documents]
-            for result in results:
-                source_index = int(result.node.metadata["source_index"])
-                if 0 <= source_index < len(scores):
-                    scores[source_index] = float(result.score)
+            if not texts:
+                return []
+
+            # 使用当前模型路由进行 cross-encoding 打分
+            endpoint = resolve_llm_endpoint()
+            client = OpenAI(
+                api_key=endpoint.api_key,
+                base_url=endpoint.base_url,
+                timeout=30,
+            )
+
+            rerank_model = os.getenv("RERANK_MODEL", endpoint.model)
+
+            scores: list[float] = []
+            for idx, text in enumerate(texts):
+                try:
+                    completion = client.chat.completions.create(
+                        model=rerank_model,
+                        messages=[{
+                            "role": "system",
+                            "content": (
+                                "You are a relevance judge. Given a query and a document, "
+                                "rate how relevant the document is to answering the query. "
+                                "Score from 0.0 (completely irrelevant) to 1.0 (directly "
+                                "answers the query with specific facts). Consider: does it "
+                                "contain the specific concepts, data, or technical details "
+                                "the query asks about? Output ONLY a single float number, "
+                                "nothing else."
+                            ),
+                        }, {
+                            "role": "user",
+                            "content": (
+                                f"Query: {query}\n\n"
+                                f"Document [{idx}]: {text[:600]}"
+                            ),
+                        }],
+                        max_tokens=10,
+                        temperature=0,
+                    )
+                    raw = (completion.choices[0].message.content or "").strip()
+                    score = float(raw)
+                    scores.append(max(0.0, min(1.0, score)))
+                except Exception:
+                    scores.append(documents[idx].get("weight", 0.5))
+
             return scores
         except Exception as e:
-            print(f"Error in rerank_similarity: {str(e)}")
-            # 出错时返回原始权重
+            print(f"Error in rerank_similarity: {e}")
             return [doc.get("weight", 1.0) for doc in documents]
     
     def rerank_documents(self, question: str, documents: List[Dict[str, Any]]) -> List[Dict[str, Any]]:

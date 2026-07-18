@@ -142,7 +142,7 @@ class AgentSourceRoutingTests(unittest.TestCase):
             "LOCAL_LLM_BASE_URL": "http://127.0.0.1:11434/v1",
             "LOCAL_LLM_MODEL": "industry-qwen3:4b",
         }
-        with patch.dict(os.environ, environment, clear=False):
+        with patch.dict(os.environ, environment, clear=True):
             config = reload_config()
         self.assertEqual(config.default_model, "industry-qwen3:4b")
         self.assertEqual(config.agents.scout.model, "industry-qwen3:4b")

@@ -1,7 +1,3 @@
-/**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
 import ChunksDrawer from '@/components/chunks-drawer'
 import UploadModal, { UploadResult } from '@/components/upload-modal'
 import { authState } from '@/store/auth'

@@ -1,0 +1,1439 @@
+{
+  "report_title": "先进封装多源联合研究评测报告",
+  "generated_at": "2026-07-18T09:22:20.595667+00:00",
+  "fixture_path": "/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/sample-data/multi_source_advanced_packaging_fixture.json",
+  "eval_path": "/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/sample-data/multi_source_advanced_packaging_eval.json",
+  "overall_pass": true,
+  "gates": {
+    "adapter_conversion": {
+      "pass": true,
+      "input_count": 13,
+      "converted_count": 13,
+      "conversion_rate": 1.0,
+      "min_required": 1.0,
+      "details": {
+        "documents": {
+          "input": 3,
+          "converted": 3,
+          "errors": []
+        },
+        "news": {
+          "input": 3,
+          "converted": 3,
+          "errors": []
+        },
+        "bidding": {
+          "input": 2,
+          "converted": 2,
+          "errors": []
+        },
+        "sql_rows": {
+          "input": 3,
+          "converted": 3,
+          "errors": []
+        },
+        "market_quote": {
+          "input": 2,
+          "converted": 2,
+          "errors": []
+        }
+      }
+    },
+    "contract_validation": {
+      "pass": true,
+      "total": 13,
+      "valid": 13,
+      "invalid": 0,
+      "min_required_rate": 1.0,
+      "details": [
+        {
+          "evidence_id": "ee2e04985f0523e9e0e9feef",
+          "source_kind": "document",
+          "title": "Advanced_Packaging_Technology_Overview_2025",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "41c08f9b8765998aad9d7b39",
+          "source_kind": "document",
+          "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "ecc81ea77d4639b0104d0220",
+          "source_kind": "document",
+          "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "edefe9a6d1e852314d5a12fd",
+          "source_kind": "policy",
+          "title": "国务院发布《关于促进集成电路产业高质量发展的若干措施》",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "02c5ecce4fa0039214843820",
+          "source_kind": "policy",
+          "title": "工信部公示2026年先进封装装备重点专项拟支持项目",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "be749c641997e01ded21937b",
+          "source_kind": "news",
+          "title": "国产键合机龙头企业完成28nm先进封装量产验证",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "b6d048a544c29de3d52d3321",
+          "source_kind": "bidding",
+          "title": "先进封装产线键合机设备采购招标公告",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "8c3712bddedc9dc7d871e28b",
+          "source_kind": "bidding",
+          "title": "12英寸先进封装检测设备采购项目中标结果公告",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "67b0fbf3793d2818552013e6",
+          "source_kind": "sql_row",
+          "title": "长电科技",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "fe3e483c29ee2b8e6a64349a",
+          "source_kind": "sql_row",
+          "title": "通富微电",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "e1d3298718d160297a5e55fe",
+          "source_kind": "sql_row",
+          "title": "中微公司",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "01f56aea7ec69edbcbdbae0d",
+          "source_kind": "market_quote",
+          "title": "长电科技 (sh600584) 实时行情",
+          "valid": true,
+          "issues": []
+        },
+        {
+          "evidence_id": "9e49d4497492a66a196b4adc",
+          "source_kind": "market_quote",
+          "title": "中微公司 (sh688012) 实时行情",
+          "valid": true,
+          "issues": []
+        }
+      ]
+    },
+    "eval_structure": {
+      "pass": true,
+      "total_cases": 12,
+      "category_distribution": {
+        "document_plus_news": 3,
+        "document_plus_bidding": 3,
+        "document_plus_text2sql": 2,
+        "document_plus_market": 2,
+        "missing_source_refuse": 2
+      },
+      "expected_distribution": {
+        "document_plus_news": 3,
+        "document_plus_bidding": 3,
+        "document_plus_text2sql": 2,
+        "document_plus_market": 2,
+        "missing_source_refuse": 2
+      },
+      "distribution_ok": true,
+      "min_cases_met": true
+    },
+    "case_availability": {
+      "pass": true,
+      "available_count": 12,
+      "total_cases": 12,
+      "cases": [
+        {
+          "case_id": "multi-dn-001",
+          "title": "先进封装设备国产化政策环境",
+          "category": "document_plus_news",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-dn-002",
+          "title": "先进封装技术路线对比",
+          "category": "document_plus_news",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-dn-003",
+          "title": "键合机国产化技术进展",
+          "category": "document_plus_news",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-db-001",
+          "title": "先进封装设备采购需求分析",
+          "category": "document_plus_bidding",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-db-002",
+          "title": "检测设备招投标中国产厂商表现",
+          "category": "document_plus_bidding",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-db-003",
+          "title": "键合机招投标需求与产能扩张",
+          "category": "document_plus_bidding",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-dt-001",
+          "title": "先进封装上市公司财务对比",
+          "category": "document_plus_text2sql",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-dt-002",
+          "title": "先进封装市场规模与上市公司业绩印证",
+          "category": "document_plus_text2sql",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-dm-001",
+          "title": "先进封装公司行情与产业链定位",
+          "category": "document_plus_market",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-dm-002",
+          "title": "设备市场增长与上市公司估值",
+          "category": "document_plus_market",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-ms-001",
+          "title": "缺失来源：TSV刻蚀设备国产化具体成本数据",
+          "category": "missing_source_refuse",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        },
+        {
+          "case_id": "multi-ms-002",
+          "title": "缺失来源：特定公司先进封装设备出货量",
+          "category": "missing_source_refuse",
+          "available": true,
+          "missing_gold_docs": [],
+          "missing_gold_news": [],
+          "missing_gold_bids": [],
+          "missing_gold_sql": [],
+          "missing_gold_stock": []
+        }
+      ]
+    },
+    "end_to_end_execution": {
+      "pass": true,
+      "passed_cases": 12,
+      "total_cases": 12,
+      "cases": [
+        {
+          "case_id": "multi-dn-001",
+          "title": "先进封装设备国产化政策环境",
+          "category": "document_plus_news",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "国务院和工信部2026年出台了哪些支持先进封装设备国产化的政策？这些政策主要覆盖哪些设备方向？",
+            "tools_used": [
+              "knowledge_search",
+              "news_search"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-002",
+              "fixture-doc-003",
+              "fixture-news-001",
+              "fixture-news-002"
+            ],
+            "retrieved_source_kinds": [
+              "document",
+              "policy"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-003",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+                "locator": {
+                  "page": 18,
+                  "chunk_index": 5,
+                  "doc_id": "fixture-doc-003",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-news-001",
+                "source_kind": "policy",
+                "title": "国务院发布《关于促进集成电路产业高质量发展的若干措施》",
+                "locator": {
+                  "news_id": "fixture-news-001"
+                },
+                "as_of": null,
+                "published_at": "2026-03-20T00:00:00Z"
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-news-002",
+                "source_kind": "policy",
+                "title": "工信部公示2026年先进封装装备重点专项拟支持项目",
+                "locator": {
+                  "news_id": "fixture-news-002"
+                },
+                "as_of": null,
+                "published_at": "2026-06-10T00:00:00Z"
+              }
+            ],
+            "answer": "- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E1]（时点：时点未提供）\n- 事实证据：2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。 [E2]（时点：时点未提供）\n- 事实证据：2026年3月，国务院发布集成电路产业扶持新政，明确将先进封装设备纳入重点支持目录。政策提出对先进封装设备研发企业给予最高15%的研发费用加计扣除，并在设备采购环节提供进口替代补贴。 [E3]（时点：2026-03-20T00:00:00Z）\n- 事实证据：工信部公示了2026年度先进封装装备重点专项拟支持项目名单，涉及键合机、TSV刻蚀设备、混合键合设备和先进检测设备四大方向共15个项目。其中键合设备项目5个、检测设备项目4个、TSV设备项目3个、混合键合设备项目3个。拟安排中央财政资金约12亿元。 [E4]（时点：2026-06-10T00:00:00Z）",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-dn-002",
+          "title": "先进封装技术路线对比",
+          "category": "document_plus_news",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "2.5D封装和3D封装在技术方案上有什么主要差异？最近国内政策对哪种技术路线支持力度更大？",
+            "tools_used": [
+              "knowledge_search",
+              "news_search"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-001",
+              "fixture-doc-002",
+              "fixture-news-001",
+              "fixture-news-002"
+            ],
+            "retrieved_source_kinds": [
+              "document",
+              "policy"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-001",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Technology_Overview_2025",
+                "locator": {
+                  "page": 12,
+                  "chunk_index": 3,
+                  "doc_id": "fixture-doc-001",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-news-001",
+                "source_kind": "policy",
+                "title": "国务院发布《关于促进集成电路产业高质量发展的若干措施》",
+                "locator": {
+                  "news_id": "fixture-news-001"
+                },
+                "as_of": null,
+                "published_at": "2026-03-20T00:00:00Z"
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-news-002",
+                "source_kind": "policy",
+                "title": "工信部公示2026年先进封装装备重点专项拟支持项目",
+                "locator": {
+                  "news_id": "fixture-news-002"
+                },
+                "as_of": null,
+                "published_at": "2026-06-10T00:00:00Z"
+              }
+            ],
+            "answer": "- 事实证据：先进封装技术包括2.5D Interposer、3D TSV堆叠、Fan-Out WLP和混合键合等方案。2.5D封装通过硅中介层连接多个芯片，TSV直径约5-10μm，深宽比10:1。3D封装通过微凸点或混合键合实现芯片垂直堆叠，间距可缩至40μm以下。台积电CoWoS、三星I-Cube和Intel EMIB是当前主流2.5D平台。混合键合（Hybrid Bonding）可实现亚微米级对准精度，是未来高带宽存储（HBM）和芯粒集成的关键使能技术。 [E1]（时点：时点未提供）\n- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E2]（时点：时点未提供）\n- 事实证据：2026年3月，国务院发布集成电路产业扶持新政，明确将先进封装设备纳入重点支持目录。政策提出对先进封装设备研发企业给予最高15%的研发费用加计扣除，并在设备采购环节提供进口替代补贴。 [E3]（时点：2026-03-20T00:00:00Z）\n- 事实证据：工信部公示了2026年度先进封装装备重点专项拟支持项目名单，涉及键合机、TSV刻蚀设备、混合键合设备和先进检测设备四大方向共15个项目。其中键合设备项目5个、检测设备项目4个、TSV设备项目3个、混合键合设备项目3个。拟安排中央财政资金约12亿元。 [E4]（时点：2026-06-10T00:00:00Z）\n- 来源冲突检查：不同来源口径和时点可能不同；当前样本未发现可直接裁决的冲突，结论需持续复核。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-dn-003",
+          "title": "键合机国产化技术进展",
+          "category": "document_plus_news",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "国产键合机在先进封装领域的当前技术水平和产业化进展如何？与国际领先水平的主要差距是什么？",
+            "tools_used": [
+              "knowledge_search",
+              "news_search"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-001",
+              "fixture-doc-002",
+              "fixture-news-002",
+              "fixture-news-003"
+            ],
+            "retrieved_source_kinds": [
+              "document",
+              "news",
+              "policy"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-001",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Technology_Overview_2025",
+                "locator": {
+                  "page": 12,
+                  "chunk_index": 3,
+                  "doc_id": "fixture-doc-001",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-news-003",
+                "source_kind": "news",
+                "title": "国产键合机龙头企业完成28nm先进封装量产验证",
+                "locator": {
+                  "news_id": "fixture-news-003"
+                },
+                "as_of": null,
+                "published_at": "2026-07-05T00:00:00Z"
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-news-002",
+                "source_kind": "policy",
+                "title": "工信部公示2026年先进封装装备重点专项拟支持项目",
+                "locator": {
+                  "news_id": "fixture-news-002"
+                },
+                "as_of": null,
+                "published_at": "2026-06-10T00:00:00Z"
+              }
+            ],
+            "answer": "- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E1]（时点：时点未提供）\n- 事实证据：先进封装技术包括2.5D Interposer、3D TSV堆叠、Fan-Out WLP和混合键合等方案。2.5D封装通过硅中介层连接多个芯片，TSV直径约5-10μm，深宽比10:1。3D封装通过微凸点或混合键合实现芯片垂直堆叠，间距可缩至40μm以下。台积电CoWoS、三星I-Cube和Intel EMIB是当前主流2.5D平台。混合键合（Hybrid Bonding）可实现亚微米级对准精度，是未来高带宽存储（HBM）和芯粒集成的关键使能技术。 [E2]（时点：时点未提供）\n- 事实证据：国内半导体设备龙头企业宣布其自主研发的全自动键合机已通过28nm制程先进封装量产验证，良率达到99.5%，产能效率达到进口设备的90%。该设备主要应用于Fan-Out WLP封装工艺，已获得国内3家封装厂订单。 [E3]（时点：2026-07-05T00:00:00Z）\n- 事实证据：工信部公示了2026年度先进封装装备重点专项拟支持项目名单，涉及键合机、TSV刻蚀设备、混合键合设备和先进检测设备四大方向共15个项目。其中键合设备项目5个、检测设备项目4个、TSV设备项目3个、混合键合设备项目3个。拟安排中央财政资金约12亿元。 [E4]（时点：2026-06-10T00:00:00Z）\n- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-db-001",
+          "title": "先进封装设备采购需求分析",
+          "category": "document_plus_bidding",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "从近期招投标信息来看，先进封装设备的采购需求和预算规模如何？设备国产化在采购环节是否有明显体现？",
+            "tools_used": [
+              "knowledge_search",
+              "bidding_search"
+            ],
+            "retrieved_source_ids": [
+              "fixture-bid-001",
+              "fixture-bid-002",
+              "fixture-doc-002",
+              "fixture-doc-003"
+            ],
+            "retrieved_source_kinds": [
+              "bidding",
+              "document"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-003",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+                "locator": {
+                  "page": 18,
+                  "chunk_index": 5,
+                  "doc_id": "fixture-doc-003",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-bid-002",
+                "source_kind": "bidding",
+                "title": "12英寸先进封装检测设备采购项目中标结果公告",
+                "locator": {
+                  "notice_id": "SH2026-ZB-0002",
+                  "notice_type": "中标结果",
+                  "province": "上海市",
+                  "city": "上海市"
+                },
+                "as_of": null,
+                "published_at": "2026-06-20T00:00:00Z"
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-bid-001",
+                "source_kind": "bidding",
+                "title": "先进封装产线键合机设备采购招标公告",
+                "locator": {
+                  "notice_id": "LN2026-GK-0001",
+                  "notice_type": "招标",
+                  "province": "辽宁省",
+                  "city": "沈阳市"
+                },
+                "as_of": null,
+                "published_at": "2026-05-15T00:00:00Z"
+              }
+            ],
+            "answer": "- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E1]（时点：时点未提供）\n- 事实证据：2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。 [E2]（时点：时点未提供）\n- 事实证据：中标供应商：国产厂商A；中标金额：人民币3200万元；采购内容：晶圆级光学检测设备1台、缺陷复检设备1台。项目周期12个月。 [E3]（时点：2026-06-20T00:00:00Z）\n- 事实证据：采购内容：全自动晶圆级键合机2台，主要技术指标包括对准精度≤1μm、键合温度≤350°C、产能≥40WPH。预算金额：人民币4800万元。 [E4]（时点：2026-05-15T00:00:00Z）\n- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-db-002",
+          "title": "检测设备招投标中国产厂商表现",
+          "category": "document_plus_bidding",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "先进封装检测设备领域的招投标中，国产厂商的参与度和中标情况如何？是否有明显的国产替代趋势？",
+            "tools_used": [
+              "knowledge_search",
+              "bidding_search"
+            ],
+            "retrieved_source_ids": [
+              "fixture-bid-001",
+              "fixture-bid-002",
+              "fixture-doc-002",
+              "fixture-doc-003"
+            ],
+            "retrieved_source_kinds": [
+              "bidding",
+              "document"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-003",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+                "locator": {
+                  "page": 18,
+                  "chunk_index": 5,
+                  "doc_id": "fixture-doc-003",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-bid-002",
+                "source_kind": "bidding",
+                "title": "12英寸先进封装检测设备采购项目中标结果公告",
+                "locator": {
+                  "notice_id": "SH2026-ZB-0002",
+                  "notice_type": "中标结果",
+                  "province": "上海市",
+                  "city": "上海市"
+                },
+                "as_of": null,
+                "published_at": "2026-06-20T00:00:00Z"
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-bid-001",
+                "source_kind": "bidding",
+                "title": "先进封装产线键合机设备采购招标公告",
+                "locator": {
+                  "notice_id": "LN2026-GK-0001",
+                  "notice_type": "招标",
+                  "province": "辽宁省",
+                  "city": "沈阳市"
+                },
+                "as_of": null,
+                "published_at": "2026-05-15T00:00:00Z"
+              }
+            ],
+            "answer": "- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E1]（时点：时点未提供）\n- 事实证据：2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。 [E2]（时点：时点未提供）\n- 事实证据：中标供应商：国产厂商A；中标金额：人民币3200万元；采购内容：晶圆级光学检测设备1台、缺陷复检设备1台。项目周期12个月。 [E3]（时点：2026-06-20T00:00:00Z）\n- 事实证据：采购内容：全自动晶圆级键合机2台，主要技术指标包括对准精度≤1μm、键合温度≤350°C、产能≥40WPH。预算金额：人民币4800万元。 [E4]（时点：2026-05-15T00:00:00Z）\n- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。\n- 来源冲突检查：不同来源口径和时点可能不同；当前样本未发现可直接裁决的冲突，结论需持续复核。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-db-003",
+          "title": "键合机招投标需求与产能扩张",
+          "category": "document_plus_bidding",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "当前招投标市场对键合机的需求集中在哪些技术指标？采购预算与行业报告中的产能扩张预测是否一致？",
+            "tools_used": [
+              "knowledge_search",
+              "bidding_search"
+            ],
+            "retrieved_source_ids": [
+              "fixture-bid-001",
+              "fixture-bid-002",
+              "fixture-doc-001",
+              "fixture-doc-003"
+            ],
+            "retrieved_source_kinds": [
+              "bidding",
+              "document"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-003",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+                "locator": {
+                  "page": 18,
+                  "chunk_index": 5,
+                  "doc_id": "fixture-doc-003",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-001",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Technology_Overview_2025",
+                "locator": {
+                  "page": 12,
+                  "chunk_index": 3,
+                  "doc_id": "fixture-doc-001",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-bid-001",
+                "source_kind": "bidding",
+                "title": "先进封装产线键合机设备采购招标公告",
+                "locator": {
+                  "notice_id": "LN2026-GK-0001",
+                  "notice_type": "招标",
+                  "province": "辽宁省",
+                  "city": "沈阳市"
+                },
+                "as_of": null,
+                "published_at": "2026-05-15T00:00:00Z"
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-bid-002",
+                "source_kind": "bidding",
+                "title": "12英寸先进封装检测设备采购项目中标结果公告",
+                "locator": {
+                  "notice_id": "SH2026-ZB-0002",
+                  "notice_type": "中标结果",
+                  "province": "上海市",
+                  "city": "上海市"
+                },
+                "as_of": null,
+                "published_at": "2026-06-20T00:00:00Z"
+              }
+            ],
+            "answer": "- 事实证据：2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。 [E1]（时点：时点未提供）\n- 事实证据：先进封装技术包括2.5D Interposer、3D TSV堆叠、Fan-Out WLP和混合键合等方案。2.5D封装通过硅中介层连接多个芯片，TSV直径约5-10μm，深宽比10:1。3D封装通过微凸点或混合键合实现芯片垂直堆叠，间距可缩至40μm以下。台积电CoWoS、三星I-Cube和Intel EMIB是当前主流2.5D平台。混合键合（Hybrid Bonding）可实现亚微米级对准精度，是未来高带宽存储（HBM）和芯粒集成的关键使能技术。 [E2]（时点：时点未提供）\n- 事实证据：采购内容：全自动晶圆级键合机2台，主要技术指标包括对准精度≤1μm、键合温度≤350°C、产能≥40WPH。预算金额：人民币4800万元。 [E3]（时点：2026-05-15T00:00:00Z）\n- 事实证据：中标供应商：国产厂商A；中标金额：人民币3200万元；采购内容：晶圆级光学检测设备1台、缺陷复检设备1台。项目周期12个月。 [E4]（时点：2026-06-20T00:00:00Z）\n- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。\n- 来源冲突检查：不同来源口径和时点可能不同；当前样本未发现可直接裁决的冲突，结论需持续复核。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-dt-001",
+          "title": "先进封装上市公司财务对比",
+          "category": "document_plus_text2sql",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "对比长电科技、通富微电、中微公司2024年的营收、净利润和毛利率，分析先进封装企业与设备企业在盈利模式上的差异。",
+            "tools_used": [
+              "knowledge_search",
+              "text2sql"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-002",
+              "fixture-doc-003",
+              "fixture-sql-001"
+            ],
+            "retrieved_source_kinds": [
+              "document",
+              "sql_row"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-003",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+                "locator": {
+                  "page": 18,
+                  "chunk_index": 5,
+                  "doc_id": "fixture-doc-003",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "长电科技",
+                "locator": {
+                  "row_id": "fd79e817dd5a8b48",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "通富微电",
+                "locator": {
+                  "row_id": "a7ba84df4e6bc4b3",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              },
+              {
+                "marker": "E5",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "中微公司",
+                "locator": {
+                  "row_id": "ea1c24c7f8aba838",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              }
+            ],
+            "answer": "- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E1]（时点：时点未提供）\n- 事实证据：2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。 [E2]（时点：时点未提供）\n- 事实证据：company_name=长电科技; stock_code=600584.SH; revenue=359.5; net_profit=32.8; gross_margin=18.5; sub_industry=先进封装; year=2024 [E3]（时点：year=2024）\n- 事实证据：company_name=通富微电; stock_code=002156.SZ; revenue=246.3; net_profit=18.7; gross_margin=22.1; sub_industry=先进封装; year=2024 [E4]（时点：year=2024）\n- 事实证据：company_name=中微公司; stock_code=688012.SH; revenue=63.8; net_profit=14.2; gross_margin=45.3; sub_industry=半导体设备; year=2024 [E5]（时点：year=2024）\n- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-dt-002",
+          "title": "先进封装市场规模与上市公司业绩印证",
+          "category": "document_plus_text2sql",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "全球先进封装设备市场2024-2028年的增长预测是否与国内先进封装上市公司的营收趋势一致？",
+            "tools_used": [
+              "knowledge_search",
+              "text2sql"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-002",
+              "fixture-doc-003",
+              "fixture-sql-001"
+            ],
+            "retrieved_source_kinds": [
+              "document",
+              "sql_row"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-003",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+                "locator": {
+                  "page": 18,
+                  "chunk_index": 5,
+                  "doc_id": "fixture-doc-003",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "长电科技",
+                "locator": {
+                  "row_id": "fd79e817dd5a8b48",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "通富微电",
+                "locator": {
+                  "row_id": "a7ba84df4e6bc4b3",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              },
+              {
+                "marker": "E5",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "中微公司",
+                "locator": {
+                  "row_id": "ea1c24c7f8aba838",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              }
+            ],
+            "answer": "- 事实证据：2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。 [E1]（时点：时点未提供）\n- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E2]（时点：时点未提供）\n- 事实证据：company_name=长电科技; stock_code=600584.SH; revenue=359.5; net_profit=32.8; gross_margin=18.5; sub_industry=先进封装; year=2024 [E3]（时点：year=2024）\n- 事实证据：company_name=通富微电; stock_code=002156.SZ; revenue=246.3; net_profit=18.7; gross_margin=22.1; sub_industry=先进封装; year=2024 [E4]（时点：year=2024）\n- 事实证据：company_name=中微公司; stock_code=688012.SH; revenue=63.8; net_profit=14.2; gross_margin=45.3; sub_industry=半导体设备; year=2024 [E5]（时点：year=2024）\n- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。\n- 来源冲突检查：不同来源口径和时点可能不同；当前样本未发现可直接裁决的冲突，结论需持续复核。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-dm-001",
+          "title": "先进封装公司行情与产业链定位",
+          "category": "document_plus_market",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "长电科技在先进封装产业链中的定位如何？当前股价表现是否反映了其在先进封装设备国产化中的受益逻辑？",
+            "tools_used": [
+              "knowledge_search",
+              "stock_query"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-002",
+              "fixture-doc-003",
+              "fixture-stock-001"
+            ],
+            "retrieved_source_kinds": [
+              "document",
+              "market_quote"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-003",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+                "locator": {
+                  "page": 18,
+                  "chunk_index": 5,
+                  "doc_id": "fixture-doc-003",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-stock-001",
+                "source_kind": "market_quote",
+                "title": "长电科技 (sh600584) 实时行情",
+                "locator": {
+                  "stock_code": "sh600584",
+                  "data_provider": "juhe_finance"
+                },
+                "as_of": "2026-07-18T15:00:00Z",
+                "published_at": null
+              }
+            ],
+            "answer": "- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E1]（时点：时点未提供）\n- 事实证据：2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。 [E2]（时点：时点未提供）\n- 事实证据：长电科技 (sh600584): 现价 ¥38.50, 涨跌 1.20 (3.22), 今开 ¥37.30, 昨收 ¥37.30, 最高 ¥39.10, 最低 ¥37.10 [E3]（时点：2026-07-18T15:00:00Z）\n- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。\n- 风险提示：行情与估值分析仅供研究参考，不构成投资建议。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-dm-002",
+          "title": "设备市场增长与上市公司估值",
+          "category": "document_plus_market",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "结合先进封装设备市场增长预测和中微公司的财务数据及股价，分析市场增长预期是否已经反映在设备企业的估值中。",
+            "tools_used": [
+              "knowledge_search",
+              "text2sql",
+              "stock_query"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-002",
+              "fixture-doc-003",
+              "fixture-sql-001",
+              "fixture-stock-002"
+            ],
+            "retrieved_source_kinds": [
+              "document",
+              "market_quote",
+              "sql_row"
+            ],
+            "citations": [
+              {
+                "marker": "E1",
+                "source_id": "fixture-doc-002",
+                "source_kind": "document",
+                "title": "China_Advanced_Packaging_Equipment_Landscape_2025Q4",
+                "locator": {
+                  "page": 24,
+                  "chunk_index": 7,
+                  "doc_id": "fixture-doc-002",
+                  "kb_name": "semiconductor_materials_equipment"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E2",
+                "source_id": "fixture-doc-003",
+                "source_kind": "document",
+                "title": "Advanced_Packaging_Equipment_Market_Forecast_2026",
+                "locator": {
+                  "page": 18,
+                  "chunk_index": 5,
+                  "doc_id": "fixture-doc-003",
+                  "kb_name": "semiconductor_packaging_testing"
+                },
+                "as_of": null,
+                "published_at": null
+              },
+              {
+                "marker": "E3",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "中微公司",
+                "locator": {
+                  "row_id": "ea1c24c7f8aba838",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              },
+              {
+                "marker": "E4",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "长电科技",
+                "locator": {
+                  "row_id": "fd79e817dd5a8b48",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              },
+              {
+                "marker": "E5",
+                "source_id": "fixture-sql-001",
+                "source_kind": "sql_row",
+                "title": "通富微电",
+                "locator": {
+                  "row_id": "a7ba84df4e6bc4b3",
+                  "table_name": "company_data",
+                  "columns": [
+                    "company_name",
+                    "stock_code",
+                    "revenue",
+                    "net_profit",
+                    "gross_margin",
+                    "sub_industry",
+                    "year"
+                  ],
+                  "sql_hash": "5affedf526f0"
+                },
+                "as_of": "year=2024",
+                "published_at": null
+              },
+              {
+                "marker": "E6",
+                "source_id": "fixture-stock-002",
+                "source_kind": "market_quote",
+                "title": "中微公司 (sh688012) 实时行情",
+                "locator": {
+                  "stock_code": "sh688012",
+                  "data_provider": "juhe_finance"
+                },
+                "as_of": "2026-07-18T15:00:00Z",
+                "published_at": null
+              }
+            ],
+            "answer": "- 事实证据：先进封装设备国产化率目前处于较低水平。键合机领域，国际厂商如Besi、ASM Pacific和Shinkawa占据主导，国产键合机在 Fan-Out 领域开始实现小批量供应。TSV刻蚀和CVD设备方面，中微公司和北方华创已进入先进封装产线，但深孔刻蚀（>100μm深度）仍主要依赖泛林半导体。检测设备方面，中科飞测的光学检测设备已覆盖2.5D封装的部分检测环节。 [E1]（时点：时点未提供）\n- 事实证据：2024年全球先进封装设备市场规模约86亿美元，预计2028年将达到135亿美元（CAGR 12%）。键合设备占约35%市场份额，刻蚀与沉积设备约25%，检测与量测设备约20%，其他辅助设备约20%。其中混合键合设备是增长最快的细分市场，CAGR预计超过30%。 [E2]（时点：时点未提供）\n- 事实证据：company_name=中微公司; stock_code=688012.SH; revenue=63.8; net_profit=14.2; gross_margin=45.3; sub_industry=半导体设备; year=2024 [E3]（时点：year=2024）\n- 事实证据：company_name=长电科技; stock_code=600584.SH; revenue=359.5; net_profit=32.8; gross_margin=18.5; sub_industry=先进封装; year=2024 [E4]（时点：year=2024）\n- 事实证据：company_name=通富微电; stock_code=002156.SZ; revenue=246.3; net_profit=18.7; gross_margin=22.1; sub_industry=先进封装; year=2024 [E5]（时点：year=2024）\n- 事实证据：中微公司 (sh688012): 现价 ¥168.20, 涨跌 -1.80 (-1.06), 今开 ¥170.50, 昨收 ¥170.00, 最高 ¥171.20, 最低 ¥166.80 [E6]（时点：2026-07-18T15:00:00Z）\n- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。\n- 来源冲突检查：不同来源口径和时点可能不同；当前样本未发现可直接裁决的冲突，结论需持续复核。\n- 风险提示：行情与估值分析仅供研究参考，不构成投资建议。",
+            "refused": false,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-ms-001",
+          "title": "缺失来源：TSV刻蚀设备国产化具体成本数据",
+          "category": "missing_source_refuse",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "TSV深孔刻蚀设备的国产产品单台成本是多少？与国际竞品的价差百分比是多少？",
+            "tools_used": [
+              "knowledge_search"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-002",
+              "fixture-doc-003"
+            ],
+            "retrieved_source_kinds": [
+              "document"
+            ],
+            "citations": [],
+            "answer": "证据不足：当前已检索来源不包含问题要求的具体数值，无法给出可靠结论。",
+            "refused": true,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        },
+        {
+          "case_id": "multi-ms-002",
+          "title": "缺失来源：特定公司先进封装设备出货量",
+          "category": "missing_source_refuse",
+          "passed": true,
+          "checks": {
+            "tool_selection_ok": true,
+            "gold_evidence_recall_ok": true,
+            "source_type_recall_ok": true,
+            "citation_coverage_ok": true,
+            "citation_locator_ok": true,
+            "refusal_ok": true,
+            "inference_labeling_ok": true,
+            "source_conflict_disclosure_ok": true
+          },
+          "run": {
+            "question": "中微公司2026年Q1先进封装相关设备的出货量是多少台？北方华创同期出货量是多少？",
+            "tools_used": [
+              "knowledge_search",
+              "text2sql"
+            ],
+            "retrieved_source_ids": [
+              "fixture-doc-002",
+              "fixture-doc-003",
+              "fixture-sql-001"
+            ],
+            "retrieved_source_kinds": [
+              "document",
+              "sql_row"
+            ],
+            "citations": [],
+            "answer": "证据不足：当前已检索来源不包含问题要求的具体数值，无法给出可靠结论。",
+            "refused": true,
+            "inference_labeled": true,
+            "conflict_disclosed": true
+          }
+        }
+      ]
+    }
+  },
+  "distribution_summary": {
+    "document_plus_news": 3,
+    "document_plus_bidding": 3,
+    "document_plus_text2sql": 2,
+    "document_plus_market": 2,
+    "missing_source_refuse": 2
+  },
+  "evaluation_dimensions_covered": [
+    "tool_selection_correctness",
+    "required_source_type_recall",
+    "numeric_unit_and_time_context",
+    "citation_locator_verifiability",
+    "inference_labeling",
+    "source_conflict_disclosure",
+    "missing_evidence_refusal"
+  ],
+  "note": "本报告执行确定性多源研究 Runner，验证工具规划、检索召回、引用定位、推断/冲突标注和缺证据拒答；自然语言表达质量仍需人工复核。"
+}

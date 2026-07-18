@@ -69,6 +69,7 @@ def test_openai_compatible_model_readiness_requires_configured_model():
             _openai_compatible_model("http://model.test/v1", "missing", "test-key")
 
 
+@pytest.mark.integration
 def test_milvus_lite_insert_and_search_integration():
     previous_tempdir = tempfile.tempdir
     tempfile.tempdir = "/tmp"

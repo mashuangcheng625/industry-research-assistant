@@ -1,13 +1,20 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 from fastapi import APIRouter, Depends, HTTPException
 from starlette.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_500_INTERNAL_SERVER_ERROR
 
 from service import WebSearchService, ServiceConfig
 from schemas import WebSearchRequest, WebSearchResponse
+from router.auth_router import get_current_user_required
+from core.rate_limit import enforce_standard_rate_limit
 
 # Create router instance
-router = APIRouter(prefix="/search", tags=["search"])
+router = APIRouter(
+    prefix="/search",
+    tags=["search"],
+    dependencies=[
+        Depends(get_current_user_required),
+        Depends(enforce_standard_rate_limit),
+    ],
+)
 
 # Get WebSearchService instance
 def get_web_search_service():
@@ -65,4 +72,4 @@ async def web_search(
         raise HTTPException(
             status_code=HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error performing web search: {str(e)}"
-        ) 
+        )

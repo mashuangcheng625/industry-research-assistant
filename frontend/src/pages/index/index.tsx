@@ -1,7 +1,3 @@
-/**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
 import IconBg from '@/assets/index/bg.png'
 import IconSearch from '@/assets/index/search.svg'
 import { INDUSTRY_CONFIGS, setCurrentIndustry } from '@/store/industry'
@@ -80,17 +76,16 @@ export default function Index() {
     <div className={styles['index-page']}>
       <div className={styles.header}>
         <img className={styles.bg} src={IconBg} alt="" />
-        <div className={styles.eyebrow}>SEMICONDUCTOR VALUE CHAIN RESEARCH</div>
-        <h1 className={styles.title}>半导体产业研究助手</h1>
+        <div className={styles.eyebrow}>EVIDENCE-DRIVEN INDUSTRY RESEARCH</div>
+        <h1 className={styles.title}>证据驱动行业研究平台</h1>
         <p className={styles.desc}>
-          覆盖芯片设计与
-          EDA/IP、半导体材料与设备、晶圆制造与前道工艺、封装与测试，融合专业知识库、产业数据和公开信息，支持技术路线研判、工艺问题分析、供应链研究与可溯源报告生成。
+          统一编排专业知识库、产业数据、新闻政策与招投标情报，以半导体全产业链为深度垂直示范，支持技术路线研判、工艺问题分析、供应链研究与可溯源报告生成。
         </p>
         <div className={styles.capabilities}>
-          <span>多源知识检索</span>
-          <span>技术与产业研判</span>
-          <span>研究依据可追溯</span>
-          <span>结构化研究报告</span>
+          <span>多源研究工具</span>
+          <span>结构化数据分析</span>
+          <span>证据与引用可追溯</span>
+          <span>半导体垂直示范</span>
         </div>
       </div>
 

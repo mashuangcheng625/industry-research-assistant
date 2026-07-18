@@ -28,6 +28,8 @@ services:
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-bge-m3}
       EMBEDDING_DIMENSIONS: ${EMBEDDING_DIMENSIONS:-1024}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY:-local-demo-change-before-production}
+      ALLOW_INSECURE_DEMO_SECRET: ${ALLOW_INSECURE_DEMO_SECRET:-true}
+      RATE_LIMIT_ENABLED: "true"
       CORS_ALLOW_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
       AUTO_CREATE_TABLES: "true"
       ENABLE_SCHEDULER: "false"
@@ -64,7 +66,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        VITE_TITLE: 半导体产业研究助手
+        VITE_TITLE: 证据驱动行业研究平台
         VITE_API_BASE: http://localhost:8000/
         VITE_API_PROXY: http://localhost:8000/
     image: industry-research-assistant-frontend:local

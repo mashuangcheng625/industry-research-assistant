@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 """股票资讯服务 - 聚合数据股票API"""
 import os
 import httpx

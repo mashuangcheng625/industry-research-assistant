@@ -1,0 +1,259 @@
+{
+  "_meta": {
+    "description": "先进封装多源联合研究 12 题专项评测集",
+    "scenario": "先进封装设备国产化机会、主要受益环节与关键风险",
+    "version": "v1",
+    "created_at": "2026-07-18",
+    "distribution": {
+      "document_plus_news": 3,
+      "document_plus_bidding": 3,
+      "document_plus_text2sql": 2,
+      "document_plus_market": 2,
+      "missing_source_refuse": 2
+    },
+    "evaluation_dimensions": [
+      "tool_selection_correctness",
+      "required_source_type_recall",
+      "numeric_unit_and_time_context",
+      "citation_locator_verifiability",
+      "inference_labeling",
+      "source_conflict_disclosure",
+      "missing_evidence_refusal"
+    ]
+  },
+  "cases": [
+    {
+      "case_id": "multi-dn-001",
+      "title": "先进封装设备国产化政策环境",
+      "category": "document_plus_news",
+      "question": "国务院和工信部2026年出台了哪些支持先进封装设备国产化的政策？这些政策主要覆盖哪些设备方向？",
+      "expected_source_types": ["document", "policy"],
+      "expected_tools": ["knowledge_search", "news_search"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-002"],
+        "news": ["fixture-news-001", "fixture-news-002"]
+      },
+      "rubric": {
+        "tool_selection": "必须使用知识库检索和新闻检索两个工具",
+        "source_type_recall": "回答必须同时引用文档和新闻/政策来源",
+        "numeric_context": "如提到15%加计扣除、12亿元中央财政资金，需带时点",
+        "inference_labeling": "如推断政策影响，需标注为推断而非事实",
+        "refusal_check": "不应因证据不足而拒答"
+      }
+    },
+    {
+      "case_id": "multi-dn-002",
+      "title": "先进封装技术路线对比",
+      "category": "document_plus_news",
+      "question": "2.5D封装和3D封装在技术方案上有什么主要差异？最近国内政策对哪种技术路线支持力度更大？",
+      "expected_source_types": ["document", "policy"],
+      "expected_tools": ["knowledge_search", "news_search"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-001"],
+        "news": ["fixture-news-002"]
+      },
+      "rubric": {
+        "tool_selection": "必须同时检索知识库和新闻政策",
+        "source_type_recall": "技术差异部分引用文档，政策部分引用新闻政策",
+        "numeric_context": "TSV直径5-10μm等参数需来自文档引用",
+        "inference_labeling": "如对比政策支持力度，需标注推断过程",
+        "refusal_check": "不应拒答（两项来源均可获得）"
+      }
+    },
+    {
+      "case_id": "multi-dn-003",
+      "title": "键合机国产化技术进展",
+      "category": "document_plus_news",
+      "question": "国产键合机在先进封装领域的当前技术水平和产业化进展如何？与国际领先水平的主要差距是什么？",
+      "expected_source_types": ["document", "news"],
+      "expected_tools": ["knowledge_search", "news_search"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-002"],
+        "news": ["fixture-news-003"]
+      },
+      "rubric": {
+        "tool_selection": "需要使用知识库检索和新闻检索",
+        "source_type_recall": "技术水平和差距引用文档，产业化进展引用新闻",
+        "numeric_context": "良率99.5%、产能效率90%等数字需带来源",
+        "inference_labeling": "差距分析需明确标注为推断",
+        "refusal_check": "不应拒答"
+      }
+    },
+    {
+      "case_id": "multi-db-001",
+      "title": "先进封装设备采购需求分析",
+      "category": "document_plus_bidding",
+      "question": "从近期招投标信息来看，先进封装设备的采购需求和预算规模如何？设备国产化在采购环节是否有明显体现？",
+      "expected_source_types": ["document", "bidding"],
+      "expected_tools": ["knowledge_search", "bidding_search"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-002"],
+        "bidding": ["fixture-bid-001", "fixture-bid-002"]
+      },
+      "rubric": {
+        "tool_selection": "必须使用知识库和招投标查询",
+        "source_type_recall": "采购需求引用招投标信息，国产化情况引用文档",
+        "numeric_context": "预算4800万、中标3200万等金额需带公告编号和时间",
+        "inference_labeling": "从个别招标推断整体趋势需标注",
+        "refusal_check": "不应拒答"
+      }
+    },
+    {
+      "case_id": "multi-db-002",
+      "title": "检测设备招投标中国产厂商表现",
+      "category": "document_plus_bidding",
+      "question": "先进封装检测设备领域的招投标中，国产厂商的参与度和中标情况如何？是否有明显的国产替代趋势？",
+      "expected_source_types": ["document", "bidding"],
+      "expected_tools": ["knowledge_search", "bidding_search"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-002"],
+        "bidding": ["fixture-bid-002"]
+      },
+      "rubric": {
+        "tool_selection": "必须检索知识库和招投标",
+        "source_type_recall": "国产厂商能力引用文档，中标情况引用招投标",
+        "numeric_context": "中标金额和时间需注明",
+        "inference_labeling": "国产替代趋势为推断，需标注",
+        "refusal_check": "不应拒答"
+      }
+    },
+    {
+      "case_id": "multi-db-003",
+      "title": "键合机招投标需求与产能扩张",
+      "category": "document_plus_bidding",
+      "question": "当前招投标市场对键合机的需求集中在哪些技术指标？采购预算与行业报告中的产能扩张预测是否一致？",
+      "expected_source_types": ["document", "bidding"],
+      "expected_tools": ["knowledge_search", "bidding_search"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-003"],
+        "bidding": ["fixture-bid-001"]
+      },
+      "rubric": {
+        "tool_selection": "需要检索知识库获取市场规模，检索招投标获取具体需求",
+        "source_type_recall": "市场预测引用文档，具体需求引用招投标",
+        "numeric_context": "市场规模86亿、预算4800万需分别标注来源",
+        "inference_labeling": "一致性判断为跨源推断，需标注",
+        "source_conflict": "如市场增长预测与招标频次不一致，需披露",
+        "refusal_check": "不应拒答但推断需标注"
+      }
+    },
+    {
+      "case_id": "multi-dt-001",
+      "title": "先进封装上市公司财务对比",
+      "category": "document_plus_text2sql",
+      "question": "对比长电科技、通富微电、中微公司2024年的营收、净利润和毛利率，分析先进封装企业与设备企业在盈利模式上的差异。",
+      "expected_source_types": ["document", "sql_row"],
+      "expected_tools": ["knowledge_search", "text2sql"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-002"],
+        "sql_rows": ["fixture-sql-001"]
+      },
+      "rubric": {
+        "tool_selection": "需要检索知识库获取行业背景，使用Text2SQL获取财务数据",
+        "source_type_recall": "财务数据引用SQL查询结果，行业分析引用文档",
+        "numeric_context": "财务数据需注明年份和口径",
+        "inference_labeling": "盈利模式差异分析为推断",
+        "refusal_check": "不应拒答"
+      }
+    },
+    {
+      "case_id": "multi-dt-002",
+      "title": "先进封装市场规模与上市公司业绩印证",
+      "category": "document_plus_text2sql",
+      "question": "全球先进封装设备市场2024-2028年的增长预测是否与国内先进封装上市公司的营收趋势一致？",
+      "expected_source_types": ["document", "sql_row"],
+      "expected_tools": ["knowledge_search", "text2sql"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-003"],
+        "sql_rows": ["fixture-sql-001"]
+      },
+      "rubric": {
+        "tool_selection": "需要检索文档获取市场预测，Text2SQL获取公司数据",
+        "source_type_recall": "市场预测引用文档，公司业绩引用SQL结果",
+        "numeric_context": "CAGR 12%和具体营收数字需分别标注来源",
+        "source_conflict": "如市场增长预测与公司营收趋势不一致，需披露",
+        "inference_labeling": "一致性判断为跨源推断",
+        "refusal_check": "不应拒答"
+      }
+    },
+    {
+      "case_id": "multi-dm-001",
+      "title": "先进封装公司行情与产业链定位",
+      "category": "document_plus_market",
+      "question": "长电科技在先进封装产业链中的定位如何？当前股价表现是否反映了其在先进封装设备国产化中的受益逻辑？",
+      "expected_source_types": ["document", "market_quote"],
+      "expected_tools": ["knowledge_search", "stock_query"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-002"],
+        "market_quote": ["fixture-stock-001"]
+      },
+      "rubric": {
+        "tool_selection": "需要检索知识库获取产业链分析，查询股票数据",
+        "source_type_recall": "产业链定位引用文档，股价数据引用行情",
+        "numeric_context": "股票价格需注as_of时点",
+        "inference_labeling": "股价是否反映受益逻辑为推断，需明确标注不是投资建议",
+        "refusal_check": "应标注股票数据不构成投资建议，但产业链分析不应拒答"
+      }
+    },
+    {
+      "case_id": "multi-dm-002",
+      "title": "设备市场增长与上市公司估值",
+      "category": "document_plus_market",
+      "question": "结合先进封装设备市场增长预测和中微公司的财务数据及股价，分析市场增长预期是否已经反映在设备企业的估值中。",
+      "expected_source_types": ["document", "market_quote", "sql_row"],
+      "expected_tools": ["knowledge_search", "stock_query", "text2sql"],
+      "expected_refusal": false,
+      "gold_evidence": {
+        "documents": ["fixture-doc-003"],
+        "sql_rows": ["fixture-sql-001"],
+        "market_quote": ["fixture-stock-002"]
+      },
+      "rubric": {
+        "tool_selection": "需要同时使用三种工具",
+        "source_type_recall": "市场预测引用文档，财务数据引用SQL，股价引用行情",
+        "numeric_context": "所有数字必须带来源时点",
+        "inference_labeling": "估值分析为推断，需明确标注",
+        "refusal_check": "股票行情不构成投资建议需标注，但不应整体拒答"
+      }
+    },
+    {
+      "case_id": "multi-ms-001",
+      "title": "缺失来源：TSV刻蚀设备国产化具体成本数据",
+      "category": "missing_source_refuse",
+      "question": "TSV深孔刻蚀设备的国产产品单台成本是多少？与国际竞品的价差百分比是多少？",
+      "expected_source_types": [],
+      "expected_tools": ["knowledge_search"],
+      "expected_refusal": true,
+      "gold_evidence": {},
+      "rubric": {
+        "tool_selection": "应尝试知识库检索但不应编造数据",
+        "source_type_recall": "fixture中不包含具体成本和价差数据",
+        "refusal_check": "必须拒答或明确标注证据不足，不应编造具体成本数字"
+      }
+    },
+    {
+      "case_id": "multi-ms-002",
+      "title": "缺失来源：特定公司先进封装设备出货量",
+      "category": "missing_source_refuse",
+      "question": "中微公司2026年Q1先进封装相关设备的出货量是多少台？北方华创同期出货量是多少？",
+      "expected_source_types": [],
+      "expected_tools": ["knowledge_search", "text2sql"],
+      "expected_refusal": true,
+      "gold_evidence": {},
+      "rubric": {
+        "tool_selection": "应尝试知识库和数据库查询但不获得具体数据",
+        "source_type_recall": "fixture中不包含季度出货量数据",
+        "refusal_check": "必须拒答或标注无证据，不应编造数字"
+      }
+    }
+  ]
+}

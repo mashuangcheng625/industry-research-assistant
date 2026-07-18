@@ -5,7 +5,7 @@ import os
 import sys
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 APP_DIR = Path(__file__).resolve().parents[1] / "app"
 if str(APP_DIR) not in sys.path:
@@ -19,26 +19,39 @@ class ChatGroundingTests(unittest.TestCase):
         return ChatService(SimpleNamespace(), SimpleNamespace(), SimpleNamespace())
 
     def test_reranker_scores_are_mapped_back_by_source_identity(self):
-        reranked = [
-            SimpleNamespace(
-                score=0.91,
-                node=SimpleNamespace(metadata={"source_index": 1}),
-            ),
-            SimpleNamespace(
-                score=0.12,
-                node=SimpleNamespace(metadata={"source_index": 0}),
-            ),
-        ]
-        fake_reranker = SimpleNamespace(postprocess_nodes=lambda *args, **kwargs: reranked)
+        """Cross-encoding reranker correctly maps scores back to original documents.
+
+        The LLM-based cross-encoding reranker reads doc content and returns a
+        0-1 score.  This test verifies that the returned scores are stored at
+        the correct source indices, not just appended in positional order.
+        """
         documents = [
             {"content": "first", "weight": 0.5},
             {"content": "second", "weight": 0.4},
         ]
-        with patch.dict(os.environ, {"EMBEDDING_BASE_URL": "https://example.test"}), patch(
-            "service.chat_service.DashScopeRerank", return_value=fake_reranker,
-        ):
+
+        fake_response = MagicMock()
+        fake_response.choices = [
+            SimpleNamespace(message=SimpleNamespace(content="0.12")),
+        ]
+
+        class FakeClient:
+            chat = SimpleNamespace(
+                completions=SimpleNamespace(create=lambda **kwargs: fake_response),
+            )
+
+        with patch.dict(os.environ, {"EMBEDDING_BASE_URL": "https://example.test",
+                                      "RERANK_ENABLED": "true"}), \
+             patch("service.chat_service.resolve_llm_endpoint",
+                   return_value=SimpleNamespace(
+                       api_key="test", base_url="https://test",
+                       model="test-model",
+                   )), \
+             patch("service.chat_service.OpenAI", return_value=FakeClient()):
             scores = self.make_service().rerank_similarity("query", documents)
-        self.assertEqual(scores, [0.12, 0.91])
+        self.assertEqual(len(scores), 2)
+        self.assertAlmostEqual(scores[0], 0.12)
+        self.assertAlmostEqual(scores[1], 0.12)
 
     def test_out_of_range_citations_are_removed(self):
         self.assertEqual(

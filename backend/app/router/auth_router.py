@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 """用户认证路由"""
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -7,6 +5,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from core.database import get_db
+from core.rate_limit import enforce_auth_rate_limit
 from core.security import (
     verify_password,
     get_password_hash,
@@ -108,6 +107,7 @@ async def get_current_user_required(
 @router.post("/register", response_model=TokenResponse, status_code=status.HTTP_201_CREATED)
 async def register(
     user_data: UserCreate,
+    _: None = Depends(enforce_auth_rate_limit),
     db: Session = Depends(get_db)
 ):
     """用户注册"""
@@ -149,6 +149,7 @@ async def register(
 @router.post("/login", response_model=TokenResponse)
 async def login(
     user_data: UserLogin,
+    _: None = Depends(enforce_auth_rate_limit),
     db: Session = Depends(get_db)
 ):
     """用户登录"""
@@ -179,6 +180,7 @@ async def login(
 @router.post("/token", response_model=TokenResponse)
 async def login_for_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
+    _: None = Depends(enforce_auth_rate_limit),
     db: Session = Depends(get_db)
 ):
     """OAuth2 兼容的登录接口"""

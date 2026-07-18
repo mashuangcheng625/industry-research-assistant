@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 """
 DeepResearch V2.0 - Agent 基类
 
@@ -60,6 +58,10 @@ class BaseAgent(ABC):
         本地小模型的上下文窗口通常小于云端模型。如果仍使用
         Writer 等 Agent 声明的 16000 token 上限，Ollama 可能会拒绝
         请求或长时间无法完成。
+
+        注意：DeepSeek V4-Pro 等推理模型会在 max_tokens 内消耗
+        reasoning_tokens。如果允许的预算太小，可见输出可能为零。
+        因此云端推理模型推荐 CLOUD_LLM_MAX_OUTPUT_TOKENS >= 8192。
         """
         is_local_endpoint = any(
             marker in (self.llm_base_url or "").lower()

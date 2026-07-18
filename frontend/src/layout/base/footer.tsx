@@ -1,7 +1,3 @@
-/**
- * Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
- */
-
 import { authActions, authState } from '@/store/auth'
 import { LogoutOutlined, UserOutlined } from '@ant-design/icons'
 import { Avatar, Dropdown, message } from 'antd'

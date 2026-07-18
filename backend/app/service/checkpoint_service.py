@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 """检查点服务 - 用于保存和恢复深度研究状态"""
 import json
 import logging

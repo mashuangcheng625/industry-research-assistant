@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 """研究检查点模型"""
 import uuid
 from datetime import datetime

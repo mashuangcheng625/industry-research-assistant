@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 from typing import Dict, Any, List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException
@@ -9,13 +7,23 @@ from sqlalchemy.orm import Session
 
 from core.database import get_db
 from models.chat import ChatAttachment
+from models.user import User
 from service import DocumentService, WebSearchService, ChatService, SessionService, ServiceConfig
 from service.retrieval_service import retrieve_content, retrieve_from_knowledge_base
 from service.llm_router import get_model_routing_status
 from schemas import ChatRequest, LegacySessionResponse, ChatWithAttachmentsRequest
+from router.auth_router import get_current_user_required
+from core.rate_limit import enforce_standard_rate_limit
 
 # Create router instance
-router = APIRouter(prefix="/chat", tags=["chat"])
+router = APIRouter(
+    prefix="/chat",
+    tags=["chat"],
+    dependencies=[
+        Depends(get_current_user_required),
+        Depends(enforce_standard_rate_limit),
+    ],
+)
 
 
 @router.get("/models/status")
@@ -229,6 +237,7 @@ async def chat_completion_v2(
 @router.post("/completion/v3", status_code=HTTP_200_OK)
 async def chat_completion_with_attachments(
     request: ChatWithAttachmentsRequest,
+    current_user: User = Depends(get_current_user_required),
     db: Session = Depends(get_db),
     services: Dict[str, Any] = Depends(get_services)
 ):
@@ -259,7 +268,10 @@ async def chat_completion_with_attachments(
         for att_id in request.attachment_ids:
             try:
                 att_uuid = UUID(att_id)
-                att = db.query(ChatAttachment).filter(ChatAttachment.id == att_uuid).first()
+                att = db.query(ChatAttachment).filter(
+                    ChatAttachment.id == att_uuid,
+                    ChatAttachment.user_id == current_user.id,
+                ).first()
                 if att and att.content_text and att.status == "completed":
                     attachment_contents.append({
                         "filename": att.filename,

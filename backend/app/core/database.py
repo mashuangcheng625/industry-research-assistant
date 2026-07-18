@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 """数据库连接和会话管理"""
 import os
 from sqlalchemy import create_engine

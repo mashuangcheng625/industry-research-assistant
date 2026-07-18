@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "baseline_id": "local4b-regression-claim-citation-2026-07-17",
+  "status": "historical_frozen",
+  "code_revision": {
+    "commit": "2546de90fe119e9373d28a79b7e6c76e51524427",
+    "working_tree_clean_at_run": null,
+    "reproducibility_note": "The historical report did not record working-tree state. Re-run after the P0 code freeze before claiming exact commit reproducibility."
+  },
+  "dataset": {
+    "path": "sample-data/semiconductor_rag_eval_regression.json",
+    "sha256": "8f363f7dc590e9a15c4fb9d77a4562ee5d834dda1d58f531b81eb5e2797a8aea",
+    "cases": 20
+  },
+  "report": {
+    "path": "reports/semiconductor_rag_answers_regression_claim_citation_2026-07-17.json",
+    "sha256": "b443724ac94609eff9b2140264b4b9ade62ca9f5925c82d93e30cdf8a251db46",
+    "generated_at": "2026-07-17T08:19:11+00:00"
+  },
+  "runtime": {
+    "generation_provider": "ollama",
+    "generation_model": "industry-qwen3:4b",
+    "embedding_model": "bge-m3",
+    "model_mode": "local",
+    "structured_grounding_enabled": false,
+    "semantic_entailment_enabled": false,
+    "max_latency_seconds": 20.0
+  },
+  "accepted_metrics": {
+    "strict_passed": 16,
+    "total": 20,
+    "quality_passed": 16,
+    "sla_passed": 20,
+    "p95_latency_seconds": 12.477,
+    "gold_source_retrieval_hits": 16,
+    "gold_source_total": 16,
+    "gold_citation_hits": 15,
+    "citation_support_passed": 12,
+    "citation_support_total": 16,
+    "refusal_hits": 4,
+    "refusal_total": 4
+  },
+  "claim_policy": {
+    "allowed": "Frozen regression engineering baseline under the recorded model and thresholds.",
+    "forbidden": "Do not describe this as open-domain accuracy, production accuracy, or an independent blind result."
+  }
+}

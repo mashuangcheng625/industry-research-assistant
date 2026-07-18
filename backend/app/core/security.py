@@ -1,5 +1,3 @@
-# Copyright © 2026 深圳市深维智见教育科技有限公司 版权所有
-
 """安全相关：密码哈希、JWT Token"""
 import os
 import bcrypt
@@ -12,6 +10,26 @@ from pydantic import BaseModel
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your-super-secret-key-change-in-production")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "1440"))
+
+INSECURE_DEMO_SECRETS = {
+    "",
+    "your-super-secret-key-change-in-production",
+    "local-demo-change-before-production",
+}
+
+
+def validate_security_config() -> None:
+    """Reject missing/weak JWT configuration outside explicit local demo mode."""
+    allow_demo = os.getenv("ALLOW_INSECURE_DEMO_SECRET", "false").strip().casefold() in {
+        "1", "true", "yes", "on"
+    }
+    if SECRET_KEY in INSECURE_DEMO_SECRETS or len(SECRET_KEY) < 32:
+        if allow_demo:
+            return
+        raise RuntimeError(
+            "JWT_SECRET_KEY must be a non-default secret with at least 32 characters; "
+            "set ALLOW_INSECURE_DEMO_SECRET=true only for an isolated local demo"
+        )
 
 
 class Token(BaseModel):
