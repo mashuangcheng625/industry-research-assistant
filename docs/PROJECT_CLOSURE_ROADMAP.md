@@ -154,7 +154,7 @@ PDF 解析、结构恢复、清洗与质量检查
 
 ### 已知缺口
 
-- 私有远端和 CI 已建立；本轮 P0 在推送后以 GitHub Actions 结果为最终验收；
+- 私有远端和 CI 已建立；P0 分支 `7f674a3` 的 GitHub Actions 后端、前端与干净镜像构建全部通过；
 - 后端 Python 3.12 传递依赖已锁定，161 条 unit 与 1 条 Milvus Lite integration
   由带硬超时的 `make check` 验证通过；
 - 公开评测已分离为 40 题有标签开发集与 40 题无标签问题集，公开 CI
