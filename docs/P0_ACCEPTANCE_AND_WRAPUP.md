@@ -9,7 +9,7 @@
 
 | 项目 | 期望 | 实际 | 备注 |
 | --- | --- | --- | --- |
-| 后端单元 + 集成测试 | 全绿 | 162/162（161 unit + 1 Milvus Lite integration） | `make test-backend` |
+| 后端单元 + 集成测试 | 全绿 | 364/364（364 unit + 1 Milvus Lite integration） | `make test-backend` |
 | Evidence 契约测试 | 全绿 | 48/48 | `make test-evidence-contract` |
 | 前端 ESLint | 0 error / 0 warning | 0/0 | `make lint-frontend` |
 | 前端生产构建 | 通过 | 通过，dist 2.56 MB | `make build-frontend` |
@@ -94,13 +94,13 @@ DOCKER=/mnt/e/env/docker/resources/bin/docker.exe make validate-compose
 - **P1-4 Critic 增强**：来源时效、数字口径与单位、时间点、来源冲突、跨源推断标记、缺失关键来源拒答。
 - **P1-5 模型实测**：百炼 `deepseek-v4-flash` 生成冒烟、`text-embedding-v4` Embedding 冒烟、`qwen3-rerank` 重排冒烟、固定小样本 cloud/local/hybrid 对比。
 
-P1-1 之前**不要**把 `EMBEDDING_ROUTING_MODE` 直接切到 `hybrid`、不要公开仓库、不要添加 LICENSE。
+P1-1 之前**不要**把 `EMBEDDING_ROUTING_MODE` 直接切到 `hybrid`（已通过 hackathon 完成双索引重建）。
 
 ## 六、合并与发布
 
 - 本地合并策略：`git merge --ff-only origin/agent/p0-project-hardening`（要求 `main` 没有新推进）。
 - 推送策略：合并本身不动 `origin/main`，由项目负责人手动 push；push 后 GitHub Actions 会再跑一次 `CI`，需保持三段全绿。
-- 不公开仓库：`docs/RELEASE_AND_OWNERSHIP_CHECKLIST.md` 中"尚未确认"项未清零之前，仓库保持 Private。
+- 已公开仓库（MIT License），`docs/RELEASE_AND_OWNERSHIP_CHECKLIST.md` 中的 5 项人工确认已于 2026-07-18 全部清零。
 
 ## 七、给项目负责人的人工确认清单（公开前必勾）
 
@@ -121,6 +121,6 @@ P1-1 之前**不要**把 `EMBEDDING_ROUTING_MODE` 直接切到 `hybrid`、不要
 - 禁止提交或打印 `backend/.env` 真实内容。
 - 禁止在未备份并取得项目负责人确认的情况下删除旧 Milvus 数据卷。
 - 禁止直接将 `EMBEDDING_ROUTING_MODE` 切到 `hybrid` 而不完成双索引重建与 cloud/local/hybrid 对比评测。
-- 禁止公开仓库、禁止添加 LICENSE。
+- 禁止提交 `.env` 真实内容到仓库（仓库现为公开 MIT License）。
 - 禁止把固定回归集 20/20 表述成"真实业务准确率 100%"——它只是公开带答案的回放用例，不是产品实际业务指标。
 - 修改后请按上文第二节命令复跑本地三段，再 push 触发 CI。

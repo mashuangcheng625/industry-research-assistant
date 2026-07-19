@@ -44,7 +44,7 @@ make validate-observability
 - regression 端到端：严格质量 16/20，SLA 20/20，拒答 4/4，P95 12.477 秒；
 - 并发 4：8/8、P95 10.217 秒；并发 8：16/16、P95 19.919 秒；
 - 上下文压力：600,400 输入 token，证据预算内选取 3,002/6,000；
-- 后端测试：162/162（161 unit + 1 Milvus Lite integration）；前端 lint/build 通过；Prometheus 4 条规则有效；
+- 后端测试：364/364（364 unit + 1 Milvus Lite integration）；前端 lint/build 通过；Prometheus 4 条规则有效；
 - Agent 真实运行：取消和精确恢复已验证；另一次完整审核因 1 critical、2 major 正确进入
   `research_review_failed`，没有被错误放行。
 
@@ -61,7 +61,7 @@ make validate-observability
 - 新闻、招投标、Text2SQL、股票有真实代码与入口，但缺少和 RAG 同等级的专项评测；
 - 旧评测发生过标签暴露，下一次泛化结论必须使用独立 blind-v2；
 - 原始 PDF、私有 80 题答案、本地 `.env`、数据库和依赖目录都必须保持 Git 忽略；
-- GitHub 仓库是 private；公开代码和资料前必须确认公司与数据授权。
+- GitHub 仓库已公开（MIT License），公开前的 5 项人工确认已于 2026-07-18 全部清零。
 
 ## 5. 当前代码地图
 
