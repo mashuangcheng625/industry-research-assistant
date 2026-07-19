@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "started_at": "2026-07-19T07:38:16.422758+00:00",
-  "finished_at": "2026-07-19T07:39:56.049772+00:00",
+  "started_at": "2026-07-19T08:11:30.508281+00:00",
+  "finished_at": "2026-07-19T08:12:56.266132+00:00",
   "config": {
     "cloud_gen": {
       "mode": "cloud",
@@ -24,29 +24,29 @@
   "generation": {
     "latency_ms": {
       "count": 10,
-      "p50_ms": 2360.44,
-      "p95_ms": 8036.84,
-      "mean_ms": 2785.79,
-      "min_ms": 1112.52,
-      "max_ms": 8036.84
+      "p50_ms": 2326.17,
+      "p95_ms": 3495.21,
+      "mean_ms": 2178.19,
+      "min_ms": 1070.16,
+      "max_ms": 3495.21
     },
     "tokens_in": 223,
-    "tokens_out": 665,
+    "tokens_out": 721,
     "records": [
       {
         "task_id": "gen-001",
         "provider": "cloud",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 2360.44,
+        "latency_ms": 3181.8,
         "attempts": 1,
         "last_error": null,
-        "content": "中芯国际在中国大陆A股市场的证券代码是688981（科创板）。",
-        "content_length": 31,
+        "content": "中芯国际在中国大陆A股市场的证券代码是688981。",
+        "content_length": 26,
         "tokens": {
           "prompt_tokens": 42,
-          "completion_tokens": 95,
-          "total_tokens": 137
+          "completion_tokens": 86,
+          "total_tokens": 128
         },
         "judge_score": null,
         "judge_raw": null
@@ -56,7 +56,7 @@
         "provider": "local",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 8036.84,
+        "latency_ms": 1071.25,
         "attempts": 1,
         "last_error": null,
         "content": "中芯国际在中国大陆的证券代码是688981。",
@@ -74,15 +74,15 @@
         "provider": "cloud",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 2257.31,
+        "latency_ms": 2055.01,
         "attempts": 1,
         "last_error": null,
-        "content": "中微公司的主营业务是研发、生产和销售半导体设备，包括等离子体刻蚀设备和MOCVD设备。",
-        "content_length": 43,
+        "content": "中微公司的主营业务是研发、生产和销售半导体设备，主要包括等离子体刻蚀设备和MOCVD（金属有机化合物化学气相沉积）设备。",
+        "content_length": 60,
         "tokens": {
           "prompt_tokens": 40,
-          "completion_tokens": 135,
-          "total_tokens": 175
+          "completion_tokens": 107,
+          "total_tokens": 147
         },
         "judge_score": null,
         "judge_raw": null
@@ -92,7 +92,7 @@
         "provider": "local",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 1485.55,
+        "latency_ms": 1747.04,
         "attempts": 1,
         "last_error": null,
         "content": "中微公司（Microsemi）是一家专注于半导体制造设备的公司，其主营业务是研发、生产和销售高端半导体制造设备，主要包括刻蚀机、薄膜沉积设备等，广泛应用于集成电路和先进制程工艺领域。根据公开资料，中微公司是中国领先的半导体设备制造商之一，其产品主要服务于国内及全球的芯片生产企业。",
@@ -110,15 +110,15 @@
         "provider": "cloud",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 1861.25,
+        "latency_ms": 1686.17,
         "attempts": 1,
         "last_error": null,
-        "content": "长电科技属于半导体产业链的中下游环节，具体为封装测试（封测）环节。",
-        "content_length": 33,
+        "content": "长电科技属于半导体产业链中的封装测试环节。",
+        "content_length": 21,
         "tokens": {
           "prompt_tokens": 42,
-          "completion_tokens": 75,
-          "total_tokens": 117
+          "completion_tokens": 71,
+          "total_tokens": 113
         },
         "judge_score": null,
         "judge_raw": null
@@ -128,7 +128,7 @@
         "provider": "local",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 1112.52,
+        "latency_ms": 1070.16,
         "attempts": 1,
         "last_error": null,
         "content": "长电科技属于半导体产业链中的“封测环节”（封装与测试），是全球领先的集成电路封测企业之一，主要服务于芯片的最终封装和功能测试。",
@@ -146,15 +146,15 @@
         "provider": "cloud",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 3103.09,
+        "latency_ms": 3495.21,
         "attempts": 1,
         "last_error": null,
-        "content": "2.5D 封装通过硅中介层实现芯片并排互连，而 3D 封装则直接将芯片垂直堆叠并利用硅通孔（TSV）连接，典型如 HBM 是 2.5D 方案，而 3D NAND 闪存采用 3D 堆叠技术。",
-        "content_length": 94,
+        "content": "2.5D封装通过硅中介层（Interposer）将芯片并排放置，利用硅通孔（TSV）实现互连，而3D封装则将芯片直接垂直堆叠，通过更密集的微凸点和TSV连接，后者在垂直方向上集成度更高、互连间距更小（如10-50微米）。",
+        "content_length": 110,
         "tokens": {
           "prompt_tokens": 50,
-          "completion_tokens": 215,
-          "total_tokens": 265
+          "completion_tokens": 274,
+          "total_tokens": 324
         },
         "judge_score": null,
         "judge_raw": null
@@ -164,7 +164,7 @@
         "provider": "local",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 2295.13,
+        "latency_ms": 2326.17,
         "attempts": 1,
         "last_error": null,
         "content": "2.5D 封装通过硅中介层（Si interposer）连接多个芯片，实现芯片间的高密度互连，但芯片仍位于同一平面；3D 封装则在垂直方向上堆叠芯片，通过直接键合实现更短的信号路径和更高的集成度。根据国际半导体产业协会（SEMI）数据，2023年全球2.5D封装市场规模约为18亿美元，3D封装为42亿美元，显示3D技术发展更快。",
@@ -182,15 +182,15 @@
         "provider": "cloud",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 2594.45,
+        "latency_ms": 2665.92,
         "attempts": 1,
         "last_error": null,
-        "content": "EUV（极紫外）光刻使用13.5nm波长，可实现7nm及以下节点的高分辨率，而DUV（深紫外）光刻常用193nm或248nm波长，分辨率相对较低，主要用于成熟制程。",
-        "content_length": 82,
+        "content": "EUV光刻使用13.5nm极紫外光，必须在真空中通过反射式掩模实现，单次曝光分辨率可达7nm以下；而DUV光刻（如193nm ArF）在空气中采用透射式掩模，分辨率通常限于28nm以上。",
+        "content_length": 93,
         "tokens": {
           "prompt_tokens": 49,
-          "completion_tokens": 145,
-          "total_tokens": 194
+          "completion_tokens": 183,
+          "total_tokens": 232
         },
         "judge_score": null,
         "judge_raw": null
@@ -200,15 +200,15 @@
         "provider": "local",
         "ok": true,
         "error_code": "PROVIDER_OK",
-        "latency_ms": 2751.34,
+        "latency_ms": 2483.21,
         "attempts": 1,
         "last_error": null,
-        "content": "在半导体光刻工艺中，EUV（极紫外光）与DUV（深紫外光）的关键差异如下：EUV波长为13.5 nm，远短于DUV的193 nm或248 nm，因此EUV具有更高的分辨率和更小的特征尺寸能力，可实现7纳米及以下节点的制程；同时，EUV的光刻能量密度高，但设备成本高昂、产率低，且需要复杂的真空环境与反射镜系统，而DUV技术成熟、成本较低，但受限于光学衍射效应，难以突破10纳米以下节点。",
-        "content_length": 193,
+        "content": "在半导体光刻工艺中，EUV（极紫外光，波长13.5 nm）与DUV（深紫外光，波长193 nm或248 nm）的关键差异如下：EUV的波长更短，分辨率更高，可实现更小的特征尺寸（如7nm及以下），而DUV受限于光学衍射效应，难以突破10nm以下节点。根据国际半导体技术路线图（STL），EUV已成主流，2023年全球EUV光刻机产量占比超过80%。",
+        "content_length": 174,
         "tokens": {
           "prompt_tokens": 58,
-          "completion_tokens": 134,
-          "total_tokens": 192
+          "completion_tokens": 124,
+          "total_tokens": 182
         },
         "judge_score": null,
         "judge_raw": null
@@ -223,7 +223,7 @@
         "ok": true,
         "score": 3,
         "raw": "3",
-        "latency_ms": 5782.44,
+        "latency_ms": 4513.64,
         "error_code": null
       },
       {
@@ -232,7 +232,7 @@
         "ok": true,
         "score": 3,
         "raw": "3",
-        "latency_ms": 5547.91,
+        "latency_ms": 2600.05,
         "error_code": null
       },
       {
@@ -241,7 +241,7 @@
         "ok": true,
         "score": 5,
         "raw": "5",
-        "latency_ms": 2764.83,
+        "latency_ms": 1570.51,
         "error_code": null
       },
       {
@@ -250,7 +250,7 @@
         "ok": true,
         "score": 1,
         "raw": "1",
-        "latency_ms": 4928.0,
+        "latency_ms": 4921.55,
         "error_code": null
       },
       {
@@ -259,7 +259,7 @@
         "ok": true,
         "score": 5,
         "raw": "5",
-        "latency_ms": 1594.39,
+        "latency_ms": 2587.81,
         "error_code": null
       },
       {
@@ -268,7 +268,7 @@
         "ok": true,
         "score": 5,
         "raw": "5",
-        "latency_ms": 2613.2,
+        "latency_ms": 2785.0,
         "error_code": null
       },
       {
@@ -277,7 +277,7 @@
         "ok": true,
         "score": 5,
         "raw": "5",
-        "latency_ms": 3104.55,
+        "latency_ms": 3469.63,
         "error_code": null
       },
       {
@@ -286,7 +286,7 @@
         "ok": true,
         "score": 3,
         "raw": "3",
-        "latency_ms": 2716.61,
+        "latency_ms": 5078.42,
         "error_code": null
       },
       {
@@ -295,16 +295,16 @@
         "ok": true,
         "score": 5,
         "raw": "5",
-        "latency_ms": 3438.85,
+        "latency_ms": 3532.91,
         "error_code": null
       },
       {
         "task_id": "gen-005-local",
         "provider": "judge-cloud",
         "ok": true,
-        "score": 5,
-        "raw": "5",
-        "latency_ms": 1933.22,
+        "score": 3,
+        "raw": "3",
+        "latency_ms": 5521.75,
         "error_code": null
       }
     ],
@@ -314,19 +314,19 @@
   "embedding": {
     "latency_ms_cloud": {
       "count": 20,
-      "p50_ms": 330.54,
-      "p95_ms": 410.28,
-      "mean_ms": 335.0,
-      "min_ms": 288.88,
-      "max_ms": 412.36
+      "p50_ms": 401.84,
+      "p95_ms": 563.13,
+      "mean_ms": 404.33,
+      "min_ms": 287.09,
+      "max_ms": 608.65
     },
     "latency_ms_local": {
       "count": 20,
-      "p50_ms": 440.38,
-      "p95_ms": 478.79,
-      "mean_ms": 625.99,
-      "min_ms": 379.56,
-      "max_ms": 4295.63
+      "p50_ms": 436.88,
+      "p95_ms": 448.79,
+      "mean_ms": 435.07,
+      "min_ms": 401.08,
+      "max_ms": 468.23
     },
     "avg_pairwise_cosine_cloud": 0.5032,
     "avg_pairwise_cosine_local": 0.4234,
@@ -336,7 +336,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 347.54,
+        "latency_ms": 411.43,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -345,7 +345,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 4295.63,
+        "latency_ms": 468.23,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -354,7 +354,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 302.36,
+        "latency_ms": 381.41,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -363,7 +363,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 386.62,
+        "latency_ms": 446.37,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -372,7 +372,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 330.54,
+        "latency_ms": 388.23,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -381,7 +381,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 379.56,
+        "latency_ms": 432.6,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -390,7 +390,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 356.89,
+        "latency_ms": 355.94,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -399,7 +399,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 478.79,
+        "latency_ms": 448.79,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -408,7 +408,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 375.64,
+        "latency_ms": 433.63,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -417,7 +417,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 449.11,
+        "latency_ms": 427.02,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -426,7 +426,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 334.11,
+        "latency_ms": 349.32,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -435,7 +435,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 447.68,
+        "latency_ms": 440.01,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -444,7 +444,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 334.74,
+        "latency_ms": 469.07,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -453,7 +453,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 456.95,
+        "latency_ms": 427.57,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -462,7 +462,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 412.36,
+        "latency_ms": 426.3,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -471,7 +471,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 449.24,
+        "latency_ms": 436.88,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -480,7 +480,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 288.88,
+        "latency_ms": 401.84,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -489,7 +489,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 437.12,
+        "latency_ms": 443.91,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -498,7 +498,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 409.96,
+        "latency_ms": 314.66,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -507,7 +507,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 442.26,
+        "latency_ms": 446.44,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -516,7 +516,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 328.61,
+        "latency_ms": 287.09,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -525,7 +525,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 424.76,
+        "latency_ms": 427.5,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -534,7 +534,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 312.01,
+        "latency_ms": 369.03,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -543,7 +543,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 454.28,
+        "latency_ms": 433.98,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -552,7 +552,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 334.42,
+        "latency_ms": 608.65,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -561,7 +561,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 434.41,
+        "latency_ms": 432.5,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -570,7 +570,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 304.6,
+        "latency_ms": 438.69,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -579,7 +579,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 435.12,
+        "latency_ms": 444.03,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -588,7 +588,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 410.28,
+        "latency_ms": 341.9,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -597,7 +597,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 433.55,
+        "latency_ms": 428.67,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -606,7 +606,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 302.56,
+        "latency_ms": 331.8,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -615,7 +615,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 440.38,
+        "latency_ms": 437.35,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -624,7 +624,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 289.84,
+        "latency_ms": 563.13,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -633,7 +633,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 469.85,
+        "latency_ms": 426.58,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -642,7 +642,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 293.59,
+        "latency_ms": 405.4,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -651,7 +651,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 402.28,
+        "latency_ms": 439.64,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -660,7 +660,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 303.83,
+        "latency_ms": 328.42,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -669,7 +669,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 404.78,
+        "latency_ms": 412.29,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -678,7 +678,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 327.19,
+        "latency_ms": 480.73,
         "vector_dim": 1024,
         "vector_norm": 1.0
       },
@@ -687,7 +687,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 397.4,
+        "latency_ms": 401.08,
         "vector_dim": 1024,
         "vector_norm": 1.0
       }
@@ -696,11 +696,11 @@
   "rerank": {
     "latency_ms": {
       "count": 5,
-      "p50_ms": 320.78,
-      "p95_ms": 402.58,
-      "mean_ms": 333.56,
-      "min_ms": 289.87,
-      "max_ms": 402.58
+      "p50_ms": 295.26,
+      "p95_ms": 379.52,
+      "mean_ms": 319.81,
+      "min_ms": 287.65,
+      "max_ms": 379.52
     },
     "records": [
       {
@@ -708,7 +708,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 320.78,
+        "latency_ms": 379.52,
         "ranking": [
           {
             "index": 0,
@@ -743,7 +743,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 289.87,
+        "latency_ms": 342.34,
         "ranking": [
           {
             "index": 0,
@@ -780,7 +780,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 402.58,
+        "latency_ms": 287.65,
         "ranking": [
           {
             "index": 0,
@@ -817,7 +817,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 333.86,
+        "latency_ms": 295.26,
         "ranking": [
           {
             "index": 0,
@@ -855,7 +855,7 @@
         "ok": true,
         "error_code": "PROVIDER_OK",
         "last_error": null,
-        "latency_ms": 320.73,
+        "latency_ms": 294.26,
         "ranking": [
           {
             "index": 0,
@@ -871,7 +871,7 @@
           },
           {
             "index": 4,
-            "score": 0.5295754420273676
+            "score": 0.5295754636025504
           },
           {
             "index": 3,
@@ -891,52 +891,168 @@
   },
   "hybrid": {
     "latency_ms": {
-      "count": 0,
-      "p50_ms": null,
-      "p95_ms": null,
-      "mean_ms": null
+      "count": 5,
+      "p50_ms": 1125.03,
+      "p95_ms": 1133.22,
+      "mean_ms": 1119.75,
+      "min_ms": 1101.8,
+      "max_ms": 1133.22
     },
     "records": [
       {
-        "ok": false,
-        "latency_ms": 8.13,
-        "count": 0,
-        "first_score": null,
-        "error": "TypeError: retrieve_from_knowledge_base() got an unexpected keyword argument 'knowledge_base'",
-        "task_id": "gen-001"
+        "ok": true,
+        "latency_ms": 1112.33,
+        "count": 5,
+        "first_score": 0.850725597778105,
+        "expected_document_ids": [
+          "smoke-doc-013"
+        ],
+        "returned_document_ids": [
+          "smoke-doc-013",
+          "smoke-doc-000",
+          "smoke-doc-002",
+          "smoke-doc-015",
+          "smoke-doc-018"
+        ],
+        "route_coverage": [
+          "cloud",
+          "local"
+        ],
+        "gold_hit": true,
+        "dual_route_hit": true,
+        "degraded_routes": [],
+        "error": null,
+        "task_id": "hybrid-001"
       },
       {
-        "ok": false,
-        "latency_ms": 0.0,
-        "count": 0,
-        "first_score": null,
-        "error": "TypeError: retrieve_from_knowledge_base() got an unexpected keyword argument 'knowledge_base'",
-        "task_id": "gen-002"
+        "ok": true,
+        "latency_ms": 1101.8,
+        "count": 5,
+        "first_score": 0.8933099737609157,
+        "expected_document_ids": [
+          "smoke-doc-002"
+        ],
+        "returned_document_ids": [
+          "smoke-doc-002",
+          "smoke-doc-010",
+          "smoke-doc-001",
+          "smoke-doc-014",
+          "smoke-doc-004"
+        ],
+        "route_coverage": [
+          "cloud",
+          "local"
+        ],
+        "gold_hit": true,
+        "dual_route_hit": true,
+        "degraded_routes": [],
+        "error": null,
+        "task_id": "hybrid-002"
       },
       {
-        "ok": false,
-        "latency_ms": 0.0,
-        "count": 0,
-        "first_score": null,
-        "error": "TypeError: retrieve_from_knowledge_base() got an unexpected keyword argument 'knowledge_base'",
-        "task_id": "gen-003"
+        "ok": true,
+        "latency_ms": 1126.38,
+        "count": 5,
+        "first_score": 0.8920065546781768,
+        "expected_document_ids": [
+          "smoke-doc-003"
+        ],
+        "returned_document_ids": [
+          "smoke-doc-003",
+          "smoke-doc-018",
+          "smoke-doc-004",
+          "smoke-doc-013",
+          "smoke-doc-009"
+        ],
+        "route_coverage": [
+          "cloud",
+          "local"
+        ],
+        "gold_hit": true,
+        "dual_route_hit": true,
+        "degraded_routes": [],
+        "error": null,
+        "task_id": "hybrid-003"
       },
       {
-        "ok": false,
-        "latency_ms": 0.0,
-        "count": 0,
-        "first_score": null,
-        "error": "TypeError: retrieve_from_knowledge_base() got an unexpected keyword argument 'knowledge_base'",
-        "task_id": "gen-004"
+        "ok": true,
+        "latency_ms": 1133.22,
+        "count": 5,
+        "first_score": 0.9493467668014722,
+        "expected_document_ids": [
+          "smoke-doc-018"
+        ],
+        "returned_document_ids": [
+          "smoke-doc-018",
+          "smoke-doc-019",
+          "smoke-doc-013",
+          "smoke-doc-004",
+          "smoke-doc-002"
+        ],
+        "route_coverage": [
+          "cloud",
+          "local"
+        ],
+        "gold_hit": true,
+        "dual_route_hit": true,
+        "degraded_routes": [],
+        "error": null,
+        "task_id": "hybrid-004"
       },
       {
-        "ok": false,
-        "latency_ms": 0.0,
-        "count": 0,
-        "first_score": null,
-        "error": "TypeError: retrieve_from_knowledge_base() got an unexpected keyword argument 'knowledge_base'",
-        "task_id": "gen-005"
+        "ok": true,
+        "latency_ms": 1125.03,
+        "count": 5,
+        "first_score": 0.9106895419010717,
+        "expected_document_ids": [
+          "smoke-doc-016"
+        ],
+        "returned_document_ids": [
+          "smoke-doc-016",
+          "smoke-doc-002",
+          "smoke-doc-010",
+          "smoke-doc-001",
+          "smoke-doc-013"
+        ],
+        "route_coverage": [
+          "cloud",
+          "local"
+        ],
+        "gold_hit": true,
+        "dual_route_hit": true,
+        "degraded_routes": [],
+        "error": null,
+        "task_id": "hybrid-005"
       }
     ]
-  }
+  },
+  "gates": {
+    "generation": {
+      "pass": true,
+      "ok": 10,
+      "expected": 10
+    },
+    "judge": {
+      "pass": true,
+      "ok": 10,
+      "expected": 10
+    },
+    "embedding": {
+      "pass": true,
+      "ok": 40,
+      "expected": 40,
+      "dimensions": 1024
+    },
+    "rerank": {
+      "pass": true,
+      "ok": 5,
+      "expected": 5
+    },
+    "hybrid": {
+      "pass": true,
+      "ok": 5,
+      "expected": 5
+    }
+  },
+  "overall_pass": true
 }

@@ -49,6 +49,7 @@ import logging
 import os
 import statistics
 import sys
+import tempfile
 import time
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -61,6 +62,12 @@ if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
 from openai import OpenAI  # noqa: E402
+from dotenv import load_dotenv  # noqa: E402
+
+# Load the repository's ignored runtime configuration without requiring the
+# caller to source it in the shell. The report never serializes API keys.
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+load_dotenv(BACKEND_DIR / ".env")
 
 from core.provider_reliability import (  # noqa: E402
     PROVIDER_OK,
@@ -316,6 +323,7 @@ async def _embed(
             first = items[0]
             vec = getattr(first, "embedding", None) or []
             if isinstance(vec, list):
+                record["_vector"] = list(vec)
                 record["vector_dim"] = len(vec)
                 if vec:
                     record["vector_norm"] = round(
@@ -444,22 +452,49 @@ def _hybrid_retrieval(
     knowledge_base: str,
     query: str,
     top_k: int,
+    expected_document_ids: Sequence[str],
 ) -> Dict[str, Any]:
     started = time.perf_counter()
     try:
         from service.retrieval_service import retrieve_from_knowledge_base
         items = retrieve_from_knowledge_base(
-            knowledge_base=knowledge_base,
-            query=query,
+            kb_name=knowledge_base,
+            question=query,
             top_k=top_k,
+            min_score=0.0,
         )
         elapsed = time.perf_counter() - started
+        expected = {str(item) for item in expected_document_ids}
+        returned_ids = [str(item.get("document_id", "")) for item in items]
+        route_coverage = sorted({
+            str(route)
+            for item in items
+            for route in item.get("retrieval_routes", [])
+        })
+        gold_hit = bool(expected & set(returned_ids))
+        dual_route_hit = any(
+            set(item.get("retrieval_routes", [])) == {"cloud", "local"}
+            and str(item.get("document_id", "")) in expected
+            for item in items
+        )
+        degraded_routes = sorted({
+            str(route)
+            for item in items
+            for route in (item.get("degraded_route") or [])
+        })
+        ok = bool(items) and gold_hit and dual_route_hit and not degraded_routes
         return {
-            "ok": True,
+            "ok": ok,
             "latency_ms": round(elapsed * 1000, 2),
             "count": len(items),
-            "first_score": getattr(items[0], "score", None) if items else None,
-            "error": None,
+            "first_score": items[0].get("score") if items else None,
+            "expected_document_ids": sorted(expected),
+            "returned_document_ids": returned_ids,
+            "route_coverage": route_coverage,
+            "gold_hit": gold_hit,
+            "dual_route_hit": dual_route_hit,
+            "degraded_routes": degraded_routes,
+            "error": None if ok else "Hybrid retrieval contract was not satisfied",
         }
     except Exception as exc:  # noqa: BLE001
         elapsed = time.perf_counter() - started
@@ -468,8 +503,115 @@ def _hybrid_retrieval(
             "latency_ms": round(elapsed * 1000, 2),
             "count": 0,
             "first_score": None,
+            "expected_document_ids": sorted(str(item) for item in expected_document_ids),
+            "returned_document_ids": [],
+            "route_coverage": [],
+            "gold_hit": False,
+            "dual_route_hit": False,
+            "degraded_routes": [],
             "error": f"{type(exc).__name__}: {exc}",
         }
+
+
+def _run_hybrid_benchmark(
+    *,
+    cases: Sequence[Dict[str, Any]],
+    corpus: Sequence[str],
+    cloud_vectors: Sequence[Sequence[float]],
+    local_vectors: Sequence[Sequence[float]],
+    top_k: int,
+) -> List[Dict[str, Any]]:
+    """Build isolated dual indexes in Milvus Lite and execute real Hybrid retrieval."""
+    if not cases:
+        raise ValueError("hybrid_cases must not be empty")
+    if not (len(corpus) == len(cloud_vectors) == len(local_vectors)):
+        raise ValueError(
+            "Hybrid corpus and cloud/local vector counts must match: "
+            f"corpus={len(corpus)}, cloud={len(cloud_vectors)}, local={len(local_vectors)}"
+        )
+
+    from pymilvus import connections
+    from service import milvus_service as milvus_module
+    from service.embedding_router import collection_name_for_route, get_embedding_route
+    from service.milvus_service import MilvusService
+
+    managed_keys = {
+        "MILVUS_URI": None,
+        "EMBEDDING_ROUTING_MODE": "hybrid",
+        "RAG_HYBRID_ENABLED": "false",
+        "RAG_MULTI_QUERY_ENABLED": "false",
+        "RAG_NEIGHBOR_ENABLED": "false",
+        "RAG_MIN_SCORE": "0",
+        "RAG_MIN_LEXICAL_SCORE": "0",
+        "HYBRID_CLOUD_TOP_K": str(max(top_k, 5)),
+        "HYBRID_LOCAL_TOP_K": str(max(top_k, 5)),
+        "HYBRID_RERANK_TOP_K": str(max(top_k, 5)),
+        "RERANK_ENABLED": "true",
+    }
+    previous_env = {key: os.environ.get(key) for key in managed_keys}
+    previous_service = milvus_module._milvus_service
+    previous_tempdir = tempfile.tempdir
+    records: List[Dict[str, Any]] = []
+
+    tempfile.tempdir = "/tmp"
+    try:
+        with tempfile.TemporaryDirectory(prefix="p1-5-hybrid-", dir="/tmp") as temp_dir:
+            managed_keys["MILVUS_URI"] = str(Path(temp_dir) / "hybrid.db")
+            connections.disconnect("default")
+            for key, value in managed_keys.items():
+                os.environ[key] = str(value)
+
+            service = MilvusService()
+            milvus_module._milvus_service = service
+            knowledge_base = "p1_5_smoke"
+            collection_base = f"kb_{knowledge_base}"
+
+            for route_name, vectors in (
+                ("cloud", cloud_vectors),
+                ("local", local_vectors),
+            ):
+                route = get_embedding_route(route_name)  # type: ignore[arg-type]
+                collection_name = collection_name_for_route(collection_base, route)
+                documents = []
+                for index, (content, vector) in enumerate(zip(corpus, vectors)):
+                    doc_id = f"smoke-doc-{index:03d}"
+                    documents.append({
+                        "id": doc_id,
+                        "doc_id": doc_id,
+                        "kb_id": knowledge_base,
+                        "filename": f"{doc_id}.md",
+                        "content": str(content),
+                        "chunk_index": 0,
+                        "content_hash": "",
+                        "embedding_provider": route.provider,
+                        "embedding_model": route.model,
+                        "embedding_version": route.version,
+                        "vector": list(vector),
+                    })
+                service.insert_documents(collection_name, documents)
+
+            try:
+                for case in cases:
+                    record = _hybrid_retrieval(
+                        knowledge_base=knowledge_base,
+                        query=str(case["query"]),
+                        top_k=top_k,
+                        expected_document_ids=case.get("expected_document_ids", []),
+                    )
+                    record["task_id"] = str(case["id"])
+                    records.append(record)
+            finally:
+                connections.disconnect("default")
+    finally:
+        tempfile.tempdir = previous_tempdir
+        milvus_module._milvus_service = previous_service
+        for key, value in previous_env.items():
+            if value is None:
+                os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
+
+    return records
 
 
 # ---------------------------------------------------------------------------
@@ -490,14 +632,9 @@ async def _main() -> Dict[str, Any]:
         help="Path to write the JSON report.",
     )
     parser.add_argument(
-        "--knowledge-base",
-        default="semiconductor_advanced_packaging",
-        help="Knowledge base name to query for the hybrid retrieval step.",
-    )
-    parser.add_argument(
         "--hybrid-top-k",
         type=int,
-        default=3,
+        default=5,
         help="Top-k for the hybrid retrieval step.",
     )
     parser.add_argument(
@@ -514,6 +651,7 @@ async def _main() -> Dict[str, Any]:
 
     generation_prompts: List[Dict[str, str]] = inputs["generation_prompts"]
     embedding_texts: List[str] = inputs["embedding_texts"]
+    hybrid_cases: List[Dict[str, Any]] = inputs["hybrid_cases"]
     rerank_cases: List[Dict[str, Any]] = inputs["rerank_cases"]
     rubric: str = inputs["judge_rubric"]["criteria"]
 
@@ -626,17 +764,9 @@ async def _main() -> Dict[str, Any]:
         emb_records.append(cloud_rec)
         if cloud_rec["ok"]:
             emb_latency_cloud.add(cloud_rec["latency_ms"] / 1000.0)
-            if "vector_dim" in cloud_rec and cloud_rec["vector_dim"]:
-                # Re-call once to get the vector itself; cheaper than
-                # re-running with a side-channel.
-                client = OpenAI(api_key=emb_cloud_key, base_url=emb_cloud_url, timeout=20.0)
-                resp = client.embeddings.create(
-                    model=emb_cloud_model,
-                    input=text,
-                    dimensions=emb_dim,
-                )
-                if resp.data:
-                    cloud_vectors.append(list(resp.data[0].embedding))
+            vector = cloud_rec.pop("_vector", None)
+            if isinstance(vector, list):
+                cloud_vectors.append(vector)
 
         if not skip_local:
             try:
@@ -659,16 +789,9 @@ async def _main() -> Dict[str, Any]:
             emb_records.append(local_rec)
             if local_rec.get("ok") and not args.skip_local:
                 emb_latency_local.add(local_rec["latency_ms"] / 1000.0)
-                try:
-                    client = OpenAI(api_key=emb_local_key, base_url=emb_local_url, timeout=20.0)
-                    resp = client.embeddings.create(
-                        model=emb_local_model,
-                        input=text,
-                    )
-                    if resp.data:
-                        local_vectors.append(list(resp.data[0].embedding))
-                except Exception:  # noqa: BLE001
-                    pass
+                vector = local_rec.pop("_vector", None)
+                if isinstance(vector, list):
+                    local_vectors.append(vector)
 
     # Similarity sanity: average pairwise cosine on same-provider vectors.
     def _avg_pairwise(vectors: List[List[float]]) -> Optional[float]:
@@ -715,14 +838,35 @@ async def _main() -> Dict[str, Any]:
     # ---------- hybrid retrieval ----------
     hybrid_records: List[Dict[str, Any]] = []
     hybrid_latency = Bucket("hybrid")
-    for prompt in generation_prompts:
-        result = _hybrid_retrieval(
-            query=prompt["user"],
-            knowledge_base=args.knowledge_base,
+    try:
+        if skip_local:
+            raise RuntimeError("Hybrid benchmark requires the local provider")
+        hybrid_records = _run_hybrid_benchmark(
+            cases=hybrid_cases,
+            corpus=embedding_texts,
+            cloud_vectors=cloud_vectors,
+            local_vectors=local_vectors,
             top_k=args.hybrid_top_k,
         )
-        result["task_id"] = prompt["id"]
-        hybrid_records.append(result)
+    except Exception as exc:  # noqa: BLE001
+        hybrid_records = [
+            {
+                "task_id": str(case["id"]),
+                "ok": False,
+                "latency_ms": None,
+                "count": 0,
+                "first_score": None,
+                "expected_document_ids": case.get("expected_document_ids", []),
+                "returned_document_ids": [],
+                "route_coverage": [],
+                "gold_hit": False,
+                "dual_route_hit": False,
+                "degraded_routes": [],
+                "error": f"{type(exc).__name__}: {exc}",
+            }
+            for case in hybrid_cases
+        ]
+    for result in hybrid_records:
         if result["ok"]:
             hybrid_latency.add(result["latency_ms"] / 1000.0)
 
@@ -776,6 +920,16 @@ async def _main() -> Dict[str, Any]:
             "records": hybrid_records,
         },
     }
+    report["gates"] = _build_gates(
+        report,
+        generation_expected=len(generation_prompts) * (1 if skip_local else 2),
+        judge_expected=len(generation_prompts) * (1 if skip_local else 2),
+        embedding_expected=len(embedding_texts) * (1 if skip_local else 2),
+        rerank_expected=len(rerank_cases),
+        hybrid_expected=len(hybrid_cases),
+        embedding_dimensions=emb_dim,
+    )
+    report["overall_pass"] = all(gate["pass"] for gate in report["gates"].values())
 
     out_path = Path(args.output)
     if not out_path.is_absolute():
@@ -790,6 +944,8 @@ async def _main() -> Dict[str, Any]:
         json.dumps(
             {
                 "output": str(out_path),
+                "overall_pass": report["overall_pass"],
+                "gates": report["gates"],
                 "generation_count": len(gen_records),
                 "generation_ok": sum(1 for r in gen_records if r["ok"]),
                 "judge_count": len(judge_records),
@@ -829,5 +985,68 @@ def _avg(records: Iterable[Dict[str, Any]], key: str) -> Optional[float]:
     return round(sum(vals) / len(vals), 4)
 
 
+def _build_gates(
+    report: Dict[str, Any],
+    *,
+    generation_expected: int,
+    judge_expected: int,
+    embedding_expected: int,
+    rerank_expected: int,
+    hybrid_expected: int,
+    embedding_dimensions: int,
+) -> Dict[str, Dict[str, Any]]:
+    generation_records = report["generation"]["records"]
+    judge_records = report["judge"]["records"]
+    embedding_records = report["embedding"]["records"]
+    rerank_records = report["rerank"]["records"]
+    hybrid_records = report["hybrid"]["records"]
+
+    generation_ok = sum(bool(record.get("ok")) for record in generation_records)
+    judge_ok = sum(
+        bool(record.get("ok")) and record.get("score") is not None
+        for record in judge_records
+    )
+    embedding_ok = sum(
+        bool(record.get("ok"))
+        and record.get("vector_dim") == embedding_dimensions
+        for record in embedding_records
+    )
+    rerank_ok = sum(
+        bool(record.get("ok")) and bool(record.get("ranking"))
+        for record in rerank_records
+    )
+    hybrid_ok = sum(bool(record.get("ok")) for record in hybrid_records)
+
+    return {
+        "generation": {
+            "pass": generation_ok == generation_expected,
+            "ok": generation_ok,
+            "expected": generation_expected,
+        },
+        "judge": {
+            "pass": judge_ok == judge_expected,
+            "ok": judge_ok,
+            "expected": judge_expected,
+        },
+        "embedding": {
+            "pass": embedding_ok == embedding_expected,
+            "ok": embedding_ok,
+            "expected": embedding_expected,
+            "dimensions": embedding_dimensions,
+        },
+        "rerank": {
+            "pass": rerank_ok == rerank_expected,
+            "ok": rerank_ok,
+            "expected": rerank_expected,
+        },
+        "hybrid": {
+            "pass": hybrid_ok == hybrid_expected,
+            "ok": hybrid_ok,
+            "expected": hybrid_expected,
+        },
+    }
+
+
 if __name__ == "__main__":
-    asyncio.run(_main())
+    result = asyncio.run(_main())
+    raise SystemExit(0 if result["overall_pass"] else 1)

@@ -174,27 +174,39 @@ LLM Critic（`deep_research_v2/agents/critic.py`）继续负责语义层
 ## 模型实测（P1-5）
 
 固定样本的云端/本地/hybrid对比冒烟脚本
-[`p1_5_model_smoke.py`](../../backend/scripts/p1_5_model_smoke.py)，
+[`p1_5_model_smoke.py`](../backend/scripts/p1_5_model_smoke.py)，
 搭配
-[`p1_5_model_smoke_inputs.json`](../../backend/sample-data/p1_5_model_smoke_inputs.json)
+[`p1_5_model_smoke_inputs.json`](../backend/sample-data/p1_5_model_smoke_inputs.json)
 输入在本地 `.env` 有 `DASHSCOPE_API_KEY` 且 Ollama 运行时可直接执行。
 实测报告
-[`reports/p1-5-model-smoke.json`](../../reports/p1-5-model-smoke.json)。
+[`reports/p1-5-model-smoke.json`](../reports/p1-5-model-smoke.json)。
+
+```bash
+.venv/bin/python backend/scripts/p1_5_model_smoke.py \
+  --output reports/p1-5-model-smoke.json
+```
 
 2026-07-19 实测（WSL+Ollama qwen3:4b + 百炼 deepseek-v4-flash +
 text-embedding-v4 + qwen3-rerank）：
 
-- **生成**（5 prompt × cloud + local）：云 P50=2.0s / P95=2.4s；
-  本地 P50≈3.5s / P95≈8s；LLM-judge 平均分 cloud=4.8 / local≈3.2。
-- **Embedding**（20 text × cloud + local）：云 P50=330ms / P95=410ms；
-  本地 P50=440ms / P95=479ms（首次冷启动 4.3s）；
+- **生成**（5 prompt × cloud + local）：10/10 调用成功，整体
+  P50=2.33s / P95=3.50s；LLM-judge 10/10 完成，平均分 3.8/5。
+- **Embedding**（20 text × cloud + local）：40/40 调用成功，
+  云 P50=402ms / P95=563ms，本地 P50=437ms / P95=449ms；
   云平均余弦=0.50，本地=0.42（量纲一致、向量空间接近）。
-- **Rerank**（5 query × cloud）：P50=321ms / P95=403ms，
+- **Rerank**（5 query × cloud）：5/5 调用成功，P50=295ms /
+  P95=380ms，
   nDCG@3=1.0（5 个预制测试用例全部完美排序）。
+- **Hybrid 检索**（5 query × cloud + local + rerank）：5/5 通过，
+  P50=1.13s / P95=1.13s。脚本在临时 Milvus Lite 数据库中
+  分别建立 `text-v4` 云端索引与 `bge-m3` 本地索引，每个用例
+  都要求目标文档命中、同时包含 `cloud` / `local` 路由来源，
+  且不允许任一路降级。
 
-脚本本身不调用收费 API（除非本地 `.env` 有有效 key + 主动运行），
-CI 不触发，不增加任何日常额度成本。每次完整云+本地跑完
-总费用 < 0.5 CNY。
+该脚本是手工、可选的真实模型门禁；主动运行时会读取本地
+`.env` 并消耗云端 API 额度，CI 默认不触发。报告不记录 API key。
+任一阶段数量不足、向量维度错误、Hybrid 单路命中或路由降级时，
+脚本都会将 `overall_pass` 置为 `false` 并以非零状态退出。
 
 ## 尚未覆盖的生产能力
 

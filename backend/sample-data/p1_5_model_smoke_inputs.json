@@ -54,6 +54,33 @@
     "2.5D 封装常用 CoWoS 工艺由台积电提供",
     "Chiplet 模式允许不同工艺节点裸晶拼接"
   ],
+  "hybrid_cases": [
+    {
+      "id": "hybrid-001",
+      "query": "中芯国际 14nm 工艺量产",
+      "expected_document_ids": ["smoke-doc-013"]
+    },
+    {
+      "id": "hybrid-002",
+      "query": "中微公司的主要半导体设备",
+      "expected_document_ids": ["smoke-doc-002"]
+    },
+    {
+      "id": "hybrid-003",
+      "query": "长电科技封测业务",
+      "expected_document_ids": ["smoke-doc-003"]
+    },
+    {
+      "id": "hybrid-004",
+      "query": "2.5D 封装 CoWoS 工艺",
+      "expected_document_ids": ["smoke-doc-018"]
+    },
+    {
+      "id": "hybrid-005",
+      "query": "EUV 光刻机价格",
+      "expected_document_ids": ["smoke-doc-016"]
+    }
+  ],
   "rerank_cases": [
     {
       "id": "rerank-001",

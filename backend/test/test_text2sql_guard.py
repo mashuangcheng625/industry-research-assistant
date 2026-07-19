@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import pytest
 
-from app.core.text2sql_guard import (
+from core.text2sql_guard import (
     ALLOWED_TABLES,
     GUARD_COMMENT_DENIED,
     GUARD_COPY_DENIED,
@@ -423,7 +423,7 @@ def test_dual_backend_pglast_rejects_when_sqlglot_would_pass(monkeypatch) -> Non
             super().__init__(max_rows=50, backend="dual")
 
         def _check_pglast(self_inner, sql: str):  # noqa: D401
-            from app.core.text2sql_guard import GuardResult, GUARD_PARSE_FAIL
+            from core.text2sql_guard import GuardResult, GUARD_PARSE_FAIL
 
             return GuardResult(
                 ok=False,
