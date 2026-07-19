@@ -61,6 +61,9 @@ data/evaluation-private/
 
 sample-data/semiconductor_rag_eval_80.json
 sample-data/semiconductor_rag_eval_test.json
+# Blind-v2 evaluation answers (private). Questions-only JSON is tracked.
+sample-data/semiconductor_rag_eval_blind_v2_answers.json
+data/evaluation-private/semiconductor_rag_eval_blind_v2_answers.json
 sample-data/*_private_*.json
 sample-data/*_answers_*.json
 sample-data/*_master.json

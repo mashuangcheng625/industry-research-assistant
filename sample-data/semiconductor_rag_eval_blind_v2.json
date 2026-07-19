@@ -1,0 +1,252 @@
+[
+  {
+    "id": "blind-design-001",
+    "domain": "芯片设计与EDA/IP",
+    "category": "单文档事实题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V 特权架构定义了哪三种标准特权级别？请写出它们的名称和编码值。",
+    "source_document": "riscv-privileged-20260120.md",
+    "source_section": "§1.2 Privilege Levels"
+  },
+  {
+    "id": "blind-design-002",
+    "domain": "芯片设计与EDA/IP",
+    "category": "专业参数题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V CSR 地址空间中，标准读写 CSR 按什么规则编码其读写权限和最低特权级？",
+    "source_document": "riscv-privileged-20260120.md",
+    "source_section": "§2.1 CSR Address Mapping Conventions"
+  },
+  {
+    "id": "blind-design-003",
+    "domain": "芯片设计与EDA/IP",
+    "category": "综合分析题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "在 RISC-V 向量扩展中，向量长度寄存器 VLEN 和向量类型寄存器 VTYPE 如何协同控制向量指令的行为？",
+    "source_document": "riscv-unprivileged-20260120.md",
+    "source_section": "Vector Extension 章节"
+  },
+  {
+    "id": "blind-design-004",
+    "domain": "芯片设计与EDA/IP",
+    "category": "跨段落题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "RISC-V PMP（物理内存保护）使用 pmpcfg.L 位区分 M-mode only 和 S/U-mode only 两类规则，请分别说明这两类规则的锁定策略和访问行为。",
+    "source_document": "riscv-privileged-20260120.md",
+    "source_section": "Smepmp Extension 附录"
+  },
+  {
+    "id": "blind-design-005",
+    "domain": "芯片设计与EDA/IP",
+    "category": "无证据题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_chip_design_eda_ip",
+    "question": "请给出虚构 RISC-V 扩展 Zx-Quantum 的指令编码表和量子纠缠寄存器 CSR 地址。",
+    "source_document": "无",
+    "source_section": null
+  },
+  {
+    "id": "blind-materials-001",
+    "domain": "半导体材料与设备",
+    "category": "单文档事实题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "NIST 在其 CHIPS 计量学战略中定义了哪七个重大挑战？请列出其中至少四个挑战的名称。",
+    "source_document": "nist-chips-1000.md",
+    "source_section": "§ Grand Challenges"
+  },
+  {
+    "id": "blind-materials-002",
+    "domain": "半导体材料与设备",
+    "category": "专业参数题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "在先进封装中，multi-die 桥接互连（EMIB）与硅中介层在互连距离和带宽上有何不同？请给出具体数字。",
+    "source_document": "nist-chips-1000.md 和 nist-chips-1400-2.md",
+    "source_section": "先进封装 / Chiplet Interfaces 章节"
+  },
+  {
+    "id": "blind-materials-003",
+    "domain": "半导体材料与设备",
+    "category": "综合分析题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "NIST 报告中指出半导体制造中超过 50% 的步骤涉及测量。结合材料纯度、物理特性和溯源三个方面，分析计量学如何在晶圆制造中保证质量。",
+    "source_document": "nist-chips-1000.md",
+    "source_section": "§ Grand Challenge 1: Materials Purity, Properties and Provenance"
+  },
+  {
+    "id": "blind-materials-004",
+    "domain": "半导体材料与设备",
+    "category": "跨段落题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "数字孪生（digital twin）在半导体制造中的应用涉及哪六个优先级维度？按 NIST workshop 的排序列出。",
+    "source_document": "nist-chips-1400-2.md",
+    "source_section": "附表：Digital Twin Standards Priorities"
+  },
+  {
+    "id": "blind-materials-005",
+    "domain": "半导体材料与设备",
+    "category": "无证据题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_materials_equipment",
+    "question": "请提供 2026 年全球半导体光刻胶在 2nm 节点下的具体市场占有率和价格波动区间。",
+    "source_document": "无",
+    "source_section": null
+  },
+  {
+    "id": "blind-process-001",
+    "domain": "晶圆制造与前道工艺",
+    "category": "单文档事实题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_process",
+    "question": "RISC-V 调试规范中定义了哪几种触发类型？分别用于什么调试场景？",
+    "source_document": "riscv-debug-v1.0.md",
+    "source_section": "Trigger Module"
+  },
+  {
+    "id": "blind-process-002",
+    "domain": "晶圆制造与前道工艺",
+    "category": "专业参数题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_process",
+    "question": "RISC-V H 扩展为虚拟化引入了哪两种新的特权模式转换？说明 HS-mode 和 VS-mode 的区别。",
+    "source_document": "riscv-privileged-20260120.md",
+    "source_section": "§15 H Extension for Hypervisor Support"
+  },
+  {
+    "id": "blind-process-003",
+    "domain": "晶圆制造与前道工艺",
+    "category": "综合分析题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_process",
+    "question": "RISC-V 的安全扩展（Smepmp）如何通过 PMP 规则的 RW=01 编码实现共享代码区域？请说明执行保护机制和权限控制逻辑。",
+    "source_document": "riscv-privileged-20260120.md",
+    "source_section": "Smepmp Extension 附录"
+  },
+  {
+    "id": "blind-process-004",
+    "domain": "晶圆制造与前道工艺",
+    "category": "跨段落题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_process",
+    "question": "RISC-V 两次间接地址翻译（VS-stage 和 G-stage）在 H 扩展中如何处理 PMA 和 PBMT 属性覆盖？请按优先级顺序说明最终物理属性的确定过程。",
+    "source_document": "riscv-privileged-20260120.md",
+    "source_section": "§15 H Extension 和 §12.9 Svinval"
+  },
+  {
+    "id": "blind-process-005",
+    "domain": "晶圆制造与前道工艺",
+    "category": "无证据题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_process",
+    "question": "请给出 NIST 报告中指定的离子注入设备校准精度的最新标准值（精确到 0.01nm）。",
+    "source_document": "无",
+    "source_section": null
+  },
+  {
+    "id": "blind-packaging-001",
+    "domain": "封装与测试",
+    "category": "单文档事实题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "UCIe 2.0 标准定义了哪三种封装层级？分别对应的互连距离范围是什么？",
+    "source_document": "riscv-unprivileged-20260120.md 中含 UCIe/Advanced Packaging 阐述",
+    "source_section": "§33.1 UCIe / Advanced Packaging"
+  },
+  {
+    "id": "blind-packaging-002",
+    "domain": "封装与测试",
+    "category": "专业参数题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "在先进封装设备供应链愿景中，NIST 提出了哪四类关键计量学研发需求？",
+    "source_document": "nist-materials-equipment-vision-2023.md",
+    "source_section": "Strategy / Grand Challenges"
+  },
+  {
+    "id": "blind-packaging-003",
+    "domain": "封装与测试",
+    "category": "综合分析题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "结合 NIST 的 chiplet 标准化工作坊输出和 UCIe 2.0 规范，分析 chiplet 生态需要哪些关键互连标准才能实现真正的'即插即用'。",
+    "source_document": "nist-chips-1400-2.md 和 riscv-unprivileged-20260120.md",
+    "source_section": "Chiplet Standards 和 UCIe"
+  },
+  {
+    "id": "blind-packaging-004",
+    "domain": "封装与测试",
+    "category": "跨段落题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "NIST 报告中数字孪生在半导体封装测试中的应用面临的数据互操作性、安全性和标准缺失三个问题分别是什么？请从不同章节摘录具体描述。",
+    "source_document": "nist-chips-1400-2.md",
+    "source_section": "多章节"
+  },
+  {
+    "id": "blind-packaging-005",
+    "domain": "封装与测试",
+    "category": "无证据题",
+    "split": "blind_v2",
+    "knowledge_base": "semiconductor_packaging_testing",
+    "question": "请列出全球三大先进封装设备厂商在 2026 年的具体出货量和客户名单。",
+    "source_document": "无",
+    "source_section": null
+  },
+  {
+    "id": "blind-cross-001",
+    "domain": "跨领域综合",
+    "category": "综合分析题",
+    "split": "blind_v2",
+    "knowledge_base": "all",
+    "question": "从 RISC-V 特权架构的角度，说明在芯片设计工具链中，debug spec 定义的触发（trigger）如何与物理内存保护（PMP）协同工作以保证调试安全性。",
+    "source_document": "riscv-privileged-20260120.md 和 riscv-debug-v1.0.md",
+    "source_section": "触发模块 + PMP"
+  },
+  {
+    "id": "blind-cross-002",
+    "domain": "跨领域综合",
+    "category": "综合分析题",
+    "split": "blind_v2",
+    "knowledge_base": "all",
+    "question": "NIST 重大挑战和 RISC-V 密码学扩展在硬件随机数生成方面各自提出了什么要求？二者如何互补？",
+    "source_document": "nist-chips-1000.md 和 riscv-unprivileged-20260120.md",
+    "source_section": "Grand Challenge 1 和 Crypto Extensions (entropy source)"
+  },
+  {
+    "id": "blind-cross-003",
+    "domain": "跨领域综合",
+    "category": "跨段落题",
+    "split": "blind_v2",
+    "knowledge_base": "all",
+    "question": "UCIe 2.0 定义的 PHY 层物理参数（通道速率 4/8/12/16/24/32 GT/s）与前道工艺中的先进制程节点之间存在什么关系？为什么更小的制程节点可以支持更高的互连速率？",
+    "source_document": "riscv-unprivileged-20260120.md 和 nist-chips-1000.md",
+    "source_section": "UCIe + Grand Challenge 2 Advanced Metrology"
+  },
+  {
+    "id": "blind-cross-004",
+    "domain": "跨领域综合",
+    "category": "综合分析题",
+    "split": "blind_v2",
+    "knowledge_base": "all",
+    "question": "NIST 报告中芯片计量学「建模与仿真」和 RISC-V 虚拟化「ISA 模拟器」共同推动了什么工程实践？说明模拟与建模在半导体制造中的价值。",
+    "source_document": "nist-chips-1000.md 和 riscv-privileged-20260120.md",
+    "source_section": "Grand Challenge 4 和 Hypervisor Extension"
+  },
+  {
+    "id": "blind-cross-005",
+    "domain": "跨领域综合",
+    "category": "无证据题",
+    "split": "blind_v2",
+    "knowledge_base": "all",
+    "question": "请给出 2nm 以下节点 Cu-Cu 混合键合的接触间距和键合强度的精确工艺窗口数据。",
+    "source_document": "无",
+    "source_section": null
+  }
+]

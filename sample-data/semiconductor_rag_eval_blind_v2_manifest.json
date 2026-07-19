@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "split_name": "blind_v2",
+  "description": "Independent blind-v2 evaluation set (P1-11). Questions are based on the same corpus as the regression/development splits but were NOT used during model tuning. Answer keys are stored in data/evaluation-private/ (gitignored) so quantitative evaluation can be performed without exposing labels in the public repository.",
+  "question_count": 25,
+  "domain_counts": {
+    "芯片设计与EDA/IP": 5,
+    "半导体材料与设备": 5,
+    "晶圆制造与前道工艺": 5,
+    "封装与测试": 5,
+    "跨领域综合": 5
+  },
+  "category_counts": {
+    "单文档事实题": 5,
+    "专业参数题": 4,
+    "综合分析题": 6,
+    "跨段落题": 5,
+    "无证据题": 5
+  },
+  "label_visibility": "private",
+  "answer_key_path": "data/evaluation-private/semiconductor_rag_eval_blind_v2_answers.json",
+  "questions_file": "sample-data/semiconductor_rag_eval_blind_v2.json",
+  "protocol": "Evaluate against the blind-v2 answer key using the same evaluation pipeline as the regression split (see scripts/evaluate_rag_answers.py). The answer key must NOT be committed to the public repository. Results should be reported as a relative change vs. the public development/regression baseline, never as a standalone percentage."
+}
