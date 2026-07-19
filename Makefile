@@ -21,7 +21,7 @@ MULTI_SOURCE_FIXTURE ?= sample-data/multi_source_advanced_packaging_fixture.json
 MULTI_SOURCE_EVAL ?= sample-data/multi_source_advanced_packaging_eval.json
 MULTI_SOURCE_REPORT ?= /tmp/industry-research-multi-source-report.json
 
-.PHONY: setup-backend test-backend test-backend-unit test-backend-integration test-evidence-contract check-backend-deps check-backend-import lint-frontend build-frontend build-images validate-compose validate-observability validate-sources validate-baseline smoke-ingest-lite audit-ingestion ablate-retrieval-development evaluate-answers-regression demo-rag load-test-chat stress-context-budget run-backend-structured evaluate-answers-regression-structured run-backend-semantic evaluate-answers-regression-semantic build-eval-public validate-eval validate-eval-private evaluate-multi-source check
+.PHONY: setup-backend test-backend test-backend-unit test-backend-integration test-evidence-contract check-backend-deps check-backend-import lint-frontend build-frontend build-images validate-compose validate-observability validate-sources validate-baseline smoke-ingest-lite audit-ingestion ablate-retrieval-development evaluate-answers-regression demo-rag load-test-chat stress-context-budget run-backend-structured evaluate-answers-regression-structured run-backend-semantic evaluate-answers-regression-semantic build-eval-public validate-eval validate-eval-private evaluate-multi-source check migrate-head migrate-history migrate-autogenerate
 
 setup-backend:
 	python3 -m venv .venv
@@ -30,6 +30,22 @@ setup-backend:
 
 test-backend:
 	cd backend && PYTHONPATH=app timeout 300s ../$(PYTHON) -m pytest -q -W error::DeprecationWarning
+
+# ---- Alembic database migrations (P1-9) ----
+# Run ``make migrate-head`` to apply all pending migrations against the
+# database configured in ``backend/.env``. The commands use the same
+# Python interpreter and ``PYTHONPATH`` as the rest of the project so
+# they share the same import hooks.
+migrate-head:
+	cd backend && PYTHONPATH=app ../$(PYTHON) -m alembic -c alembic.ini upgrade head
+
+migrate-history:
+	cd backend && PYTHONPATH=app ../$(PYTHON) -m alembic -c alembic.ini history
+
+# Autogenerate is only intended for local development against a running
+# database; CI should never call this target.
+migrate-autogenerate:
+	cd backend && PYTHONPATH=app ../$(PYTHON) -m alembic -c alembic.ini revision --autogenerate -m "auto"
 
 test-backend-unit:
 	cd backend && PYTHONPATH=app timeout 240s ../$(PYTHON) -m pytest -q -m "not integration" -W error::DeprecationWarning
