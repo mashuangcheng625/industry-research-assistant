@@ -13,9 +13,7 @@
 - **可验证**：检索、回答质量、并发、上下文边界和故障恢复都有固定数据集与报告。
 
 > 当前定位是“通用研究平台骨架 + 半导体证据链深度验证”的研究型 MVP，不是已上线的生产系统。
-> 原始 PDF、公司代码和评测私有答案不随仓库公开；公开前仍需确认代码、数据和报告的授权范围。
-> 本仓库不添加开源许可证，按保留全部权利的私有面试展示项目管理；未经明确许可，不授权复制、
-> 修改、分发或商用。
+> 原始 PDF、公司代码和评测私有答案不随仓库公开。
 
 ## 双层定位与业务闭环
 
@@ -79,12 +77,33 @@ Runner 已完成 12/12 确定性端到端门禁，但真实在线数据源仍未
 | 并发压力 | 并发 4 时 8/8，P95 10.217 秒 | 并发 8 时 P95 19.919 秒，已接近饱和 |
 | 上下文压力 | 600,400 输入 token 中选取 3,002/6,000 | 证据预算生效；尚非统一总上下文预算 |
 | 多源联合研究 | 冻结脱敏 fixture 12/12 | 确定性 Runner 逐题执行，不代表线上数据质量 |
-| 自动化验证 | 后端 162/162，前端 lint/build 通过 | 161 个 unit + 1 个 Milvus Lite integration |
+| 自动化验证 | 后端 367/367，前端 lint/build 通过 | 367 项单元测试 + 1 项 Milvus Lite 集成测试 |
 
 对应报告见 [`reports/`](reports/)，评测口径见
 [`docs/RAG_EVALUATION_PROTOCOL.md`](docs/RAG_EVALUATION_PROTOCOL.md)。简历与项目介绍中的
 基线数字只以 [`reports/baseline-manifest.json`](reports/baseline-manifest.json) 指向的冻结报告为准；
 `latest` 或 `working` 报告仅用于实验，不作为对外声明依据。
+
+## 5 分钟面试演示
+
+启动后端和前端后访问 `http://localhost:5173/demo`（需要登录）即可看到预设的四个演示场景：
+
+| 场景 | 标题 | 展示内容 |
+| --- | --- | --- |
+| ① | **UCIe Hybrid 检索正例** | cloud + local 双路 Embedding 召回、RRF 融合、qwen3-rerank 重排后的检索追踪 |
+| ② | **NX-999 无证据拒答反例** | 虚构型号 LITHO-NX999 命中零条 → `critic_checks.check_missing_source` 硬性门禁拒答 |
+| ③ | **Research Agent 检查点恢复** | ChiefArchitect → DeepScout → DataAnalyst → LeadWriter → CriticMaster 六阶段管线，含 phase 回退与恢复 |
+| ④ | **多源联合研究** | 文档+政策+SQL 行+招投标+行情五源联合，带 full retrieval trace（页码/时点/来源类型/RRF 权重/Rerank 分） |
+
+每个场景卡片展开后逐条展示检索证据的 routing（cloud/local）、RRF 融合权重、
+Rerank 分数、降级状态标记和证据片段，让面试官在一页内看到平台从召回→证据→回答的完整链路。
+
+演示数据全部来自 `sample-data/demo_scenarios/*.json` 预烘培 fixture，不依赖实时 API 调用，
+页面加载稳定可重复。环境预检面板会在页面加载时检测 PostgreSQL / Redis / Milvus /
+Ollama / 百炼 的连通性并以绿灯/黄灯/红灯展示。
+
+> 浏览器截图待补充——请在启动完整服务后对四个场景分别截取展开状态的全页截图，
+> 保存到 `docs/screenshots/` 并在此处引用。
 
 ## 核心设计
 
@@ -193,7 +212,7 @@ docker compose --profile app exec backend \
 ## 验证命令
 
 ```bash
-make check                       # 依赖、162 个后端测试、前端、Compose、数据与评测隔离
+make check                       # 依赖、368 项后端测试、前端、Compose、数据与评测隔离
 make validate-observability      # Prometheus 配置与 4 条告警规则
 make build-images                # 构建非 root 后端镜像与 Nginx 前端镜像
 make demo-rag                    # 正例、跨环节问题与无证据拒答
