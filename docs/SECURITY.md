@@ -63,6 +63,36 @@ AST 检查。守卫的硬性边界是：
 `backend/test/test_security_boundaries.py` 中 `test_text2sql_service_*`
 覆盖。
 
+## 多源 Provider 可靠性（P1-2）
+
+新闻、招投标与股票行情三个外部数据源由
+[`ProviderReliability`](/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/backend/app/core/provider_reliability.py)
+包装后再发出请求，统一的硬性边界：
+
+- 每个外部调用都有显式 per-attempt 超时（可通过
+  `NEWS_PROVIDER_TIMEOUT_SECONDS`、`BIDDING_PROVIDER_TIMEOUT_SECONDS`、
+  `STOCK_PROVIDER_TIMEOUT_SECONDS` 覆盖，默认 8–10 秒）和有限重试
+  （默认 2 次，env 变量可调）；
+- 5xx、连接错误、429 与超时属于"可重试"；4xx、JSON 解析失败、未知
+  异常属于"终态"，不再重试；
+- 失败路径绝不编造结果 —— `ProviderOutcome.ok=False` 时
+  `data=None`、`degraded=True`，调用方根据 `error_code` 选择降级
+  行为；
+- 每个 service 维护最多 32 条最近 `ProviderOutcome` 滚动缓冲；
+  通过 `last_outcome()` 提供给上层多源编排做拒绝式判断；
+- 服务返回的 dict 在保留旧 `success`/`error` 字段的同时新增
+  `degraded` 与 `provider_code`，便于调度器把"零结果"与"采集失败"
+  区别对待，避免把降级数据当作证据写入 `multi_source_research` 的
+  引文列表。
+
+Text2SQL 的 `execute_sql` 在 P1-1 阶段已通过 `SQLGuard` 拿到 AST
+层保护；数据库侧的超时建议在 PostgreSQL 会话级
+`statement_timeout` 上设置（不在本 PR 范围）。
+
+相关单元测试：`backend/test/test_provider_reliability.py`（30 项）。
+后续若加入新外部数据源，应使用同一 `ProviderReliability` 包装
+后再发出请求。
+
 ## 尚未覆盖的生产能力
 
 - TLS 终止、WAF 和反向代理上传限制；

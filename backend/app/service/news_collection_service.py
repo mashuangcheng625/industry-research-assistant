@@ -3,6 +3,12 @@
 - 使用 Bocha API 搜索行业资讯
 - 使用 81API 搜索招投标信息
 - 支持多行业配置
+
+P1-2：所有外部 HTTP 调用通过 ``core.provider_reliability`` 包装，提供
+明确超时、有限重试、失败降级与 ``ProviderOutcome``。失败路径不再编造
+结果 —— 一律返回空列表并在 ``self._outcomes`` 中留下可观测的
+``PROVIDER_*`` 错误码，供上层 ``multi_source_research`` 与多源评测
+进行拒绝式判断。
 """
 import os
 import asyncio
@@ -13,11 +19,23 @@ from typing import Dict, Any, List, Optional
 import httpx
 from sqlalchemy.orm import Session
 
+from core.provider_reliability import (
+    PROVIDER_NOT_CONFIGURED,
+    PROVIDER_OK,
+    ProviderOutcome,
+    run_provider_async,
+)
 from models.news import IndustryNews, BiddingInfo, NewsCollectionTask
 from service.bidding_service import get_bidding_service
 from config.industry_config import get_industry_config, get_all_industries
 
 logger = logging.getLogger(__name__)
+
+
+# 默认 Bocha 搜索超时与重试预算。可以被环境变量 ``NEWS_PROVIDER_TIMEOUT_SECONDS``
+# 与 ``NEWS_PROVIDER_MAX_ATTEMPTS`` 覆盖，方便生产侧按网络质量调节。
+_DEFAULT_NEWS_TIMEOUT = float(os.getenv("NEWS_PROVIDER_TIMEOUT_SECONDS", "10"))
+_DEFAULT_NEWS_MAX_ATTEMPTS = int(os.getenv("NEWS_PROVIDER_MAX_ATTEMPTS", "2"))
 
 
 class NewsCollectionService:
@@ -27,6 +45,22 @@ class NewsCollectionService:
         self.db = db
         self.bocha_api_key = os.getenv("BOCHA_API_KEY", "")
         self.bidding_service = get_bidding_service()
+        # 最近一次外部调用的 ProviderOutcome；测试与上层编排可通过
+        # ``last_outcome`` 区分"零结果"和"采集失败"。
+        self._outcomes: List[ProviderOutcome] = []
+
+    def last_outcome(self) -> Optional[ProviderOutcome]:
+        """Return the most recent provider outcome or ``None`` if no
+        call has been made yet."""
+
+        return self._outcomes[-1] if self._outcomes else None
+
+    def record_outcome(self, outcome: ProviderOutcome) -> None:
+        """Append an outcome to the rolling buffer (bounded to 32)."""
+
+        self._outcomes.append(outcome)
+        if len(self._outcomes) > 32:
+            self._outcomes = self._outcomes[-32:]
 
         if not self.bocha_api_key:
             logger.warning("BOCHA_API_KEY 环境变量未设置")
@@ -40,12 +74,24 @@ class NewsCollectionService:
             count: 返回数量
 
         Returns:
-            搜索结果列表
+            搜索结果列表；任何失败情况下返回 ``[]``，并把对应的
+            ``ProviderOutcome`` 记入 ``self._outcomes``。
         """
         logger.info(f"[_bocha_search] 搜索: query='{query}', count={count}")
 
         if not self.bocha_api_key:
             logger.error("[_bocha_search] Bocha API key not configured")
+            outcome = ProviderOutcome(
+                ok=False,
+                data=None,
+                fetched_at=datetime.utcnow().isoformat() + "Z",
+                attempts=0,
+                degraded=True,
+                error_code=PROVIDER_NOT_CONFIGURED,
+                latency_ms=0,
+                last_error="BOCHA_API_KEY 未配置",
+            )
+            self.record_outcome(outcome)
             return []
 
         url = "https://api.bochaai.com/v1/web-search"
@@ -53,48 +99,53 @@ class NewsCollectionService:
             "query": query,
             "summary": True,
             "count": count,
-            "page": 1
+            "page": 1,
         }
         headers = {
-            'Authorization': f"Bearer {self.bocha_api_key}",
-            'Content-Type': 'application/json'
+            "Authorization": f"Bearer {self.bocha_api_key}",
+            "Content-Type": "application/json",
         }
 
-        try:
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                logger.info(f"[_bocha_search] 发送请求到 {url}")
+        async def _call() -> List[Dict]:
+            assert self.bocha_api_key  # narrowed by the guard above
+            async with httpx.AsyncClient(timeout=_DEFAULT_NEWS_TIMEOUT) as client:
                 response = await client.post(url, headers=headers, json=payload)
-                logger.info(f"[_bocha_search] 响应状态码: {response.status_code}")
                 response.raise_for_status()
                 data = response.json()
-                logger.info(f"[_bocha_search] 响应数据键: {data.keys() if isinstance(data, dict) else type(data)}")
-
-                webpages_data = data.get('data', {}).get('webPages', {})
-                value_list = webpages_data.get('value', [])
-                logger.info(f"[_bocha_search] 获取到 {len(value_list) if isinstance(value_list, list) else 0} 条结果")
-
+                webpages = data.get("data", {}).get("webPages", {}) if isinstance(data, dict) else {}
+                value_list = webpages.get("value", []) if isinstance(webpages, dict) else []
                 if not isinstance(value_list, list):
-                    logger.warning(f"[_bocha_search] value_list 不是列表: {type(value_list)}")
-                    return []
-
+                    raise json.JSONDecodeError("bocha payload shape changed", "{}", 0)
                 results = []
                 for item in value_list:
-                    if item.get('url') and (item.get('snippet') or item.get('summary')):
+                    if item.get("url") and (item.get("snippet") or item.get("summary")):
                         results.append({
-                            'url': item.get('url', ''),
-                            'title': item.get('name', ''),
-                            'summary': item.get('summary', '') or item.get('snippet', ''),
-                            'snippet': item.get('snippet', ''),
-                            'siteName': item.get('siteName', ''),
-                            'datePublished': item.get('datePublished', ''),
+                            "url": item.get("url", ""),
+                            "title": item.get("name", ""),
+                            "summary": item.get("summary", "") or item.get("snippet", ""),
+                            "snippet": item.get("snippet", ""),
+                            "siteName": item.get("siteName", ""),
+                            "datePublished": item.get("datePublished", ""),
                         })
-
-                logger.info(f"[_bocha_search] 返回 {len(results)} 条有效结果")
                 return results
 
-        except Exception as e:
-            logger.error(f"[_bocha_search] Bocha search error for '{query}': {e}", exc_info=True)
-            return []
+        outcome: ProviderOutcome = await run_provider_async(
+            _call,
+            timeout_seconds=_DEFAULT_NEWS_TIMEOUT,
+            max_attempts=_DEFAULT_NEWS_MAX_ATTEMPTS,
+            backoff_seconds=0.3,
+        )
+        self.record_outcome(outcome)
+        if outcome.ok:
+            return outcome.data or []
+        # degraded: never fabricate a payload, just return empty list
+        logger.warning(
+            "[_bocha_search] degraded outcome code=%s last_error=%s attempts=%d",
+            outcome.error_code,
+            outcome.last_error,
+            outcome.attempts,
+        )
+        return []
 
     async def collect_news(self, max_items: int = 20, industry_id: Optional[str] = None) -> Dict[str, Any]:
         """

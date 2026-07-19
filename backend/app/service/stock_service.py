@@ -1,9 +1,35 @@
-"""股票资讯服务 - 聚合数据股票API"""
+"""股票资讯服务 - 聚合数据股票API
+
+P1-2：所有外部 HTTP 调用通过 ``core.provider_reliability`` 包装，
+统一提供超时 / 有限重试 / 失败降级与 ``ProviderOutcome``。失败路径
+不再编造结果 —— 服务返回 ``{"success": False, "degraded": True,
+"provider_code": "..."}`` 以便上层多源编排区分"零结果"与"采集失败"。
+"""
 import os
+import json
+import logging
 import httpx
+from datetime import datetime
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from enum import Enum
+
+from core.provider_reliability import (
+    PROVIDER_NOT_CONFIGURED,
+    PROVIDER_OK,
+    ProviderOutcome,
+    run_provider_async,
+)
+
+logger = logging.getLogger(__name__)
+
+
+DEFAULT_STOCK_TIMEOUT_SECONDS = float(
+    os.getenv("STOCK_PROVIDER_TIMEOUT_SECONDS", "8")
+)
+DEFAULT_STOCK_MAX_ATTEMPTS = int(
+    os.getenv("STOCK_PROVIDER_MAX_ATTEMPTS", "2")
+)
 
 
 class StockMarket(Enum):
@@ -84,6 +110,44 @@ class StockService:
         if not self.api_key:
             print("警告: JUHE_STOCK_API_KEY 环境变量未设置")
 
+        # 最近一次外部调用的 ProviderOutcome；上层编排可通过
+        # ``last_outcome`` 区分"零结果"和"采集失败"。
+        self._outcomes: List[ProviderOutcome] = []
+
+    def last_outcome(self) -> Optional[ProviderOutcome]:
+        """Return the most recent provider outcome or ``None`` if no
+        call has been made yet."""
+
+        return self._outcomes[-1] if self._outcomes else None
+
+    def record_outcome(self, outcome: ProviderOutcome) -> None:
+        """Append an outcome to the rolling buffer (bounded to 32)."""
+
+        self._outcomes.append(outcome)
+        if len(self._outcomes) > 32:
+            self._outcomes = self._outcomes[-32:]
+
+    @staticmethod
+    def _degraded_payload(error: str, code: str, **extra: Any) -> Dict[str, Any]:
+        """Return a structured degraded payload used for failure paths.
+
+        The shape is intentionally backwards-compatible with the
+        pre-P1-2 contract (``success``, ``error``) but adds
+        ``degraded`` and ``provider_code`` so the orchestrator can
+        distinguish "no rows" from "the upstream failed".
+        """
+
+        payload: Dict[str, Any] = {
+            "success": False,
+            "error": error,
+            "degraded": True,
+            "provider_code": code,
+            "data": None,
+            "stocks": [],
+        }
+        payload.update(extra)
+        return payload
+
     async def get_stock_by_code(self, stock_code: str) -> Dict[str, Any]:
         """
         根据股票代码查询股票信息
@@ -93,52 +157,68 @@ class StockService:
                        也可以不带前缀，如 "601009"，会自动判断市场
 
         Returns:
-            包含股票信息的字典
+            包含股票信息的字典。失败路径返回带 ``degraded`` 与
+            ``provider_code`` 的失败字典。
         """
-        # 处理股票代码
         gid = self._normalize_stock_code(stock_code)
 
-        try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+        if not self.api_key:
+            outcome = ProviderOutcome(
+                ok=False,
+                data=None,
+                fetched_at=datetime.utcnow().isoformat() + "Z",
+                attempts=0,
+                degraded=True,
+                error_code=PROVIDER_NOT_CONFIGURED,
+                latency_ms=0,
+                last_error="JUHE_STOCK_API_KEY 未配置",
+            )
+            self.record_outcome(outcome)
+            return self._degraded_payload(
+                "股票API未配置，请设置 JUHE_STOCK_API_KEY 环境变量",
+                outcome.error_code,
+            )
+
+        async def _call() -> Dict[str, Any]:
+            assert self.api_key
+            async with httpx.AsyncClient(timeout=DEFAULT_STOCK_TIMEOUT_SECONDS) as client:
                 response = await client.get(
                     self.BASE_URL,
-                    params={
-                        "gid": gid,
-                        "key": self.api_key
-                    }
+                    params={"gid": gid, "key": self.api_key},
                 )
                 response.raise_for_status()
-                data = response.json()
+                return response.json()
 
-                if data.get("resultcode") == "200":
-                    result = data.get("result", [])
-                    if result and len(result) > 0:
-                        stock_data = result[0].get("data", {})
-                        stock_info = StockInfo.from_dict(stock_data)
-                        return {
-                            "success": True,
-                            "data": stock_info.to_dict(),
-                            "display": stock_info.format_display()
-                        }
+        outcome: ProviderOutcome = await run_provider_async(
+            _call,
+            timeout_seconds=DEFAULT_STOCK_TIMEOUT_SECONDS,
+            max_attempts=DEFAULT_STOCK_MAX_ATTEMPTS,
+            backoff_seconds=0.3,
+        )
+        self.record_outcome(outcome)
 
-                return {
-                    "success": False,
-                    "error": data.get("reason", "查询失败"),
-                    "data": None
-                }
+        if outcome.ok:
+            data = outcome.data or {}
+            if data.get("resultcode") == "200":
+                result = data.get("result", []) or []
+                if result:
+                    stock_data = result[0].get("data", {}) if isinstance(result[0], dict) else {}
+                    stock_info = StockInfo.from_dict(stock_data)
+                    return {
+                        "success": True,
+                        "data": stock_info.to_dict(),
+                        "display": stock_info.format_display(),
+                        "provider_code": outcome.error_code,
+                    }
+            return self._degraded_payload(
+                (data.get("reason") if isinstance(data, dict) else None) or "查询失败",
+                outcome.error_code,
+            )
 
-        except httpx.TimeoutException:
-            return {
-                "success": False,
-                "error": "请求超时",
-                "data": None
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "data": None
-            }
+        return self._degraded_payload(
+            outcome.last_error or "请求失败",
+            outcome.error_code,
+        )
 
     async def search_stock(self, keyword: str) -> Dict[str, Any]:
         """
@@ -186,46 +266,76 @@ class StockService:
             page: 页码
 
         Returns:
-            股票列表
+            股票列表。失败路径返回带 ``degraded`` 与 ``provider_code`` 的字典。
         """
         url = self.SHANGHAI_ALL_URL if market == "shanghai" else self.SHENZHEN_ALL_URL
 
-        try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
+        if not self.api_key:
+            outcome = ProviderOutcome(
+                ok=False,
+                data=None,
+                fetched_at=datetime.utcnow().isoformat() + "Z",
+                attempts=0,
+                degraded=True,
+                error_code=PROVIDER_NOT_CONFIGURED,
+                latency_ms=0,
+                last_error="JUHE_STOCK_API_KEY 未配置",
+            )
+            self.record_outcome(outcome)
+            return self._degraded_payload(
+                "股票API未配置，请设置 JUHE_STOCK_API_KEY 环境变量",
+                outcome.error_code,
+                market=market,
+                page=page,
+            )
+
+        async def _call() -> Dict[str, Any]:
+            assert self.api_key
+            async with httpx.AsyncClient(timeout=DEFAULT_STOCK_TIMEOUT_SECONDS) as client:
                 response = await client.get(
                     url,
-                    params={
-                        "key": self.api_key,
-                        "page": page
-                    }
+                    params={"key": self.api_key, "page": page},
                 )
                 response.raise_for_status()
-                data = response.json()
+                return response.json()
 
-                if data.get("resultcode") == "200":
-                    result = data.get("result", {})
-                    stocks = result.get("data", [])
+        outcome: ProviderOutcome = await run_provider_async(
+            _call,
+            timeout_seconds=DEFAULT_STOCK_TIMEOUT_SECONDS,
+            max_attempts=DEFAULT_STOCK_MAX_ATTEMPTS,
+            backoff_seconds=0.3,
+        )
+        self.record_outcome(outcome)
 
-                    return {
-                        "success": True,
-                        "market": market,
-                        "page": page,
-                        "total_count": result.get("totalCount", 0),
-                        "stocks": [StockInfo.from_dict(s.get("data", {})).to_dict() for s in stocks[:20]]  # 限制返回数量
-                    }
-
+        if outcome.ok:
+            data = outcome.data or {}
+            if data.get("resultcode") == "200":
+                result = data.get("result", {}) if isinstance(data, dict) else {}
+                stocks = result.get("data", []) if isinstance(result, dict) else []
                 return {
-                    "success": False,
-                    "error": data.get("reason", "查询失败"),
-                    "stocks": []
+                    "success": True,
+                    "market": market,
+                    "page": page,
+                    "total_count": result.get("totalCount", 0) if isinstance(result, dict) else 0,
+                    "stocks": [
+                        StockInfo.from_dict(s.get("data", {}) if isinstance(s, dict) else {}).to_dict()
+                        for s in stocks[:20]
+                    ],
+                    "provider_code": outcome.error_code,
                 }
+            return self._degraded_payload(
+                (data.get("reason") if isinstance(data, dict) else None) or "查询失败",
+                outcome.error_code,
+                market=market,
+                page=page,
+            )
 
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "stocks": []
-            }
+        return self._degraded_payload(
+            outcome.last_error or "请求失败",
+            outcome.error_code,
+            market=market,
+            page=page,
+        )
 
     def _normalize_stock_code(self, code: str) -> str:
         """

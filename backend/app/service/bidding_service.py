@@ -1,10 +1,36 @@
-"""招投标信息服务 - 81API 招投标数据"""
+"""招投标信息服务 - 81API 招投标数据
+
+P1-2：所有外部 HTTP 调用通过 ``core.provider_reliability`` 包装，
+统一提供超时 / 有限重试 / 失败降级与 ``ProviderOutcome``。失败路径
+不再编造结果 —— 服务返回 ``{"success": false, ..., "degraded": True,
+"provider_code": "..."}`` 以便上层编排区分"零结果"和"采集失败"。
+"""
 import os
+import json
+import logging
 import httpx
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from datetime import datetime
 from urllib.parse import quote
+
+from core.provider_reliability import (
+    PROVIDER_NOT_CONFIGURED,
+    PROVIDER_OK,
+    ProviderOutcome,
+    run_provider_async,
+)
+
+logger = logging.getLogger(__name__)
+
+
+# 招投标 API 调用的默认超时与重试预算。
+DEFAULT_BIDDING_TIMEOUT_SECONDS = float(
+    os.getenv("BIDDING_PROVIDER_TIMEOUT_SECONDS", "10")
+)
+DEFAULT_BIDDING_MAX_ATTEMPTS = int(
+    os.getenv("BIDDING_PROVIDER_MAX_ATTEMPTS", "2")
+)
 
 
 @dataclass
@@ -74,6 +100,44 @@ class BiddingService:
 
         if not self.app_code:
             print("警告: BID_APP_CODE 环境变量未设置")
+
+        # 最近一次外部调用的 ProviderOutcome；上层多源编排可通过
+        # ``last_outcome`` 区分"零结果"和"采集失败"。
+        self._outcomes: List[ProviderOutcome] = []
+
+    def last_outcome(self) -> Optional[ProviderOutcome]:
+        """Return the most recent provider outcome or ``None`` if no
+        call has been made yet."""
+
+        return self._outcomes[-1] if self._outcomes else None
+
+    def record_outcome(self, outcome: ProviderOutcome) -> None:
+        """Append an outcome to the rolling buffer (bounded to 32)."""
+
+        self._outcomes.append(outcome)
+        if len(self._outcomes) > 32:
+            self._outcomes = self._outcomes[-32:]
+
+    @staticmethod
+    def _degraded_payload(error: str, code: str, **extra: Any) -> Dict[str, Any]:
+        """Return a structured degraded payload used for failure paths.
+
+        The shape is intentionally backwards-compatible with the
+        pre-P1-2 contract (``success``, ``error``) but adds
+        ``degraded`` and ``provider_code`` so the orchestrator can
+        distinguish "no rows" from "the upstream failed".
+        """
+
+        payload: Dict[str, Any] = {
+            "success": False,
+            "error": error,
+            "degraded": True,
+            "provider_code": code,
+            "results": [],
+            "total": 0,
+        }
+        payload.update(extra)
+        return payload
 
     async def search_win_bids(
         self,
@@ -155,51 +219,86 @@ class BiddingService:
             bid_id: 标书ID
 
         Returns:
-            标书详情
+            标书详情。失败路径返回 ``{"success": False, "degraded": True,
+            "provider_code": "..."}`` 字典，对调用方语义保持向后兼容。
         """
         if not self.app_code:
+            outcome = ProviderOutcome(
+                ok=False,
+                data=None,
+                fetched_at=datetime.utcnow().isoformat() + "Z",
+                attempts=0,
+                degraded=True,
+                error_code=PROVIDER_NOT_CONFIGURED,
+                latency_ms=0,
+                last_error="BID_APP_CODE 未配置",
+            )
+            self.record_outcome(outcome)
             return {
                 "success": False,
                 "error": "招投标API未配置，请设置 BID_APP_CODE 环境变量",
-                "data": None
+                "data": None,
+                "degraded": True,
+                "provider_code": outcome.error_code,
             }
 
-        try:
-            url = f"{self.BASE_URL}{self.ENDPOINTS['detail']}/{bid_id}"
-            headers = {
-                "Authorization": f"APPCODE {self.app_code}"
-            }
+        url = f"{self.BASE_URL}{self.ENDPOINTS['detail']}/{bid_id}"
+        headers = {"Authorization": f"APPCODE {self.app_code}"}
 
-            async with httpx.AsyncClient(timeout=15.0, verify=False) as client:
+        async def _call() -> Dict[str, Any]:
+            assert self.app_code
+            async with httpx.AsyncClient(timeout=DEFAULT_BIDDING_TIMEOUT_SECONDS, verify=False) as client:
                 response = await client.get(url, headers=headers)
 
-                if response.status_code == 200:
-                    data = response.json()
-                    if data.get("status") == "200":
-                        return {
-                            "success": True,
-                            "data": data.get("data", {}),
-                            "message": data.get("message", "")
-                        }
-                    else:
-                        return {
-                            "success": False,
-                            "error": data.get("message", "查询失败"),
-                            "data": None
-                        }
+                if response.status_code == 403:
+                    msg = response.headers.get("x-ca-error-message", "")
+                    if "quota exhausted" in msg.lower():
+                        raise PermissionError("API 调用配额已用尽")
+                if response.status_code >= 500:
+                    raise httpx.HTTPStatusError(
+                        f"server {response.status_code}",
+                        request=response.request,
+                        response=response,
+                    )
+                # non-200 still carries a body that we want to surface as
+                # a soft failure rather than a hard retry.
+                try:
+                    payload = response.json()
+                except json.JSONDecodeError as exc:
+                    raise json.JSONDecodeError(
+                        f"non-JSON body status={response.status_code}",
+                        response.text,
+                        0,
+                    ) from exc
+                return payload
 
-            return {
-                "success": False,
-                "error": "API请求失败",
-                "data": None
-            }
+        outcome: ProviderOutcome = await run_provider_async(
+            _call,
+            timeout_seconds=DEFAULT_BIDDING_TIMEOUT_SECONDS,
+            max_attempts=DEFAULT_BIDDING_MAX_ATTEMPTS,
+            backoff_seconds=0.3,
+        )
+        self.record_outcome(outcome)
 
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "data": None
-            }
+        if outcome.ok:
+            data = outcome.data or {}
+            if data.get("status") == "200":
+                return {
+                    "success": True,
+                    "data": data.get("data", {}),
+                    "message": data.get("message", ""),
+                    "provider_code": outcome.error_code,
+                }
+            return self._degraded_payload(
+                data.get("message", "查询失败"),
+                outcome.error_code,
+                data=None,
+            )
+        return self._degraded_payload(
+            outcome.last_error or "API请求失败",
+            outcome.error_code,
+            data=None,
+        )
 
     async def _search(
         self,
@@ -216,94 +315,101 @@ class BiddingService:
             page: 页码
 
         Returns:
-            搜索结果
+            搜索结果。失败路径返回带 ``degraded`` 与 ``provider_code`` 的
+            字典，便于上层多源编排区分"零结果"和"采集失败"。
         """
         if not self.app_code:
-            return {
-                "success": False,
-                "error": "招投标API未配置，请设置 BID_APP_CODE 环境变量",
-                "results": [],
-                "total": 0
-            }
+            outcome = ProviderOutcome(
+                ok=False,
+                data=None,
+                fetched_at=datetime.utcnow().isoformat() + "Z",
+                attempts=0,
+                degraded=True,
+                error_code=PROVIDER_NOT_CONFIGURED,
+                latency_ms=0,
+                last_error="BID_APP_CODE 未配置",
+            )
+            self.record_outcome(outcome)
+            return self._degraded_payload(
+                "招投标API未配置，请设置 BID_APP_CODE 环境变量",
+                outcome.error_code,
+            )
 
         if not keyword:
-            return {
-                "success": False,
-                "error": "请提供搜索关键词",
-                "results": [],
-                "total": 0
-            }
+            return self._degraded_payload("请提供搜索关键词", PROVIDER_NOT_CONFIGURED)
 
-        try:
-            # 构建URL: /endpoint/keyword/page
-            url = f"{self.BASE_URL}{endpoint}/{keyword}/{page}"
-            headers = {
-                "Authorization": f"APPCODE {self.app_code}"
-            }
+        # 构建URL: /endpoint/keyword/page
+        url = f"{self.BASE_URL}{endpoint}/{keyword}/{page}"
+        headers = {"Authorization": f"APPCODE {self.app_code}"}
 
+        async def _call() -> Dict[str, Any]:
+            assert self.app_code
             # 注意：该API的SSL证书与域名不匹配，需要跳过验证
-            async with httpx.AsyncClient(timeout=15.0, verify=False) as client:
+            async with httpx.AsyncClient(timeout=DEFAULT_BIDDING_TIMEOUT_SECONDS, verify=False) as client:
                 response = await client.get(url, headers=headers)
 
-                if response.status_code == 200:
-                    data = response.json()
-
-                    if data.get("status") == "200":
-                        result_data = data.get("data", {})
-                        items = result_data.get("list", [])
-                        total = result_data.get("total", 0)
-
-                        results = [BidInfo.from_dict(item).to_dict() for item in items]
-
-                        return {
-                            "success": True,
-                            "results": results,
-                            "total": total,
-                            "page": page,
-                            "count": len(results),
-                            "message": data.get("message", "")
-                        }
-                    else:
-                        return {
-                            "success": False,
-                            "error": data.get("message", "查询失败"),
-                            "results": [],
-                            "total": 0
-                        }
-
-                # 处理 403 配额用尽错误
                 if response.status_code == 403:
                     error_msg = response.headers.get("x-ca-error-message", "")
                     if "quota exhausted" in error_msg.lower():
-                        return {
-                            "success": False,
-                            "error": "API 调用配额已用尽，请续费或等待配额重置",
-                            "results": [],
-                            "total": 0,
-                            "quota_exhausted": True
-                        }
+                        raise PermissionError("API 调用配额已用尽")
+                if response.status_code >= 500:
+                    raise httpx.HTTPStatusError(
+                        f"server {response.status_code}",
+                        request=response.request,
+                        response=response,
+                    )
+                try:
+                    payload = response.json()
+                except json.JSONDecodeError as exc:
+                    raise json.JSONDecodeError(
+                        f"non-JSON body status={response.status_code}",
+                        response.text,
+                        0,
+                    ) from exc
+                return payload
 
+        outcome: ProviderOutcome = await run_provider_async(
+            _call,
+            timeout_seconds=DEFAULT_BIDDING_TIMEOUT_SECONDS,
+            max_attempts=DEFAULT_BIDDING_MAX_ATTEMPTS,
+            backoff_seconds=0.3,
+        )
+        self.record_outcome(outcome)
+
+        if outcome.ok:
+            data = outcome.data or {}
+            if data.get("status") == "200":
+                result_data = data.get("data", {}) if isinstance(data, dict) else {}
+                items = result_data.get("list", []) if isinstance(result_data, dict) else []
+                total = result_data.get("total", 0) if isinstance(result_data, dict) else 0
+                if not isinstance(items, list):
+                    items = []
+                results = [BidInfo.from_dict(item).to_dict() for item in items]
                 return {
-                    "success": False,
-                    "error": f"HTTP {response.status_code}",
-                    "results": [],
-                    "total": 0
+                    "success": True,
+                    "results": results,
+                    "total": total,
+                    "page": page,
+                    "count": len(results),
+                    "message": data.get("message", "") if isinstance(data, dict) else "",
+                    "provider_code": outcome.error_code,
                 }
+            return self._degraded_payload(
+                (data.get("message") if isinstance(data, dict) else None) or "查询失败",
+                outcome.error_code,
+            )
 
-        except httpx.TimeoutException:
-            return {
-                "success": False,
-                "error": "请求超时",
-                "results": [],
-                "total": 0
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e),
-                "results": [],
-                "total": 0
-            }
+        # degraded paths
+        extra: Dict[str, Any] = {}
+        if outcome.error_code == PROVIDER_NOT_CONFIGURED:
+            pass
+        elif "quota" in (outcome.last_error or "").lower():
+            extra["quota_exhausted"] = True
+        return self._degraded_payload(
+            outcome.last_error or "API请求失败",
+            outcome.error_code,
+            **extra,
+        )
 
     def format_results(self, results: List[Dict]) -> str:
         """格式化搜索结果为可读文本"""
