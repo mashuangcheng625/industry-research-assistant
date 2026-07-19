@@ -1,7 +1,9 @@
 {
   "version": 1,
   "split_name": "blind_v2",
-  "description": "Independent blind-v2 evaluation set (P1-11). Questions are based on the same corpus as the regression/development splits but were NOT used during model tuning. Answer keys are stored in data/evaluation-private/ (gitignored) so quantitative evaluation can be performed without exposing labels in the public repository.",
+  "description": "One-shot blind-v2 evaluation set (P1-11). It was first evaluated after the code and index were frozen. The first run exposed knowledge-base mapping and source-attribution defects, so this split is now retained as an unmodified, unblinded diagnostic set rather than a model-accuracy benchmark. Answer keys remain in data/evaluation-private/ (gitignored).",
+  "evaluation_status": "unblinded_diagnostic_only",
+  "first_run_audit": "docs/BLIND_V2_EVALUATION_AUDIT.md",
   "question_count": 25,
   "domain_counts": {
     "芯片设计与EDA/IP": 5,
@@ -20,5 +22,5 @@
   "label_visibility": "private",
   "answer_key_path": "data/evaluation-private/semiconductor_rag_eval_blind_v2_answers.json",
   "questions_file": "sample-data/semiconductor_rag_eval_blind_v2.json",
-  "protocol": "Evaluate against the blind-v2 answer key using the same evaluation pipeline as the regression split (see scripts/evaluate_rag_answers.py). The answer key must NOT be committed to the public repository. Results should be reported as a relative change vs. the public development/regression baseline, never as a standalone percentage."
+  "protocol": "Preserve this split unchanged for diagnostic reproduction only. Do not tune against it or present its result as model accuracy. The answer key must NOT be committed. A new externally maintained blind split is required for the next generalization claim; see docs/BLIND_V2_EVALUATION_AUDIT.md."
 }

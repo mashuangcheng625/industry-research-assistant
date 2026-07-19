@@ -12,13 +12,16 @@ exactly how each piece of evidence maps to the rendered answer.
 
 from __future__ import annotations
 
+import asyncio
 import json
 import os
+import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 
 router = APIRouter(prefix="/demo", tags=["demo"])
 
@@ -26,6 +29,7 @@ router = APIRouter(prefix="/demo", tags=["demo"])
 # file defines one scenario with its question, expected answer, and the
 # retrieval trace that supports it.
 FIXTURE_DIR = Path(__file__).resolve().parents[2] / "sample-data" / "demo_scenarios"
+SYNC_PROBE_TIMEOUT_SECONDS = 2.5
 
 
 # ---------------------------------------------------------------------------
@@ -72,7 +76,7 @@ async def list_scenarios() -> JSONResponse:
 
 
 @router.get("/ready")
-async def readiness_check(request: Request) -> JSONResponse:
+async def readiness_check() -> JSONResponse:
     """Check whether the major infrastructure components are reachable.
 
     The preflight is intentionally lightweight (< 5 s on a healthy
@@ -83,47 +87,17 @@ async def readiness_check(request: Request) -> JSONResponse:
     ``ok=null`` with a ``detail`` explaining why.
     """
 
-    import time
-
-    checks: Dict[str, Dict[str, Any]] = {}
-
-    # PostgreSQL
-    t0 = time.perf_counter()
-    try:
-        from core.database import engine
-        with engine.connect() as conn:
-            conn.execute(conn.text("SELECT 1"))
-        checks["postgresql"] = {"ok": True, "detail": "connected", "latency_ms": _ms(t0)}
-    except Exception as exc:
-        checks["postgresql"] = {"ok": False, "detail": f"{type(exc).__name__}", "latency_ms": _ms(t0)}
-
-    # Redis
-    t0 = time.perf_counter()
-    try:
-        from core.redis_client import get_redis_client
-        client = get_redis_client()
-        if client is not None:
-            client.ping()
-            checks["redis"] = {"ok": True, "detail": "connected", "latency_ms": _ms(t0)}
-        else:
-            checks["redis"] = {"ok": None, "detail": "not configured", "latency_ms": _ms(t0)}
-    except Exception as exc:
-        checks["redis"] = {"ok": False, "detail": f"{type(exc).__name__}", "latency_ms": _ms(t0)}
-
-    # Milvus
-    t0 = time.perf_counter()
-    try:
-        from service.milvus_service import MilvusService
-        svc = MilvusService()
-        collections = svc.list_collections()
-        checks["milvus"] = {
-            "ok": True,
-            "detail": f"collections={len(collections)}",
-            "collections": collections[:10],
-            "latency_ms": _ms(t0),
-        }
-    except Exception as exc:
-        checks["milvus"] = {"ok": False, "detail": f"{type(exc).__name__}", "latency_ms": _ms(t0)}
+    # These clients are synchronous. Run them concurrently off the event loop
+    # so a slow dependency can never starve the fixture endpoint on a
+    # single-worker demo server.
+    probe_names = ("postgresql", "redis", "milvus")
+    probe_results = await asyncio.gather(
+        *(
+            _run_sync_probe(probe)
+            for probe in (_probe_postgresql, _probe_redis, _probe_milvus)
+        )
+    )
+    checks: Dict[str, Dict[str, Any]] = dict(zip(probe_names, probe_results))
 
     # Ollama (optional local provider)
     t0 = time.perf_counter()
@@ -198,8 +172,53 @@ async def readiness_check(request: Request) -> JSONResponse:
 
 
 def _ms(t0: float) -> int:
-    import time
     return int((time.perf_counter() - t0) * 1000)
+
+
+async def _run_sync_probe(
+    probe: Callable[[], Dict[str, Any]],
+) -> Dict[str, Any]:
+    """Run a blocking readiness probe without blocking FastAPI's event loop."""
+    started = time.perf_counter()
+    try:
+        result = await asyncio.wait_for(
+            asyncio.to_thread(probe),
+            timeout=SYNC_PROBE_TIMEOUT_SECONDS,
+        )
+    except TimeoutError:
+        result = {"ok": False, "detail": "timeout"}
+    except Exception as exc:
+        result = {"ok": False, "detail": type(exc).__name__}
+    return {**result, "latency_ms": _ms(started)}
+
+
+def _probe_postgresql() -> Dict[str, Any]:
+    from core.database import engine
+
+    with engine.connect() as conn:
+        conn.execute(text("SELECT 1"))
+    return {"ok": True, "detail": "connected"}
+
+
+def _probe_redis() -> Dict[str, Any]:
+    from core.redis_client import get_redis_client
+
+    client = get_redis_client()
+    if client is None:
+        return {"ok": None, "detail": "not configured"}
+    client.ping()
+    return {"ok": True, "detail": "connected"}
+
+
+def _probe_milvus() -> Dict[str, Any]:
+    from service.milvus_service import MilvusService
+
+    collections = MilvusService().list_collections()
+    return {
+        "ok": True,
+        "detail": f"collections={len(collections)}",
+        "collections": collections[:10],
+    }
 
 
 def _now_iso() -> str:

@@ -7,8 +7,11 @@ internal services to be running (the scenarios are frozen fixtures).
 
 from __future__ import annotations
 
+import asyncio
 import json
 from pathlib import Path
+import time
+from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
@@ -72,6 +75,17 @@ def test_refusal_scenario_has_empty_or_null_traces(client: TestClient) -> None:
     assert nx["meta"]["refusal_reason"] == "missing_source"
 
 
+def test_ucie_scenario_uses_approved_nist_sources_not_riscv() -> None:
+    fixture = json.loads(
+        (FIXTURE_DIR / "01-ucie-hybrid.json").read_text(encoding="utf-8")
+    )
+    document_names = {trace["doc_name"] for trace in fixture["retrieval_trace"]}
+
+    assert document_names == {"nist-chips-1400-2.md", "nist-ir-8577.md"}
+    assert fixture["meta"]["knowledge_base"] == "semiconductor_packaging_testing"
+    assert "UCIe 2.0" not in fixture["question"]
+
+
 # ---------------------------------------------------------------------------
 # GET /demo/ready (contract shape only — real-service checks are manual)
 # ---------------------------------------------------------------------------
@@ -79,6 +93,34 @@ def test_refusal_scenario_has_empty_or_null_traces(client: TestClient) -> None:
 # DB / Redis / Milvus may not be available in the test environment.
 # The scenarios endpoint is fully covered above; the ready endpoint
 # contract is exercised manually against a live deployment.
+
+
+def test_sync_readiness_probe_does_not_block_event_loop() -> None:
+    from router import demo_router
+
+    async def exercise() -> None:
+        task = asyncio.create_task(
+            demo_router._run_sync_probe(
+                lambda: (time.sleep(0.05), {"ok": True, "detail": "done"})[1]
+            )
+        )
+        await asyncio.wait_for(asyncio.sleep(0.01), timeout=0.03)
+        result = await task
+        assert result["ok"] is True
+
+    asyncio.run(exercise())
+
+
+def test_sync_readiness_probe_fails_fast_on_timeout() -> None:
+    from router import demo_router
+
+    async def exercise() -> dict:
+        with patch.object(demo_router, "SYNC_PROBE_TIMEOUT_SECONDS", 0.01):
+            return await demo_router._run_sync_probe(
+                lambda: (time.sleep(0.05), {"ok": True, "detail": "late"})[1]
+            )
+
+    assert asyncio.run(exercise())["detail"] == "timeout"
 
 
 

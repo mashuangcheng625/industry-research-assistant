@@ -58,7 +58,7 @@ make validate-sources
 
 | 检查项 | 结果 |
 | --- | ---: |
-| 后端单元 + Milvus Lite 集成测试 | 364/364 通过（364 unit + 1 integration） |
+| 后端单元 + Milvus Lite 集成测试 | 407/407 通过（406 unit + 1 integration） |
 | 全语料 Milvus Lite smoke | 15 份资料 / 36 任务 / 5256 切片，4/4 库对账通过 |
 | Python 编译检查 | 通过 |
 | Python 依赖一致性 | `pip check` 通过 |

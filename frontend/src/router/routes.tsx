@@ -89,10 +89,6 @@ export const routes: IRouteObject[] = [
     Component: withLazy(BiddingPage),
   },
   {
-    path: '/demo',
-    Component: withLazy(DemoPage),
-  },
-  {
     path: '/404',
     Component: NotFound,
     pure: true,
@@ -104,6 +100,14 @@ export const router = createBrowserRouter(
     {
       path: '/login',
       element: <LoginPage />,
+    },
+    {
+      path: '/demo',
+      element: (
+        <Lazy>
+          <DemoPage />
+        </Lazy>
+      ),
     },
     {
       path: '/',
