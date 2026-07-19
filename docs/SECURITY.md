@@ -171,6 +171,31 @@ LLM Critic（`deep_research_v2/agents/critic.py`）继续负责语义层
 
 相关单元测试：`backend/test/test_critic_checks.py`（44 项）。
 
+## 模型实测（P1-5）
+
+固定样本的云端/本地/hybrid对比冒烟脚本
+[`p1_5_model_smoke.py`](../../backend/scripts/p1_5_model_smoke.py)，
+搭配
+[`p1_5_model_smoke_inputs.json`](../../backend/sample-data/p1_5_model_smoke_inputs.json)
+输入在本地 `.env` 有 `DASHSCOPE_API_KEY` 且 Ollama 运行时可直接执行。
+实测报告
+[`reports/p1-5-model-smoke.json`](../../reports/p1-5-model-smoke.json)。
+
+2026-07-19 实测（WSL+Ollama qwen3:4b + 百炼 deepseek-v4-flash +
+text-embedding-v4 + qwen3-rerank）：
+
+- **生成**（5 prompt × cloud + local）：云 P50=2.0s / P95=2.4s；
+  本地 P50≈3.5s / P95≈8s；LLM-judge 平均分 cloud=4.8 / local≈3.2。
+- **Embedding**（20 text × cloud + local）：云 P50=330ms / P95=410ms；
+  本地 P50=440ms / P95=479ms（首次冷启动 4.3s）；
+  云平均余弦=0.50，本地=0.42（量纲一致、向量空间接近）。
+- **Rerank**（5 query × cloud）：P50=321ms / P95=403ms，
+  nDCG@3=1.0（5 个预制测试用例全部完美排序）。
+
+脚本本身不调用收费 API（除非本地 `.env` 有有效 key + 主动运行），
+CI 不触发，不增加任何日常额度成本。每次完整云+本地跑完
+总费用 < 0.5 CNY。
+
 ## 尚未覆盖的生产能力
 
 - TLS 终止、WAF 和反向代理上传限制；

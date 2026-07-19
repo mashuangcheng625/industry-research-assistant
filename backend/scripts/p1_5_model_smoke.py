@@ -1,0 +1,833 @@
+"""P1-5 model smoke test (opt-in live).
+
+Runs a fixed sample of generation, embedding, rerank and
+hybrid-retrieval tasks against the cloud (Bailian) and the local
+Ollama providers. Captures latency / token / cost metrics and emits
+a single JSON report under ``reports/`` for offline review.
+
+Run on a dev machine with ``DASHSCOPE_API_KEY`` set and Ollama
+running locally. The cloud calls consume a small but real amount of
+API quota; the local calls are free. The default invocation performs
+roughly:
+
+* 5 cloud + 5 local generation calls;
+* 20 cloud + 20 local embedding calls;
+* 5 cloud rerank calls;
+* 10 LLM-judge calls (one per generation output);
+* 5 hybrid retrieval cycles against Milvus Lite (no LLM cost).
+
+The script deliberately keeps the sample small so the run finishes in
+under 90 seconds and the cumulative spend stays under 0.5 CNY on
+Bailian.
+
+The script never hard-fails on a single provider error. Each
+provider's failures are recorded under ``provider_failures`` in the
+output so the user can re-run after fixing the local environment
+without re-paying for the cloud half.
+
+Examples:
+
+    # full run (cloud + local)
+    python scripts/p1_5_model_smoke.py
+
+    # cloud-only (faster, cheaper)
+    python scripts/p1_5_model_smoke.py --skip-local
+
+    # custom sample + output
+    python scripts/p1_5_model_smoke.py \\
+        --inputs sample-data/p1_5_model_smoke_inputs.json \\
+        --output reports/p1-5-model-smoke.json
+"""
+
+from __future__ import annotations
+
+import argparse
+import asyncio
+import json
+import math
+import logging
+import os
+import statistics
+import sys
+import time
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Tuple
+
+# Local application imports. ``backend/app`` must be on sys.path.
+APP_DIR = Path(__file__).resolve().parents[1] / "app"
+if str(APP_DIR) not in sys.path:
+    sys.path.insert(0, str(APP_DIR))
+
+from openai import OpenAI  # noqa: E402
+
+from core.provider_reliability import (  # noqa: E402
+    PROVIDER_OK,
+    PROVIDER_TIMEOUT,
+    PROVIDER_UNKNOWN,
+    run_provider_async,
+    ProviderOutcome,
+)
+from service.llm_router import (  # noqa: E402
+    LLMEndpoint,
+    resolve_llm_endpoint,
+)
+
+
+logger = logging.getLogger("p1_5_smoke")
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+
+# ---------------------------------------------------------------------------
+# Stats helpers
+# ---------------------------------------------------------------------------
+
+
+@dataclass
+class Bucket:
+    name: str
+    samples: List[float] = field(default_factory=list)
+
+    def add(self, value: Optional[float]) -> None:
+        if value is None:
+            return
+        self.samples.append(float(value))
+
+    def stats(self) -> Dict[str, Any]:
+        if not self.samples:
+            return {"count": 0, "p50_ms": None, "p95_ms": None, "mean_ms": None}
+        ordered = sorted(self.samples)
+        n = len(ordered)
+        p50 = ordered[min(n // 2, n - 1)]
+        p95_index = min(int(round(0.95 * (n - 1))), n - 1)
+        p95 = ordered[p95_index]
+        return {
+            "count": n,
+            "p50_ms": round(p50 * 1000, 2),
+            "p95_ms": round(p95 * 1000, 2),
+            "mean_ms": round(statistics.mean(ordered) * 1000, 2),
+            "min_ms": round(ordered[0] * 1000, 2),
+            "max_ms": round(ordered[-1] * 1000, 2),
+        }
+
+
+def _endpoint_dict(endpoint: LLMEndpoint) -> Dict[str, str]:
+    """Return a safe dict for the report (no API keys)."""
+
+    return {
+        "mode": endpoint.mode,
+        "provider": endpoint.provider,
+        "base_url": endpoint.base_url,
+        "model": endpoint.model,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Generation smoke
+# ---------------------------------------------------------------------------
+
+
+async def _run_generation(
+    endpoint: LLMEndpoint,
+    prompt: Dict[str, str],
+    *,
+    task_id: str,
+    provider_label: str,
+) -> Dict[str, Any]:
+    """Call the LLM via :func:`run_provider_async` so the smoke test
+    shares the P1-2 reliability contract with the rest of the
+    codebase.
+    """
+
+    started = time.perf_counter()
+    client = OpenAI(api_key=endpoint.api_key, base_url=endpoint.base_url, timeout=30.0)
+
+    def _build_call() -> Any:
+        return client.chat.completions.create(
+            model=endpoint.model,
+            messages=[
+                {"role": "system", "content": prompt["system"]},
+                {"role": "user", "content": prompt["user"]},
+            ],
+            temperature=0.0,
+        )
+
+    async def _build_async() -> Any:
+        return await asyncio.to_thread(_build_call)
+
+    outcome: ProviderOutcome = await run_provider_async(
+        _build_async,
+        timeout_seconds=30.0,
+        max_attempts=1,
+        backoff_seconds=0.0,
+    )
+    elapsed = time.perf_counter() - started
+
+    record: Dict[str, Any] = {
+        "task_id": task_id,
+        "provider": provider_label,
+        "ok": outcome.ok,
+        "error_code": outcome.error_code,
+        "latency_ms": round(elapsed * 1000, 2),
+        "attempts": outcome.attempts,
+        "last_error": outcome.last_error,
+        "content": None,
+        "content_length": 0,
+        "tokens": None,
+    }
+    if outcome.ok and outcome.data is not None:
+        try:
+            record["content"] = outcome.data.choices[0].message.content
+        except (AttributeError, IndexError, KeyError):
+            record["content"] = None
+        record["content_length"] = len(record["content"] or "")
+        usage = getattr(outcome.data, "usage", None)
+        if usage is not None:
+            record["tokens"] = {
+                "prompt_tokens": getattr(usage, "prompt_tokens", None),
+                "completion_tokens": getattr(usage, "completion_tokens", None),
+                "total_tokens": getattr(usage, "total_tokens", None),
+            }
+    return record
+
+
+async def _run_judge(
+    endpoint: LLMEndpoint,
+    *,
+    task_id: str,
+    user_prompt: str,
+    candidate: str,
+    expected_keywords: Sequence[str],
+    provider_label: str,
+    rubric: str,
+) -> Dict[str, Any]:
+    """Score ``candidate`` against ``user_prompt`` / expected keywords.
+
+    The judge uses the cloud ``deepseek-v4-flash`` to keep scoring
+    consistent across the smoke test.
+    """
+
+    keyword_list = "、".join(expected_keywords) if expected_keywords else "（无）"
+    judge_prompt = (
+        "你是一位严苛的半导体行业评审员,按以下评分细则给候选答案打分,只输出 1-5 之间的整数:\n"
+        f"{rubric}\n\n"
+        f"问题: {user_prompt}\n"
+        f"期望关键词: {keyword_list}\n"
+        f"候选答案: {candidate}\n\n"
+        "请只输出 1-5 之间的整数:"
+    )
+    started = time.perf_counter()
+    client = OpenAI(api_key=endpoint.api_key, base_url=endpoint.base_url, timeout=20.0)
+
+    def _build_call() -> Any:
+        return client.chat.completions.create(
+            model=endpoint.model,
+            messages=[
+                {"role": "system", "content": "你只输出 1-5 之间的整数,不要解释。"},
+                {"role": "user", "content": judge_prompt},
+            ],
+            temperature=0.0,
+        )
+
+    async def _build_async() -> Any:
+        return await asyncio.to_thread(_build_call)
+
+    outcome: ProviderOutcome = await run_provider_async(
+        _build_async,
+        timeout_seconds=20.0,
+        max_attempts=1,
+        backoff_seconds=0.0,
+    )
+    elapsed = time.perf_counter() - started
+    score: Optional[int] = None
+    raw_content: Optional[str] = None
+    if outcome.ok and outcome.data is not None:
+        try:
+            raw_content = (outcome.data.choices[0].message.content or "").strip()
+        except (AttributeError, IndexError):
+            raw_content = None
+        if raw_content is not None:
+            digits = "".join(ch for ch in raw_content if ch.isdigit())
+            if digits:
+                try:
+                    score = int(digits[0])
+                    score = max(1, min(5, score))
+                except ValueError:
+                    score = None
+    return {
+        "task_id": task_id,
+        "provider": provider_label,
+        "ok": outcome.ok,
+        "score": score,
+        "raw": raw_content,
+        "latency_ms": round(elapsed * 1000, 2),
+        "error_code": outcome.error_code if not outcome.ok else None,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Embedding smoke
+# ---------------------------------------------------------------------------
+
+
+async def _embed(
+    text: str,
+    *,
+    api_key: str,
+    base_url: str,
+    model_name: str,
+    dim: int,
+    provider_label: str,
+) -> Dict[str, Any]:
+    started = time.perf_counter()
+    client = OpenAI(api_key=api_key, base_url=base_url, timeout=20.0)
+
+    def _build_call() -> Any:
+        return client.embeddings.create(
+            model=model_name,
+            input=text,
+            dimensions=dim,
+            encoding_format="float",
+        )
+
+    async def _build_async() -> Any:
+        return await asyncio.to_thread(_build_call)
+
+    outcome: ProviderOutcome = await run_provider_async(
+        _build_async,
+        timeout_seconds=20.0,
+        max_attempts=1,
+        backoff_seconds=0.0,
+    )
+    elapsed = time.perf_counter() - started
+    record: Dict[str, Any] = {
+        "provider": provider_label,
+        "ok": outcome.ok,
+        "error_code": outcome.error_code,
+        "last_error": outcome.last_error,
+        "latency_ms": round(elapsed * 1000, 2),
+        "vector_dim": None,
+        "vector_norm": None,
+    }
+    if outcome.ok and outcome.data is not None:
+        items = getattr(outcome.data, "data", None) or []
+        if items:
+            first = items[0]
+            vec = getattr(first, "embedding", None) or []
+            if isinstance(vec, list):
+                record["vector_dim"] = len(vec)
+                if vec:
+                    record["vector_norm"] = round(
+                        sum(x * x for x in vec) ** 0.5, 4
+                    )
+    return record
+
+
+def _cosine(a: Sequence[float], b: Sequence[float]) -> float:
+    if not a or not b or len(a) != len(b):
+        return 0.0
+    num = sum(x * y for x, y in zip(a, b))
+    den_a = sum(x * x for x in a) ** 0.5
+    den_b = sum(y * y for y in b) ** 0.5
+    if den_a == 0 or den_b == 0:
+        return 0.0
+    return num / (den_a * den_b)
+
+
+# ---------------------------------------------------------------------------
+# Rerank smoke
+# ---------------------------------------------------------------------------
+
+
+async def _rerank(
+    *,
+    query: str,
+    documents: Sequence[str],
+    api_key: str,
+    base_url: str,
+    model_name: str,
+    provider_label: str,
+) -> Dict[str, Any]:
+    started = time.perf_counter()
+    client = OpenAI(api_key=api_key, base_url=base_url, timeout=30.0)
+
+    def _build_call() -> Any:
+        return client.post(
+            "/reranks",
+            body={
+                "model": model_name,
+                "query": query,
+                "documents": list(documents),
+                "top_n": len(documents),
+                "instruct": os.environ.get(
+                    "RERANK_INSTRUCT",
+                    "Given a web search query, retrieve relevant passages that answer the query.",
+                ),
+            },
+            cast_to=object,
+        )
+
+    async def _build_async() -> Any:
+        return await asyncio.to_thread(_build_call)
+
+    outcome: ProviderOutcome = await run_provider_async(
+        _build_async,
+        timeout_seconds=30.0,
+        max_attempts=1,
+        backoff_seconds=0.0,
+    )
+    elapsed = time.perf_counter() - started
+    record: Dict[str, Any] = {
+        "provider": provider_label,
+        "ok": outcome.ok,
+        "error_code": outcome.error_code,
+        "last_error": outcome.last_error,
+        "latency_ms": round(elapsed * 1000, 2),
+        "ranking": None,
+    }
+    if outcome.ok and outcome.data is not None:
+        payload = (
+            outcome.data
+            if isinstance(outcome.data, dict)
+            else getattr(outcome.data, "__dict__", None) or {}
+        )
+        results = payload.get("results")
+        if isinstance(results, list):
+            record["ranking"] = [
+                {
+                    "index": int(item.get("index")),
+                    "score": float(item.get("relevance_score", 0.0)),
+                }
+                for item in results
+                if isinstance(item, dict)
+            ]
+    return record
+
+
+def _ndcg(ranking: Optional[List[Dict[str, Any]]], relevant: List[int], k: int) -> Optional[float]:
+    """Compute nDCG@k against a binary relevance vector.
+
+    ``ranking`` is the model's output (a list of ``{"index", "score"}``
+    dicts sorted by score descending). ``relevant`` is the list of
+    ground-truth relevant document indices.
+    """
+
+    if not ranking or not relevant:
+        return None
+    rel_set = set(relevant)
+    # DCG@k
+    dcg = 0.0
+    for rank, item in enumerate(ranking[:k], start=1):
+        idx = int(item.get("index"))
+        gain = 1.0 if idx in rel_set else 0.0
+        dcg += gain / (1.0 if rank == 1 else math.log2(rank + 1))
+    # iDCG@k
+    ideal = min(len(relevant), k)
+    if ideal == 0:
+        return 0.0
+    idcg = 0.0
+    for rank in range(1, ideal + 1):
+        idcg += 1.0 / (1.0 if rank == 1 else math.log2(rank + 1))
+    if idcg == 0:
+        return 0.0
+    return dcg / idcg
+
+
+# ---------------------------------------------------------------------------
+# Hybrid retrieval
+# ---------------------------------------------------------------------------
+
+
+def _hybrid_retrieval(
+    *,
+    knowledge_base: str,
+    query: str,
+    top_k: int,
+) -> Dict[str, Any]:
+    started = time.perf_counter()
+    try:
+        from service.retrieval_service import retrieve_from_knowledge_base
+        items = retrieve_from_knowledge_base(
+            knowledge_base=knowledge_base,
+            query=query,
+            top_k=top_k,
+        )
+        elapsed = time.perf_counter() - started
+        return {
+            "ok": True,
+            "latency_ms": round(elapsed * 1000, 2),
+            "count": len(items),
+            "first_score": getattr(items[0], "score", None) if items else None,
+            "error": None,
+        }
+    except Exception as exc:  # noqa: BLE001
+        elapsed = time.perf_counter() - started
+        return {
+            "ok": False,
+            "latency_ms": round(elapsed * 1000, 2),
+            "count": 0,
+            "first_score": None,
+            "error": f"{type(exc).__name__}: {exc}",
+        }
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+
+async def _main() -> Dict[str, Any]:
+    parser = argparse.ArgumentParser(description="P1-5 model smoke test")
+    parser.add_argument(
+        "--inputs",
+        default="sample-data/p1_5_model_smoke_inputs.json",
+        help="Path to the smoke test input JSON.",
+    )
+    parser.add_argument(
+        "--output",
+        default="reports/p1-5-model-smoke.json",
+        help="Path to write the JSON report.",
+    )
+    parser.add_argument(
+        "--knowledge-base",
+        default="semiconductor_advanced_packaging",
+        help="Knowledge base name to query for the hybrid retrieval step.",
+    )
+    parser.add_argument(
+        "--hybrid-top-k",
+        type=int,
+        default=3,
+        help="Top-k for the hybrid retrieval step.",
+    )
+    parser.add_argument(
+        "--skip-local",
+        action="store_true",
+        help="Skip the local Ollama pass (saves CPU when no GPU is available).",
+    )
+    args = parser.parse_args()
+
+    inputs_path = Path(args.inputs)
+    if not inputs_path.is_absolute():
+        inputs_path = Path(__file__).resolve().parents[1] / inputs_path
+    inputs = json.loads(inputs_path.read_text(encoding="utf-8"))
+
+    generation_prompts: List[Dict[str, str]] = inputs["generation_prompts"]
+    embedding_texts: List[str] = inputs["embedding_texts"]
+    rerank_cases: List[Dict[str, Any]] = inputs["rerank_cases"]
+    rubric: str = inputs["judge_rubric"]["criteria"]
+
+    cloud_gen = resolve_llm_endpoint("cloud")
+    try:
+        local_gen = resolve_llm_endpoint("local") if not args.skip_local else None
+    except Exception:  # noqa: BLE001
+        local_gen = None
+    rerank_endpoint = LLMEndpoint(
+        mode="cloud",
+        provider="bailian",
+        api_key=os.environ.get("RERANK_API_KEY")
+        or os.environ.get("DASHSCOPE_API_KEY", ""),
+        base_url=os.environ.get(
+            "RERANK_BASE_URL",
+            "https://dashscope.aliyuncs.com/compatible-api/v1",
+        ),
+        model=os.environ.get("RERANK_MODEL", "qwen3-rerank"),
+    )
+
+    emb_cloud_key = os.environ.get("EMBEDDING_API_KEY") or os.environ.get("DASHSCOPE_API_KEY", "")
+    emb_cloud_url = os.environ.get("EMBEDDING_BASE_URL") or os.environ.get(
+        "DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    )
+    emb_cloud_model = os.environ.get("EMBEDDING_MODEL", "text-embedding-v4")
+    emb_dim = int(os.environ.get("EMBEDDING_DIMENSIONS", "1024"))
+    emb_local_key = os.environ.get("LOCAL_EMBEDDING_API_KEY", "ollama")
+    emb_local_url = os.environ.get("LOCAL_EMBEDDING_BASE_URL", "http://127.0.0.1:11434/v1")
+    emb_local_model = os.environ.get("LOCAL_EMBEDDING_MODEL", "bge-m3")
+    skip_local = args.skip_local or local_gen is None
+
+    started_at = datetime.now(timezone.utc).isoformat()
+
+    # ---------- generation ----------
+    gen_records: List[Dict[str, Any]] = []
+    gen_latency = Bucket("gen")
+    gen_token_in = 0
+    gen_token_out = 0
+    for prompt in generation_prompts:
+        cloud_record = await _run_generation(
+            cloud_gen, prompt, task_id=prompt["id"], provider_label="cloud"
+        )
+        gen_records.append(cloud_record)
+        if cloud_record["ok"]:
+            gen_latency.add(cloud_record["latency_ms"] / 1000.0)
+            tokens = cloud_record["tokens"] or {}
+            if isinstance(tokens, dict):
+                gen_token_in += int(tokens.get("prompt_tokens") or 0)
+                gen_token_out += int(tokens.get("completion_tokens") or 0)
+
+        if not skip_local:
+            try:
+                local_record = await _run_generation(
+                    local_gen,
+                    prompt,
+                    task_id=prompt["id"],
+                    provider_label="local",
+                )
+            except Exception as exc:  # noqa: BLE001
+                local_record = {
+                    "task_id": prompt["id"],
+                    "provider": "local",
+                    "ok": False,
+                    "error_code": PROVIDER_UNKNOWN,
+                    "last_error": f"{type(exc).__name__}: {exc}",
+                    "latency_ms": None,
+                }
+            gen_records.append(local_record)
+            if local_record.get("ok"):
+                gen_latency.add(local_record["latency_ms"] / 1000.0)
+
+    # ---------- judge (LLM-as-judge) ----------
+    judge_records: List[Dict[str, Any]] = []
+    for record in gen_records:
+        if not record.get("ok"):
+            continue
+        task_id = f"{record['task_id']}-{record['provider']}"
+        prompt = next(
+            (p for p in generation_prompts if p["id"] == record["task_id"]),
+            None,
+        )
+        if prompt is None:
+            continue
+        judge = await _run_judge(
+            cloud_gen,
+            task_id=task_id,
+            user_prompt=prompt["user"],
+            candidate=record.get("content") or "",
+            expected_keywords=prompt.get("expected_keywords", []),
+            provider_label="judge-cloud",
+            rubric=rubric,
+        )
+        judge_records.append(judge)
+
+    # ---------- embedding ----------
+    emb_records: List[Dict[str, Any]] = []
+    emb_latency_cloud = Bucket("emb-cloud")
+    emb_latency_local = Bucket("emb-local")
+    cloud_vectors: List[List[float]] = []
+    local_vectors: List[List[float]] = []
+    for text in embedding_texts:
+        cloud_rec = await _embed(
+            text,
+            api_key=emb_cloud_key,
+            base_url=emb_cloud_url,
+            model_name=emb_cloud_model,
+            dim=emb_dim,
+            provider_label="cloud",
+        )
+        emb_records.append(cloud_rec)
+        if cloud_rec["ok"]:
+            emb_latency_cloud.add(cloud_rec["latency_ms"] / 1000.0)
+            if "vector_dim" in cloud_rec and cloud_rec["vector_dim"]:
+                # Re-call once to get the vector itself; cheaper than
+                # re-running with a side-channel.
+                client = OpenAI(api_key=emb_cloud_key, base_url=emb_cloud_url, timeout=20.0)
+                resp = client.embeddings.create(
+                    model=emb_cloud_model,
+                    input=text,
+                    dimensions=emb_dim,
+                )
+                if resp.data:
+                    cloud_vectors.append(list(resp.data[0].embedding))
+
+        if not skip_local:
+            try:
+                local_rec = await _embed(
+                    text,
+                    api_key=emb_local_key,
+                    base_url=emb_local_url,
+                    model_name=emb_local_model,
+                    dim=emb_dim,
+                    provider_label="local",
+                )
+            except Exception as exc:  # noqa: BLE001
+                local_rec = {
+                    "provider": "local",
+                    "ok": False,
+                    "error_code": PROVIDER_UNKNOWN,
+                    "last_error": f"{type(exc).__name__}: {exc}",
+                    "latency_ms": None,
+                }
+            emb_records.append(local_rec)
+            if local_rec.get("ok") and not args.skip_local:
+                emb_latency_local.add(local_rec["latency_ms"] / 1000.0)
+                try:
+                    client = OpenAI(api_key=emb_local_key, base_url=emb_local_url, timeout=20.0)
+                    resp = client.embeddings.create(
+                        model=emb_local_model,
+                        input=text,
+                    )
+                    if resp.data:
+                        local_vectors.append(list(resp.data[0].embedding))
+                except Exception:  # noqa: BLE001
+                    pass
+
+    # Similarity sanity: average pairwise cosine on same-provider vectors.
+    def _avg_pairwise(vectors: List[List[float]]) -> Optional[float]:
+        if len(vectors) < 2:
+            return None
+        sims: List[float] = []
+        for i in range(len(vectors)):
+            for j in range(i + 1, len(vectors)):
+                sims.append(_cosine(vectors[i], vectors[j]))
+        return round(sum(sims) / len(sims), 4) if sims else None
+
+    sim_cloud = _avg_pairwise(cloud_vectors)
+    sim_local = _avg_pairwise(local_vectors)
+
+    # ---------- rerank ----------
+    rerank_records: List[Dict[str, Any]] = []
+    rerank_latency = Bucket("rerank")
+    for case in rerank_cases:
+        try:
+            record = await _rerank(
+                query=case["query"],
+                documents=case["documents"],
+                api_key=rerank_endpoint.api_key,
+                base_url=rerank_endpoint.base_url,
+                model_name=rerank_endpoint.model,
+                provider_label="cloud",
+            )
+        except Exception as exc:  # noqa: BLE001
+            record = {
+                "id": case["id"],
+                "provider": "cloud",
+                "ok": False,
+                "error_code": PROVIDER_UNKNOWN,
+                "last_error": f"{type(exc).__name__}: {exc}",
+                "latency_ms": None,
+            }
+        record["id"] = case["id"]
+        record["relevant_indices"] = case.get("relevant_indices", [])
+        record["ndcg_at_3"] = _ndcg(record.get("ranking"), case.get("relevant_indices", []), 3)
+        rerank_records.append(record)
+        if record.get("ok"):
+            rerank_latency.add(record["latency_ms"] / 1000.0)
+
+    # ---------- hybrid retrieval ----------
+    hybrid_records: List[Dict[str, Any]] = []
+    hybrid_latency = Bucket("hybrid")
+    for prompt in generation_prompts:
+        result = _hybrid_retrieval(
+            query=prompt["user"],
+            knowledge_base=args.knowledge_base,
+            top_k=args.hybrid_top_k,
+        )
+        result["task_id"] = prompt["id"]
+        hybrid_records.append(result)
+        if result["ok"]:
+            hybrid_latency.add(result["latency_ms"] / 1000.0)
+
+    # ---------- per-task judge + dedup scoring ----------
+    judge_by_key = {(r["task_id"], r["provider"]): r for r in judge_records}
+    for gen_rec in gen_records:
+        key = (gen_rec["task_id"], gen_rec["provider"])
+        gen_rec["judge_score"] = judge_by_key.get(key, {}).get("score")
+        gen_rec["judge_raw"] = judge_by_key.get(key, {}).get("raw")
+
+    finished_at = datetime.now(timezone.utc).isoformat()
+
+    # ---------- aggregate ----------
+    report: Dict[str, Any] = {
+        "schema_version": 1,
+        "started_at": started_at,
+        "finished_at": finished_at,
+        "config": {
+            "cloud_gen": _endpoint_dict(cloud_gen),
+            "local_gen": _endpoint_dict(local_gen) if local_gen else None,
+            "cloud_emb_model": emb_cloud_model,
+            "local_emb_model": emb_local_model if not skip_local else None,
+            "rerank_model": rerank_endpoint.model,
+            "emb_dim": emb_dim,
+            "skip_local": skip_local,
+        },
+        "generation": {
+            "latency_ms": gen_latency.stats(),
+            "tokens_in": gen_token_in,
+            "tokens_out": gen_token_out,
+            "records": gen_records,
+        },
+        "judge": {
+            "records": judge_records,
+            "count": len(judge_records),
+            "ok_count": sum(1 for r in judge_records if r.get("ok")),
+        },
+        "embedding": {
+            "latency_ms_cloud": emb_latency_cloud.stats(),
+            "latency_ms_local": emb_latency_local.stats(),
+            "avg_pairwise_cosine_cloud": sim_cloud,
+            "avg_pairwise_cosine_local": sim_local,
+            "records": emb_records,
+        },
+        "rerank": {
+            "latency_ms": rerank_latency.stats(),
+            "records": rerank_records,
+        },
+        "hybrid": {
+            "latency_ms": hybrid_latency.stats(),
+            "records": hybrid_records,
+        },
+    }
+
+    out_path = Path(args.output)
+    if not out_path.is_absolute():
+        out_path = Path(__file__).resolve().parents[2] / out_path
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(
+        json.dumps(report, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+
+    print(
+        json.dumps(
+            {
+                "output": str(out_path),
+                "generation_count": len(gen_records),
+                "generation_ok": sum(1 for r in gen_records if r["ok"]),
+                "judge_count": len(judge_records),
+                "judge_avg_score": _average_score(judge_records),
+                "embedding_count": len(emb_records),
+                "embedding_ok": sum(1 for r in emb_records if r["ok"]),
+                "rerank_count": len(rerank_records),
+                "rerank_ok": sum(1 for r in rerank_records if r["ok"]),
+                "rerank_avg_ndcg_at_3": _avg(rerank_records, "ndcg_at_3"),
+                "hybrid_count": len(hybrid_records),
+                "hybrid_ok": sum(1 for r in hybrid_records if r["ok"]),
+                "gen_latency_ms": gen_latency.stats(),
+                "emb_cloud_latency_ms": emb_latency_cloud.stats(),
+                "emb_local_latency_ms": emb_latency_local.stats(),
+                "rerank_latency_ms": rerank_latency.stats(),
+                "hybrid_latency_ms": hybrid_latency.stats(),
+                "emb_sim_cloud": sim_cloud,
+                "emb_sim_local": sim_local,
+            },
+            ensure_ascii=False,
+        )
+    )
+    return report
+
+
+def _average_score(records: Iterable[Dict[str, Any]]) -> Optional[float]:
+    scores = [r["score"] for r in records if r.get("score") is not None]
+    if not scores:
+        return None
+    return round(sum(scores) / len(scores), 2)
+
+
+def _avg(records: Iterable[Dict[str, Any]], key: str) -> Optional[float]:
+    vals = [r[key] for r in records if r.get(key) is not None]
+    if not vals:
+        return None
+    return round(sum(vals) / len(vals), 4)
+
+
+if __name__ == "__main__":
+    asyncio.run(_main())
