@@ -3,19 +3,46 @@
 The runner receives only a question and a frozen source snapshot. Gold labels are
 kept exclusively in the evaluator. It exercises planning, per-tool retrieval,
 evidence normalization, citation rendering, inference labeling and refusal.
+
+P1-4: Before rendering the answer, the runner feeds the assembled
+evidence into :mod:`core.critic_checks` for six deterministic checks
+(时效 / 数字口径 / 时点 / 来源冲突 / 跨源推断 / 缺失关键来源). Findings
+are attached to the result and a structured refusal triggers when the
+aggregator reports a ``block`` finding or any required source kind is
+missing.
 """
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from typing import Any, Dict, List
 
+from core.critic_checks import (
+    CHECK_MISSING_SOURCE,
+    SEVERITY_BLOCK,
+    CriticReport,
+    run_critic_checks,
+)
 from service.evidence_contract import Evidence
 from service.evidence_adapters.bidding_adapter import adapt_bidding_item
 from service.evidence_adapters.document_adapter import adapt_document_chunk
 from service.evidence_adapters.market_adapter import adapt_stock_quote
 from service.evidence_adapters.news_adapter import adapt_news_item
 from service.evidence_adapters.sql_row_adapter import adapt_sql_result
+
+
+# Required source-kind coverage derived from the question's planned
+# tool chain. The runner only knows how to fetch the five tools below,
+# so the policy is to require a particular source kind whenever its
+# tool was scheduled. This lets the deterministic critic refuse the
+# answer when an upstream provider silently degraded.
+_TOOL_TO_SOURCE_KIND: Dict[str, str] = {
+    "knowledge_search": "document",
+    "news_search": "news",
+    "bidding_search": "bidding",
+    "text2sql": "sql_row",
+    "stock_query": "market_quote",
+}
 
 
 @dataclass(frozen=True)
@@ -122,8 +149,34 @@ class MultiSourceResearchRunner:
         inference_needed = any(term in question for term in ("分析", "是否", "差距", "趋势", "一致", "反映", "受益"))
         conflict_needed = any(term in question for term in ("是否一致", "趋势", "支持力度", "估值"))
 
+        # P1-4: deterministic critic pre-flight. Required source kinds
+        # are inferred from the scheduled tool chain so a degraded
+        # upstream provider still produces a refusal rather than a
+        # silently-thin evidence set.
+        required_kinds = [
+            _TOOL_TO_SOURCE_KIND[tool]
+            for tool in tools
+            if tool in _TOOL_TO_SOURCE_KIND
+        ]
+        evidence_dicts = [item.evidence.to_dict() for item in retrieved]
+        critic_report: CriticReport = run_critic_checks(
+            evidence_dicts,
+            required_source_kinds=required_kinds,
+        )
+        if critic_report.should_refuse:
+            refused = True
+
         if refused:
-            answer = "证据不足：当前已检索来源不包含问题要求的具体数值，无法给出可靠结论。"
+            reason_parts = ["证据不足：当前已检索来源不包含问题要求的具体数值，无法给出可靠结论。"]
+            if critic_report.findings:
+                block_findings = [f for f in critic_report.findings if f.severity == SEVERITY_BLOCK]
+                if block_findings:
+                    bullets = "; ".join(
+                        f"[{f.check}] {f.subject} — {f.detail}"
+                        for f in block_findings[:3]
+                    )
+                    reason_parts.append(f"确定性检查拒绝原因：{bullets}")
+            answer = " ".join(reason_parts)
             citations: list[dict[str, Any]] = []
         else:
             lines = []
@@ -142,6 +195,11 @@ class MultiSourceResearchRunner:
                     "as_of": evidence.as_of,
                     "published_at": evidence.published_at,
                 })
+            # Surface deterministic ``warn`` / ``info`` findings so the
+            # downstream evaluator and human readers see them.
+            for finding in critic_report.findings:
+                tag = f"[{finding.severity}][{finding.check}]"
+                lines.append(f"- 确定性检查：{tag} {finding.subject} — {finding.detail}")
             if inference_needed:
                 lines.append("- 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。")
             if conflict_needed:
@@ -160,4 +218,5 @@ class MultiSourceResearchRunner:
             "refused": refused,
             "inference_labeled": (not inference_needed) or "研究推断" in answer,
             "conflict_disclosed": (not conflict_needed) or "来源冲突检查" in answer,
+            "critic_report": critic_report.to_dict(),
         }

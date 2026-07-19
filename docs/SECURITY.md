@@ -132,6 +132,45 @@ Text2SQL 的 `execute_sql` 在 P1-1 阶段已通过 `SQLGuard` 拿到 AST
 `bidding_info.dedup_key` 与 `bidding_info.parties` 三列；为空时去重
 逻辑会自然回退到 URL / bid_id 唯一索引，不会出错。
 
+## 多源 Critic（P1-4）
+
+`multi_source_research` 端到端在渲染最终答案前跑过
+[`critic_checks`](/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/backend/app/core/critic_checks.py)
+六项确定性检查，避免把 LLM Critic 当作唯一防线：
+
+- **时效（freshness）**：每条 `Evidence` 必须有 `published_at` 或 `as_of`；
+  缺时间戳的证据集合直接 `block`。`max_age_days=730`（约 2 年），
+  超出预算逐条 `warn`。
+- **数字口径（unit_mismatch）**：从证据 `content` 抽取带单位的
+  数值 token，比较同一 bucket 在不同证据中的单位刻度（万 / 亿 /
+  元）。万 vs 亿级别的差异会被标 `warn`，让 writer 在报告中显式
+  说明。
+- **时点（time_anchor）**：当同一指标 token 在不同证据中的
+  `as_of` 相差超过 `time_anchor_tolerance_days`（默认 90 天），发出
+  `warn` 以阻止跨时间点的直接比较。
+- **来源冲突（conflict）**：当两个证据使用相同单位但数值相对偏差
+  超过 `conflict_relative_tolerance`（默认 20%）时，标 `warn`，
+  由 writer 在报告中写明口径差异。
+- **缺失关键来源（missing_source）**：根据 `plan_tools` 决定
+  `required_source_kinds`（例如 `bidding_search` 至少要有
+  `bidding` 一类证据）。一旦发现缺失，**直接 `block`，拒绝
+  整个答案**。这是 P1-4 路线中"缺失关键来源拒答"的硬性边界。
+- **跨源推断（inference）**：扫描草稿中以 `[E1]` / `[[1]]` /
+  `【1】` 形式同时引用两条及以上证据的句子，标 `info`，提示 writer
+  在最终答案中显式标注「研究推断」。
+
+聚合器 `run_critic_checks` 返回 `CriticReport`，包含全部 findings
+和 `should_refuse` 标志。`multi_source_research.run()` 在
+`should_refuse` 为真时把 `refused` 置位并把 `block` finding 的摘要
+拼到答案里。其余严重度（`warn` / `info`）会作为单独行追加到答案文
+本中，由前端直接渲染。
+
+LLM Critic（`deep_research_v2/agents/critic.py`）继续负责语义层
+面的「找茬」任务；它接收的输入现在包含已经通过 deterministic
+检查的高质量证据子集，节省 LLM 推理成本。
+
+相关单元测试：`backend/test/test_critic_checks.py`（44 项）。
+
 ## 尚未覆盖的生产能力
 
 - TLS 终止、WAF 和反向代理上传限制；
