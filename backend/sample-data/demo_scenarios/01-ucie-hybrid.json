@@ -1,0 +1,53 @@
+{
+  "id": "ucie-hybrid-retrieval",
+  "title": "UCIe Hybrid 检索正例",
+  "category": "检索",
+  "order": 1,
+  "question": "UCIe 2.0 标准在先进封装互连中定义了哪些关键物理层参数？",
+  "answer": "UCIe 2.0（Universal Chiplet Interconnect Express）是 chiplet 互连的开放标准，定义了三种封装层级：\n- **Standard Package**（标准封装）：0.5–3 mm 互连距离，3D 堆叠与封装级互连；\n- **Advanced Package**（先进封装）：2–25 mm 互连距离，支持 2.5D 中介层与 EMIB；\n- **Off-Package**（封装外）：最长 3m 线缆。\n\n物理层关键参数包括：\n- 每通道数据速率：4 / 8 / 12 / 16 / 24 / 32 GT/s（Giga Transfer）；\n- 通道宽度：每个模块 16 / 32 / 64 通道；\n- PHY 类型：标准封装 PHY、先进封装 PHY、SerDes PHY；\n- 信号完整性：NRZ 编码，自适应 CTLE 与 DFE 均衡。\n\n[确定性检查] 该检索使用了 cloud embedding（text-embedding-v4 1024维）与本地 bge-m3 双路召回，RRF 融合后 Top 5 条全部来自 RISC-V 与 OpenROAD 结构化文档。",
+  "retrieval_trace": [
+    {
+      "rank": 1,
+      "score": 0.982,
+      "rerank_score": 0.976,
+      "doc_name": "riscv-unprivileged-20260120.md",
+      "page_or_chunk": "§ 33.1 UCIe 1.1 / 2.0 章节",
+      "snippet": "UCIe 2.0 defines three packaging tiers: Standard Package (0.5-3 mm), Advanced Package (2-25 mm), and Off-Package (up to 3m cable). The PHY layer supports per-lane data rates of 4, 8, 12, 16, 24, and 32 GT/s with NRZ encoding.",
+      "source_kind": "document",
+      "routing": "cloud (text-embedding-v4)",
+      "rrf_fusion_weight": 0.82,
+      "degraded": false
+    },
+    {
+      "rank": 2,
+      "score": 0.941,
+      "rerank_score": 0.934,
+      "doc_name": "nist-chips-1000.md",
+      "page_or_chunk": "§ Advanced Packaging 节",
+      "snippet": "Advanced packaging with UCIe-compliant chiplets enables heterogeneous integration across semiconductor process nodes. The standard defines physical-layer parameters for die-to-die interconnects within a single package.",
+      "source_kind": "document",
+      "routing": "local (bge-m3)",
+      "rrf_fusion_weight": 0.71,
+      "degraded": false
+    },
+    {
+      "rank": 3,
+      "score": 0.897,
+      "rerank_score": 0.891,
+      "doc_name": "nist-chips-1400-2.md",
+      "page_or_chunk": "§ Chiplet Interfaces 节",
+      "snippet": "Chiplet architectures rely on standardised interconnect protocols such as UCIe, BoW, and OpenHBI to mix and match dies from different process nodes.",
+      "source_kind": "document",
+      "routing": "cloud (text-embedding-v4)",
+      "rrf_fusion_weight": 0.65,
+      "degraded": false
+    }
+  ],
+  "meta": {
+    "embedding_mode": "hybrid (cloud text-embedding-v4 + local bge-m3)",
+    "rerank_enabled": true,
+    "rerank_model": "qwen3-rerank",
+    "total_documents_indexed": 17,
+    "knowledge_base": "semiconductor_advanced_packaging"
+  }
+}

@@ -1,0 +1,41 @@
+.demoPage {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.readyPanel {
+  margin-bottom: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+}
+
+.scenarioCard {
+  border-radius: 8px;
+}
+
+.answer {
+  margin-bottom: 16px;
+
+  :global {
+    h5 {
+      margin-bottom: 8px;
+    }
+    p {
+      white-space: pre-wrap;
+      line-height: 1.7;
+    }
+  }
+}
+
+.traceList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.traceItem {
+  border-left: 3px solid #1677ff;
+}

@@ -4,6 +4,7 @@ import NotFound from '@/pages/404'
 import LoginPage from '@/pages/auth/login'
 import Chat from '@/pages/chat'
 import NewChat from '@/pages/chat/newchat'
+import DemoPage from '@/pages/demo'
 import Index from '@/pages/index'
 import KnowledgePage from '@/pages/knowledge'
 import MemoryPage from '@/pages/memory'
@@ -62,6 +63,10 @@ export const routes: IRouteObject[] = [
   {
     path: '/bidding',
     Component: BiddingPage,
+  },
+  {
+    path: '/demo',
+    Component: DemoPage,
   },
   {
     path: '/404',

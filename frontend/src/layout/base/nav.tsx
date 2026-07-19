@@ -102,6 +102,12 @@ export function Nav() {
         icon: IconBid,
         href: '/bidding',
       },
+      {
+        key: 'demo',
+        label: '面试演示',
+        icon: IconKnowledge,
+        href: '/demo',
+      },
       // 暂时隐藏职业规划
       // {
       //   key: 'career',

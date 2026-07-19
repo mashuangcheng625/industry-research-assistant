@@ -1,0 +1,54 @@
+{
+  "id": "agent-checkpoint",
+  "title": "Research Agent 检查点恢复",
+  "category": "研究",
+  "order": 3,
+  "question": "先进封装设备国产化政策环境的技术路线对比分析",
+  "answer": "## 研究过程\n\n### 阶段 1：PLANNING（ChiefArchitect）\n- 生成三节大纲：① 政策背景 ② 技术路线对比 ③ 国产化进展\n- 分解为 5 个研究子问题\n\n### 阶段 2：RESEARCHING（DeepScout × 3 sources）\n- 网页搜索：Bocha API → 3 条政策 / 2 条行业新闻\n- 本地 KB 搜索：Milvus → 第 2 页 RISC-V 部署指南第 33 章附近命中\n- 股票数据：检测到企业名称 \"中微公司\" → 取回实时股价\n\n### 阶段 3：ANALYZING（DataAnalyst）\n- 抽取结构化数据 8 条\n- 生成 ECharts 饼图 1 张\n\n### 阶段 4：WRITING（LeadWriter）\n- 逐节撰写：① ✅ ② ✅ ③ ✅\n- 全报告合成 1 份 Markdown\n\n### 阶段 5：REVIEWING（CriticMaster）\n- 质量评分 7/10 → verdict: `needs_revision`\n- 发现 2 个 major 问题：② 引用缺来源、③ 中芯国际/ASML 数据追溯不一致\n\n### 检查点 5 → 回溯到 2\n- DeepScout 补充搜索 \"中芯国际 ASML 合同\"\n- Agent 从 REVIEWING 回退到 RESEARCHING，保持前面三个阶段不变\n- LeadWriter 仅重写受影响的第 ③ 节\n\n### 最终审核\n- CriticMaster 二次评分 9/10 → verdict: `pass`\n- 总耗时 127s（含检查点恢复）",
+  "retrieval_trace": [
+    {
+      "rank": 1,
+      "score": 0.924,
+      "rerank_score": 0.910,
+      "doc_name": "nist-chips-1000.md",
+      "page_or_chunk": "§ Grand Challenge 1",
+      "snippet": "The CHIPS Act authorizes $39B for semiconductor manufacturing incentives and $11B for R&D. Metrology is foundational to semiconductor manufacturing.",
+      "source_kind": "policy",
+      "routing": "cloud (text-embedding-v4)",
+      "rrf_fusion_weight": 0.88,
+      "degraded": false
+    },
+    {
+      "rank": 2,
+      "score": 0.897,
+      "rerank_score": 0.884,
+      "doc_name": "nist-materials-equipment-vision-2023.md",
+      "page_or_chunk": "§ Supply Chain 节",
+      "snippet": "Advanced packaging requires new metrology for hybrid bonding, TSV inspection, and micron-level bump placement.",
+      "source_kind": "document",
+      "routing": "cloud (text-embedding-v4)",
+      "rrf_fusion_weight": 0.76,
+      "degraded": false
+    },
+    {
+      "rank": 3,
+      "score": null,
+      "rerank_score": null,
+      "doc_name": "juhe_finance (stock_api)",
+      "page_or_chunk": "sh688012",
+      "snippet": "中微公司 (688012.SH) current price: ¥120.50 涨跌: +3.2% 今开: ¥117.00 成交量: 12.4M",
+      "source_kind": "market_quote",
+      "routing": "local (bge-m3)",
+      "rrf_fusion_weight": 0.44,
+      "degraded": false,
+      "as_of": "2026-07-18T15:30:00+08:00"
+    }
+  ],
+  "meta": {
+    "phases_executed": ["planning", "researching", "analyzing", "writing", "reviewing", "re_researching", "revising", "completed"],
+    "checkpoint_triggered": true,
+    "total_duration_s": 127,
+    "critic_verdict": "pass",
+    "critic_score": 9
+  }
+}

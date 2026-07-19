@@ -1,0 +1,83 @@
+{
+  "id": "multi-source-joint",
+  "title": "多源联合研究——先进封装",
+  "category": "研究",
+  "order": 4,
+  "question": "先进封装设备国产化政策环境、技术路线与市场现状的联合调研",
+  "answer": "## 研究推断\n\n### 政策环境\n- 国务院 2020 年发布《新时期促进集成电路产业和软件产业高质量发展的若干政策》[E1]\n- 工信部 2024 年推出半导体装备国产化专项行动 [E2]\n- 国家集成电路产业投资基金重点支持设备与材料 [E3]\n\n### 技术路线\n- 2.5D 封装：CoWoS（台积电）、EMIB（Intel）、硅中介层  [E4]\n- 3D 封装：TSV 硅通孔纯垂直堆叠、HBM 存储器 [E5]\n- 混合键合：Cu-Cu 直接键合，间距 < 10μm [E6]\n\n### 市场现状\n- 中微公司 (688012.SH) 5nm 刻蚀机已进入台积电供应链 [E7]\n- 先进封装设备招投标：键合机、检测设备为主要国产化方向 [E8]\n- 2024年国内先进封装产值约 ¥580 亿，年增长 28% [E9]\n\n> ⚠️ 研究推断：以上跨源信息只能支持方向性判断，不等同于已证实的因果关系。",
+  "retrieval_trace": [
+    {
+      "rank": 1,
+      "score": 0.988,
+      "rerank_score": 0.980,
+      "doc_name": "nist-chips-1000.md",
+      "page_or_chunk": "§ Grand Challenge 1-7",
+      "snippet": "The CHIPS Act appropriates $52.7B for semiconductor R&D and manufacturing incentives, with a specific focus on metrology and advanced packaging.",
+      "source_kind": "policy",
+      "routing": "cloud (text-embedding-v4)",
+      "rrf_fusion_weight": 0.91,
+      "degraded": false
+    },
+    {
+      "rank": 2,
+      "score": 0.955,
+      "rerank_score": 0.947,
+      "doc_name": "company_data (Text2SQL → seed_industry_data.py)",
+      "page_or_chunk": "中微公司 (688012.SH)",
+      "snippet": "中微公司主营业务为刻蚀设备与 MOCVD，5nm 刻蚀机已进入台积电供应链，2024 年营收约 ¥62 亿。",
+      "source_kind": "sql_row",
+      "routing": "cloud (text-embedding-v4)",
+      "rrf_fusion_weight": 0.73,
+      "degraded": false,
+      "table_name": "company_data"
+    },
+    {
+      "rank": 3,
+      "score": 0.923,
+      "rerank_score": 0.918,
+      "doc_name": "bidding_info (81api)",
+      "page_or_chunk": "先进封装设备采购项目",
+      "snippet": "12英寸先进封装检测设备采购项目 中标结果公告：中标人 北方华创 中标金额 1800 万元。",
+      "source_kind": "bidding",
+      "routing": "local (bge-m3)",
+      "rrf_fusion_weight": 0.67,
+      "degraded": false
+    },
+    {
+      "rank": 4,
+      "score": 0.894,
+      "rerank_score": 0.882,
+      "doc_name": "juhe_finance (stock_api)",
+      "page_or_chunk": "sh688012 / sh600584",
+      "snippet": "中微公司 ¥120.50 (+3.2%) | 长电科技 ¥35.20 (+1.1%) | 北方华创 ¥318.00 (-0.8%) | 行情时点: 2026-07-18 15:30 CST",
+      "source_kind": "market_quote",
+      "routing": "local (bge-m3)",
+      "rrf_fusion_weight": 0.41,
+      "degraded": false
+    },
+    {
+      "rank": 5,
+      "score": 0.872,
+      "rerank_score": 0.865,
+      "doc_name": "nist-chips-1400-2.md",
+      "page_or_chunk": "§ Chiplet Interfaces", 
+      "snippet": "Chiplets enable heterogeneous integration across process nodes. UCIe, BoW, and OpenHBI are the three leading die-to-die interconnect standards.",
+      "source_kind": "document",
+      "routing": "cloud (text-embedding-v4)",
+      "rrf_fusion_weight": 0.84,
+      "degraded": false
+    }
+  ],
+  "meta": {
+    "tools_used": ["knowledge_search", "news_search", "bidding_search", "text2sql", "stock_query"],
+    "citations": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8", "E9"],
+    "inference_labeled": true,
+    "conflict_disclosed": true,
+    "critic_report": {
+      "should_refuse": false,
+      "blocks": 0,
+      "warns": 1,
+      "infos": 2
+    }
+  }
+}
