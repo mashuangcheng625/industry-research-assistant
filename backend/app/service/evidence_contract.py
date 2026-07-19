@@ -268,3 +268,110 @@ QUALITY_TIER_LABELS: dict[str, str] = {
     "secondary": "二手资料",
     "unknown": "未知来源",
 }
+
+
+# ---------------------------------------------------------------------------
+# Unified citation locator (P1-14)
+# ---------------------------------------------------------------------------
+# Every source kind carries its own locator shape (page number for PDFs,
+# row_id for sql_rows, notice_id for bidding, stock_code for market
+# quotes). ``CitationLocator`` normalises each shape into a single
+# machine-readable anchor so the front-end evidence panel and the
+# deterministic critic can reason about provenance without switching on
+# ``source_kind``.
+#
+# Usage::
+#
+#     loc = CitationLocator.from_evidence(evidence)
+#     print(loc.anchor)        # "page 34" or "row abcd1234..."
+#     print(loc.reference_url) # publisher link or None
+#     print(loc.to_html())     # "<a href=...>p. 34</a>" — display-safe
+
+
+from dataclasses import dataclass
+
+
+@dataclass(frozen=True)
+class CitationLocator:
+    """Unified provenance anchor that works across all source kinds.
+
+    The ``anchor`` field is the primary human-readable locator
+    (``"page 34"`` / ``"row abcd"`` / ``"notice 2024-8173"`` /
+    ``"sh688012"``). ``reference_url`` is a verification link when
+    the source exposes a public URL; it is ``None`` when the source
+    is internal (database row, local document).
+    """
+
+    anchor: str
+    reference_url: Optional[str] = None
+    source_kind: str = "unknown"
+
+    def to_html(self) -> str:
+        label = f"[{SOURCE_KIND_LABELS.get(self.source_kind, self.source_kind)}] {self.anchor}"
+        if self.reference_url:
+            return f'<a href="{self.reference_url}" target="_blank" rel="noopener">{label}</a>'
+        return label
+
+    def to_dict(self) -> dict:
+        return {
+            "anchor": self.anchor,
+            "reference_url": self.reference_url,
+            "source_kind": self.source_kind,
+        }
+
+    @classmethod
+    def from_evidence(cls, evidence: Evidence) -> "CitationLocator":
+        """Build a ``CitationLocator`` from a single ``Evidence`` row.
+
+        The mapping is deterministic per ``source_kind`` so the
+        front-end can render familiar labels and the critic can
+        compare locator precision across sources.
+        """
+
+        kind = evidence.source_kind
+        loc = evidence.locator or {}
+
+        if kind == "document":
+            page = loc.get("page")
+            chunk = loc.get("chunk_index")
+            if page is not None:
+                anchor = f"p. {page}"
+            elif chunk is not None:
+                anchor = f"chunk {chunk}"
+            else:
+                anchor = evidence.title[:50]
+            return cls(anchor=anchor, reference_url=evidence.url, source_kind=kind)
+
+        if kind in ("news", "policy", "web_search"):
+            if evidence.url:
+                domain = _domain_from_url(evidence.url)
+                anchor = f"{domain} — {evidence.title[:40]}"
+            else:
+                anchor = evidence.title[:50]
+            return cls(anchor=anchor, reference_url=evidence.url, source_kind=kind)
+
+        if kind == "bidding":
+            notice_id = loc.get("notice_id", "")
+            anchor = f"notice {notice_id}" if notice_id else evidence.title[:50]
+            return cls(anchor=anchor, reference_url=None, source_kind=kind)
+
+        if kind == "sql_row":
+            row_id = loc.get("row_id", loc.get("row_hash", ""))
+            table = loc.get("table_name", "")
+            anchor = f"row {row_id[:12]}" if row_id else f"table {table}"
+            return cls(anchor=anchor, reference_url=None, source_kind=kind)
+
+        if kind == "market_quote":
+            code = loc.get("stock_code", "")
+            anchor = code if code else evidence.title[:50]
+            return cls(anchor=anchor, reference_url=None, source_kind=kind)
+
+        return cls(anchor=evidence.title[:50], reference_url=evidence.url, source_kind=kind)
+
+
+def _domain_from_url(url: str) -> str:
+    import re
+    m = re.search(r"https?://([^/]+)", url)
+    return m.group(1) if m else url[:40]
+
+

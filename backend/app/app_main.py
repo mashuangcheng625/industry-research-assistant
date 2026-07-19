@@ -76,6 +76,10 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# P1-13: OpenTelemetry instrumentation (opt-in via OTEL_ENABLED=true).
+from core.telemetry import instrument_app
+instrument_app(app)
+
 allowed_origins = cors_origins()
 app.add_middleware(
     CORSMiddleware,
