@@ -1,22 +1,46 @@
+import { Spin } from 'antd'
+import { Suspense, lazy } from 'react'
 import { AuthGuard } from '@/components/auth-guard'
 import { BaseLayout } from '@/layout/base'
 import NotFound from '@/pages/404'
 import LoginPage from '@/pages/auth/login'
-import Chat from '@/pages/chat'
-import NewChat from '@/pages/chat/newchat'
-import DemoPage from '@/pages/demo'
 import Index from '@/pages/index'
-import KnowledgePage from '@/pages/knowledge'
-import MemoryPage from '@/pages/memory'
-import DatabasePage from '@/pages/database'
-import NewsPage from '@/pages/news'
-import BiddingPage from '@/pages/bidding'
 import {
   Navigate,
   Outlet,
   RouteObject,
   createBrowserRouter,
 } from 'react-router-dom'
+
+// ── Route-level code splitting (P1-10) ──
+// Pages that are not entry points are loaded on demand via
+// React.lazy + dynamic import(). Each chunk's loading Promise is
+// resolved at navigation time, and Suspense renders a Spin fallback
+// while the chunk is being fetched.
+const Chat            = lazy(() => import('@/pages/chat'))
+const NewChat         = lazy(() => import('@/pages/chat/newchat'))
+const DemoPage        = lazy(() => import('@/pages/demo'))
+const KnowledgePage   = lazy(() => import('@/pages/knowledge'))
+const MemoryPage      = lazy(() => import('@/pages/memory'))
+const DatabasePage    = lazy(() => import('@/pages/database'))
+const NewsPage        = lazy(() => import('@/pages/news'))
+const BiddingPage     = lazy(() => import('@/pages/bidding'))
+
+const Lazy: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <Suspense fallback={<Spin size="large" style={{ display: 'block', margin: '80px auto' }} />}>
+    {children}
+  </Suspense>
+)
+
+function withLazy(Component: React.ComponentType) {
+  return function LazyWrapper() {
+    return (
+      <Lazy>
+        <Component />
+      </Lazy>
+    )
+  }
+}
 
 export type IRouteObject = {
   children?: IRouteObject[]
@@ -36,37 +60,37 @@ export const routes: IRouteObject[] = [
     children: [
       {
         path: '',
-        Component: NewChat,
+        Component: withLazy(NewChat),
       },
       {
         path: ':id',
-        Component: Chat,
+        Component: withLazy(Chat),
       },
     ],
   },
   {
     path: '/knowledge',
-    Component: KnowledgePage,
+    Component: withLazy(KnowledgePage),
   },
   {
     path: '/memory',
-    Component: MemoryPage,
+    Component: withLazy(MemoryPage),
   },
   {
     path: '/database',
-    Component: DatabasePage,
+    Component: withLazy(DatabasePage),
   },
   {
     path: '/news',
-    Component: NewsPage,
+    Component: withLazy(NewsPage),
   },
   {
     path: '/bidding',
-    Component: BiddingPage,
+    Component: withLazy(BiddingPage),
   },
   {
     path: '/demo',
-    Component: DemoPage,
+    Component: withLazy(DemoPage),
   },
   {
     path: '/404',
