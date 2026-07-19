@@ -81,6 +81,52 @@ def test_upload_filename_discards_client_path_components():
     assert safe_upload_filename("report.pdf") == "report.pdf"
 
 
+# ---------------------------------------------------------------------------
+# P2-16: Redis rate limiter
+# ---------------------------------------------------------------------------
+
+
+def test_redis_sliding_window_limiter_fails_open_when_client_is_none() -> None:
+    """Without a Redis client the limiter must pass every request (fail-open)."""
+
+    from core.rate_limit import RedisSlidingWindowLimiter
+
+    limiter = RedisSlidingWindowLimiter(5, window_seconds=10, redis_client=None)
+    ok, retry = limiter.allow("user")
+    assert ok is True
+    assert retry == 0
+
+
+def test_get_rate_limiter_returns_local_when_no_redis() -> None:
+    """Without REDIS_URL the factory must return the process-local variant."""
+
+    import os
+    redis_url = os.environ.pop("REDIS_URL", None)
+    try:
+        from core.rate_limit import get_rate_limiter, SlidingWindowRateLimiter
+
+        limiter = get_rate_limiter(10)
+        assert isinstance(limiter, SlidingWindowRateLimiter)
+    finally:
+        if redis_url:
+            os.environ["REDIS_URL"] = redis_url
+
+
+def test_sliding_window_limiter_can_exhaust_and_recover() -> None:
+    """The local limiter must exhaust after ``limit`` calls and release
+    after the window passes."""
+
+    from core.rate_limit import SlidingWindowRateLimiter
+
+    limiter = SlidingWindowRateLimiter(2, window_seconds=10)
+    assert limiter.allow("u", now=0) == (True, 0)
+    assert limiter.allow("u", now=1) == (True, 0)
+    allowed, retry = limiter.allow("u", now=2)
+    assert allowed is False
+    assert retry > 0
+    assert limiter.allow("u", now=11) == (True, 0)
+
+
 def test_removed_legacy_document_routes_are_not_registered():
     import app_main
     paths = {getattr(route, "path", "") for route in app_main.app.routes}
