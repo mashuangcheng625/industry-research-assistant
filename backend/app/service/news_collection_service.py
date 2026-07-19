@@ -25,6 +25,7 @@ from core.provider_reliability import (
     ProviderOutcome,
     run_provider_async,
 )
+from core.data_governance import bidding_dedup_key, extract_parties, news_dedup_key
 from models.news import IndustryNews, BiddingInfo, NewsCollectionTask
 from service.bidding_service import get_bidding_service
 from config.industry_config import get_industry_config, get_all_industries
@@ -197,13 +198,33 @@ class NewsCollectionService:
                             break
 
                         source_url = item.get('url', '')
-                        if not source_url:
-                            continue
+                        title = item.get('title', '')
+                        content = item.get('summary', '') or item.get('snippet', '')
+                        # P1-3: content-hash dedup in addition to the URL
+                        # uniqueness check. Different aggregators
+                        # sometimes re-publish the same item under
+                        # different URLs - the hash collapses them.
+                        dedup_key = news_dedup_key(
+                            url=source_url or None,
+                            title=title,
+                            content=content,
+                            publisher=item.get('siteName', '') or '',
+                            publish_time=str(item.get('datePublished', '') or ''),
+                        )
 
-                        # 检查是否已存在
-                        existing = self.db.query(IndustryNews).filter(
-                            IndustryNews.source_url == source_url
-                        ).first()
+                        existing = (
+                            self.db.query(IndustryNews)
+                            .filter(IndustryNews.source_url == source_url)
+                            .first()
+                            if source_url
+                            else None
+                        )
+                        if existing is None:
+                            existing = (
+                                self.db.query(IndustryNews)
+                                .filter(IndustryNews.dedup_key == dedup_key)
+                                .first()
+                            )
 
                         if existing:
                             continue
@@ -228,7 +249,8 @@ class NewsCollectionService:
                             department=self._extract_department(title, content),
                             publish_time=publish_time,
                             keywords=keyword,
-                            collected_at=datetime.utcnow()
+                            collected_at=datetime.utcnow(),
+                            dedup_key=dedup_key,
                         )
 
                         self.db.add(news)
@@ -328,11 +350,26 @@ class NewsCollectionService:
                             if not bid_id:
                                 continue
 
-                            # 检查是否已存在
+                            # P1-3: content-hash dedup + party extraction.
+                            title = item.get("title", "")
+                            province = item.get("province") or ""
+                            dedup_key = bidding_dedup_key(
+                                bid_id=bid_id,
+                                title=title,
+                                province=province,
+                                publish_time=str(item.get("publish_time") or ""),
+                            )
+                            parties = extract_parties(
+                                f"{title} {item.get('content') or ''}"
+                            )
+
                             existing = self.db.query(BiddingInfo).filter(
                                 BiddingInfo.bid_id == bid_id
                             ).first()
-
+                            if existing is None:
+                                existing = self.db.query(BiddingInfo).filter(
+                                    BiddingInfo.dedup_key == dedup_key
+                                ).first()
                             if existing:
                                 continue
 
@@ -342,13 +379,15 @@ class NewsCollectionService:
                             bidding = BiddingInfo(
                                 industry_id=industry_id or "smart_transportation",
                                 bid_id=bid_id,
-                                title=item.get("title", "")[:500],
+                                title=title[:500],
                                 notice_type=item.get("notice_type", "招标"),
                                 province=item.get("province"),
                                 city=item.get("city"),
                                 publish_time=publish_time,
                                 source=item.get("source", "81api"),
-                                collected_at=datetime.utcnow()
+                                collected_at=datetime.utcnow(),
+                                dedup_key=dedup_key,
+                                parties=parties or None,
                             )
 
                             self.db.add(bidding)
@@ -381,11 +420,25 @@ class NewsCollectionService:
                             if not bid_id:
                                 continue
 
-                            # 检查是否已存在
+                            title = item.get("title", "")
+                            province = item.get("province") or ""
+                            dedup_key = bidding_dedup_key(
+                                bid_id=bid_id,
+                                title=title,
+                                province=province,
+                                publish_time=str(item.get("publish_time") or ""),
+                            )
+                            parties = extract_parties(
+                                f"{title} {item.get('content') or ''}"
+                            )
+
                             existing = self.db.query(BiddingInfo).filter(
                                 BiddingInfo.bid_id == bid_id
                             ).first()
-
+                            if existing is None:
+                                existing = self.db.query(BiddingInfo).filter(
+                                    BiddingInfo.dedup_key == dedup_key
+                                ).first()
                             if existing:
                                 continue
 
@@ -394,13 +447,15 @@ class NewsCollectionService:
                             bidding = BiddingInfo(
                                 industry_id=industry_id or "smart_transportation",
                                 bid_id=bid_id,
-                                title=item.get("title", "")[:500],
+                                title=title[:500],
                                 notice_type=item.get("notice_type", "中标"),
                                 province=item.get("province"),
                                 city=item.get("city"),
                                 publish_time=publish_time,
                                 source=item.get("source", "81api"),
-                                collected_at=datetime.utcnow()
+                                collected_at=datetime.utcnow(),
+                                dedup_key=dedup_key,
+                                parties=parties or None,
                             )
 
                             self.db.add(bidding)

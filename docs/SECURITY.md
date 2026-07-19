@@ -93,6 +93,45 @@ Text2SQL 的 `execute_sql` 在 P1-1 阶段已通过 `SQLGuard` 拿到 AST
 后续若加入新外部数据源，应使用同一 `ProviderReliability` 包装
 后再发出请求。
 
+## 数据治理（P1-3）
+
+新闻、招投标两类外部采集的数据由
+[`data_governance`](/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/backend/app/core/data_governance.py)
+统一处理，硬性边界：
+
+- **去重**：除原有的 `source_url` / `bid_id` 唯一索引外，新增
+  `dedup_key` 列。`news_dedup_key` / `bidding_dedup_key` 通过 NFKC 归一化 +
+  SHA-256 摘要产出稳定身份——同一资讯从不同聚合源采集时会折叠为
+  一行；新增 `create_all` 自动建表的部署会同时获得 `dedup_key`
+  与 `parties` 列（`JSONB`），已有部署需要 `ALTER TABLE` 一次性补列
+  （参见 `docs/SECURITY.md` 的「数据迁移」备注）。
+- **实体归一**：`normalise_party_name` 把
+  `中芯国际集成电路制造（上海）有限公司` 与
+  `中芯国际集成电路制造(上海)股份有限公司` 都归一到
+  `中芯国际集成电路制造`，下层 `extract_parties` 用 NFKC + 全角/半角
+  冒号 + 多种角色关键词（采购人 / 招标人 / 中标人 / 供应商 等）抽取并
+  存到 `BiddingInfo.parties`。结果可以是空 dict，宁可漏抽也不
+  编造。
+- **公告生命周期**：`cluster_lifecycle` 按
+  `normalise_party_name` + 去噪后的标题前缀做最长 24 字符匹配，
+  兼容「中芯国际」与「中芯国际集成电路制造」这种长短名字变体，
+  把同一项目的 招标 / 中标 / 更正 链到一起；不同 buyer 或标题前
+  缀差异不会被错误合并。
+- **股票代码解析**：`StockCodeResolver` 替换旧的硬编码
+  `COMPANY_STOCK_MAP`，每次解析都写入审计日志（最近 256 条），
+  并把审计事件推送给可选的 `audit_sink`，方便生产侧在
+  `metric`、`log` 中跟踪公司名识别命中与失败。`config/stock_mapping.py`
+  保留为薄 shim，导入名不变。
+- **失败行为**：去重失败、解析失败、匹配失败都属于"宁可不写
+  入"，由 `NewsCollectionService` / `BiddingService` 自身的
+  `ProviderReliability` 一起构成完整链路，绝不编造内容。
+
+相关单元测试：`backend/test/test_data_governance.py`（47 项）。
+数据迁移说明：上述模型字段新增后，旧部署应通过手工 `ALTER TABLE`
+或 Alembic 迁移补齐 `industry_news.dedup_key`、
+`bidding_info.dedup_key` 与 `bidding_info.parties` 三列；为空时去重
+逻辑会自然回退到 URL / bid_id 唯一索引，不会出错。
+
 ## 尚未覆盖的生产能力
 
 - TLS 终止、WAF 和反向代理上传限制；

@@ -4,7 +4,7 @@
 import uuid
 from datetime import datetime
 from sqlalchemy import Column, String, Text, DateTime, Integer, Boolean
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, JSONB
 
 from core.database import Base
 
@@ -24,6 +24,9 @@ class IndustryNews(Base):
     publish_time = Column(DateTime, index=True, comment="发布时间")
     collected_at = Column(DateTime, default=datetime.utcnow, comment="采集时间")
     keywords = Column(String(500), comment="关键词")
+    # P1-3: stable content-derived hash so the same news item
+    # collected from different aggregators collapses to one row.
+    dedup_key = Column(String(64), index=True, nullable=True, comment="内容去重 hash")
     is_read = Column(Boolean, default=False, comment="是否已读")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -41,6 +44,7 @@ class IndustryNews(Base):
             "publish_time": self.publish_time.isoformat() if self.publish_time else None,
             "collected_at": self.collected_at.isoformat() if self.collected_at else None,
             "keywords": self.keywords,
+            "dedup_key": self.dedup_key,
             "is_read": self.is_read,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
@@ -61,6 +65,13 @@ class BiddingInfo(Base):
     publish_time = Column(DateTime, index=True, comment="发布时间")
     source = Column(String(200), default="81api", comment="数据来源")
     collected_at = Column(DateTime, default=datetime.utcnow, comment="采集时间")
+    # P1-3: stable content-derived hash so the same bidding item
+    # collected from a different aggregator collapses to one row even
+    # when the upstream returns a slightly different ``bid_id``.
+    dedup_key = Column(String(64), index=True, nullable=True, comment="内容去重 hash")
+    # P1-3: extracted buyer / supplier names (``extract_parties``).
+    # Stored as JSONB so callers can query without parsing the body.
+    parties = Column(JSONB, nullable=True, comment="采购方 / 中标人 等归一后的实体")
     is_read = Column(Boolean, default=False, comment="是否已读")
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -78,6 +89,8 @@ class BiddingInfo(Base):
             "publish_time": self.publish_time.isoformat() if self.publish_time else None,
             "source": self.source,
             "collected_at": self.collected_at.isoformat() if self.collected_at else None,
+            "dedup_key": self.dedup_key,
+            "parties": self.parties,
             "is_read": self.is_read,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
