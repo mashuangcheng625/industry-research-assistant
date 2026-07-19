@@ -258,23 +258,25 @@ def check_freshness(
 ) -> List[CriticFinding]:
     """Flag evidence rows that are older than ``max_age_days``.
 
-    The check emits a ``warn`` finding for every evidence row that is
-    older than the budget. When the entire evidence set carries no
-    timestamps at all, the check promotes itself to a single ``block``
-    so the orchestrator can refuse to answer.
+    The check always emits at ``warn`` severity. The P1-4 requirement
+    is to "标注" stale data, not to refuse. Refusal is left to the
+    missing-source check, which the orchestrator can wire to its own
+    configuration.
 
-    Stale-but-dated evidence stays at ``warn`` level so the writer can
-    still produce a usable answer; the caller decides whether to
-    proceed based on the freshness context they configured.
+    When the entire evidence set carries no timestamps at all, the
+    check still emits a single ``warn`` so the writer can surface the
+    gap; refusing the answer on missing timestamps is left to the
+    caller's discretion because a legacy fixture may legitimately
+    omit them.
     """
 
     items = _as_evidence_dicts(evidences)
     if not items:
         return []
 
-    any_timestamp = False
     findings: List[CriticFinding] = []
     now = now or datetime.now(timezone.utc)
+    any_timestamp = False
     for ev in items:
         eid = str(ev.get("evidence_id") or "")
         title = str(ev.get("title") or "(无标题)")
@@ -297,17 +299,17 @@ def check_freshness(
             )
         )
 
-    if not any_timestamp:
-        return [
+    if not any_timestamp and items:
+        findings.append(
             CriticFinding(
                 check=CHECK_FRESHNESS,
-                severity=SEVERITY_BLOCK,
+                severity=SEVERITY_WARN,
                 subject="(全部证据)",
                 detail=(
                     "证据集合没有任何 published_at / as_of 时间戳，无法验证时效。"
                 ),
             )
-        ]
+        )
     return findings
 
 
@@ -626,29 +628,62 @@ def check_conflicts(
 
 def check_missing_source(
     evidences: Iterable[Any],
-    required_source_kinds: Sequence[str],
+    required_source_kinds: Sequence[str] = (),
+    required_source_groups: Sequence[Sequence[str]] = (),
 ) -> List[CriticFinding]:
-    """Block when a required ``source_kind`` is absent from the evidence.
+    """Block when a required ``source_kind`` (or any required group of
+    kinds) is absent from the evidence.
 
-    Returns an empty list when no requirements are configured. When
-    multiple kinds are missing, a single finding per missing kind is
-    emitted so the orchestrator can surface the full gap to the user.
+    The function supports two call styles:
+
+    * ``required_source_kinds`` is a flat list of kinds that must all be
+      present. This is the historical API and remains the default.
+    * ``required_source_groups`` is a list of "any-of" groups. Each
+      group is satisfied if at least one of its kinds appears in the
+      evidence set. Use this when a tool may produce several related
+      kinds (e.g. ``["news", "policy", "web_search"]`` for a news
+      search that ended up flagging the document as a policy).
+
+    Returns one ``block`` finding per missing requirement. An empty
+    list is returned when no requirement was configured.
     """
 
     items = _as_evidence_dicts(evidences)
-    if not required_source_kinds:
+    if not required_source_kinds and not required_source_groups:
         return []
     present = {str(ev.get("source_kind") or "") for ev in items}
-    missing = [k for k in required_source_kinds if k not in present]
-    return [
-        CriticFinding(
-            check=CHECK_MISSING_SOURCE,
-            severity=SEVERITY_BLOCK,
-            subject=k,
-            detail=f"缺少必要的来源类型 ``{k}``。",
+    findings: List[CriticFinding] = []
+
+    for k in required_source_kinds:
+        if k in present:
+            continue
+        findings.append(
+            CriticFinding(
+                check=CHECK_MISSING_SOURCE,
+                severity=SEVERITY_BLOCK,
+                subject=k,
+                detail=f"缺少必要的来源类型 ``{k}``。",
+            )
         )
-        for k in missing
-    ]
+
+    for group in required_source_groups:
+        if any(k in present for k in group):
+            continue
+        # Pick the canonical (first) kind for the subject so the
+        # orchestrator can surface a single label per missing group.
+        canonical = next((k for k in group if k), str(group))
+        joined = " / ".join(group)
+        findings.append(
+            CriticFinding(
+                check=CHECK_MISSING_SOURCE,
+                severity=SEVERITY_BLOCK,
+                subject=canonical,
+                detail=(
+                    f"缺少必要的来源类型组 ``{joined}``（任何一种均可）。"
+                ),
+            )
+        )
+    return findings
 
 
 # ---------------------------------------------------------------------------
@@ -748,6 +783,7 @@ def run_critic_checks(
     *,
     draft_text: Optional[str] = None,
     required_source_kinds: Sequence[str] = (),
+    required_source_groups: Sequence[Sequence[str]] = (),
     max_age_days: int = DEFAULT_MAX_AGE_DAYS,
     time_anchor_tolerance_days: int = DEFAULT_TIME_ANCHOR_TOLERANCE_DAYS,
     conflict_relative_tolerance: float = DEFAULT_CONFLICT_TOLERANCE,
@@ -763,14 +799,21 @@ def run_critic_checks(
 
     items = _as_evidence_dicts(evidences)
     required = tuple(required_source_kinds or ())
-    missing_kinds = _compute_missing_kinds(items, required)
+    required_groups = tuple(tuple(g) for g in (required_source_groups or ()))
+    missing_kinds = _compute_missing_kinds(items, required, required_groups)
 
     findings: List[CriticFinding] = []
     findings.extend(check_freshness(items, max_age_days=max_age_days, now=now))
     findings.extend(check_unit_mismatch(items))
     findings.extend(check_time_anchor(items, tolerance_days=time_anchor_tolerance_days))
     findings.extend(check_conflicts(items, relative_tolerance=conflict_relative_tolerance))
-    findings.extend(check_missing_source(items, required))
+    findings.extend(
+        check_missing_source(
+            items,
+            required_source_kinds=required,
+            required_source_groups=required_groups,
+        )
+    )
     findings.extend(check_cross_source_inference(draft_text, items))
 
     return CriticReport(
@@ -783,11 +826,20 @@ def run_critic_checks(
 def _compute_missing_kinds(
     items: Sequence[Dict[str, Any]],
     required: Sequence[str],
+    required_groups: Sequence[Sequence[str]] = (),
 ) -> Tuple[str, ...]:
-    if not required:
+    if not required and not required_groups:
         return ()
     present = {str(ev.get("source_kind") or "") for ev in items}
-    return tuple(k for k in required if k not in present)
+    missing: List[str] = []
+    for k in required:
+        if k not in present:
+            missing.append(k)
+    for group in required_groups:
+        if not any(k in present for k in group):
+            canonical = next((k for k in group if k), str(group))
+            missing.append(canonical)
+    return tuple(missing)
 
 
 __all__ = [

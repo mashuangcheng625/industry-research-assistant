@@ -36,12 +36,17 @@ from service.evidence_adapters.sql_row_adapter import adapt_sql_result
 # so the policy is to require a particular source kind whenever its
 # tool was scheduled. This lets the deterministic critic refuse the
 # answer when an upstream provider silently degraded.
-_TOOL_TO_SOURCE_KIND: Dict[str, str] = {
-    "knowledge_search": "document",
-    "news_search": "news",
-    "bidding_search": "bidding",
-    "text2sql": "sql_row",
-    "stock_query": "market_quote",
+#
+# Each tool maps to a list of acceptable source kinds (any-of). The
+# ``news_search`` tool, for example, may surface ``news`` / ``policy``
+# / ``web_search`` items depending on the upstream response, so the
+# runner treats all three as satisfying the news requirement.
+_TOOL_TO_ACCEPTABLE_KINDS: Dict[str, Tuple[str, ...]] = {
+    "knowledge_search": ("document",),
+    "news_search": ("news", "policy", "web_search"),
+    "bidding_search": ("bidding",),
+    "text2sql": ("sql_row",),
+    "stock_query": ("market_quote",),
 }
 
 
@@ -149,19 +154,28 @@ class MultiSourceResearchRunner:
         inference_needed = any(term in question for term in ("分析", "是否", "差距", "趋势", "一致", "反映", "受益"))
         conflict_needed = any(term in question for term in ("是否一致", "趋势", "支持力度", "估值"))
 
-        # P1-4: deterministic critic pre-flight. Required source kinds
-        # are inferred from the scheduled tool chain so a degraded
-        # upstream provider still produces a refusal rather than a
-        # silently-thin evidence set.
-        required_kinds = [
-            _TOOL_TO_SOURCE_KIND[tool]
-            for tool in tools
-            if tool in _TOOL_TO_SOURCE_KIND
-        ]
+        # P1-4: deterministic critic pre-flight. Required source-kind
+        # groups are inferred from the scheduled tool chain so a
+        # degraded upstream provider still produces a refusal rather
+        # than a silently-thin evidence set. Each group is "any-of":
+        # the news tool is satisfied if the evidence set contains
+        # ``news`` / ``policy`` / ``web_search`` items (depending on
+        # which the upstream actually surfaced).
+        required_kinds: List[str] = []
+        required_groups: List[Tuple[str, ...]] = []
+        for tool in tools:
+            kinds = _TOOL_TO_ACCEPTABLE_KINDS.get(tool)
+            if not kinds:
+                continue
+            if len(kinds) == 1:
+                required_kinds.append(kinds[0])
+            else:
+                required_groups.append(kinds)
         evidence_dicts = [item.evidence.to_dict() for item in retrieved]
         critic_report: CriticReport = run_critic_checks(
             evidence_dicts,
             required_source_kinds=required_kinds,
+            required_source_groups=required_groups,
         )
         if critic_report.should_refuse:
             refused = True

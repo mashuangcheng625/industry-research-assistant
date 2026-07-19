@@ -163,20 +163,22 @@ def test_freshness_emits_warn_for_too_old_evidence() -> None:
     assert "1000" in findings[0].detail or "1,000" in findings[0].detail or "超过" in findings[0].detail
 
 
-def test_freshness_promotes_to_block_when_no_timestamps() -> None:
+def test_freshness_emits_warn_when_no_timestamps() -> None:
+    # Freshness never blocks. Missing timestamps is an advisory signal
+    # so the writer can flag the gap; the missing-source check is
+    # responsible for refusals.
     findings = check_freshness([
         _evidence(evidence_id="E1"),
         _evidence(evidence_id="E2"),
     ])
     assert len(findings) == 1
-    assert findings[0].severity == SEVERITY_BLOCK
+    assert findings[0].severity == SEVERITY_WARN
     assert findings[0].check == CHECK_FRESHNESS
 
 
-def test_freshness_promotes_to_block_when_all_too_old() -> None:
-    # Stale-but-dated evidence stays at ``warn`` so the writer can still
-    # produce a usable answer; the orchestrator decides whether to
-    # proceed. Only no-timestamp-anywhere promotes to ``block``.
+def test_freshness_emits_warn_for_stale_evidence() -> None:
+    # Stale evidence stays at ``warn``; the orchestrator decides whether
+    # to proceed based on the freshness context it configured.
     findings = check_freshness([
         _evidence(evidence_id="E1", published_at=_iso_offset(-1000)),
         _evidence(evidence_id="E2", published_at=_iso_offset(-2000)),
