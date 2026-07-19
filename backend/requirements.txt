@@ -69,3 +69,8 @@ apscheduler>=3.10.0,<4.0.0
 prometheus-client>=0.25.0,<0.26.0
 pyyaml>=6.0.0
 python-dateutil>=2.8.0
+
+# P1-13: OpenTelemetry (opt-in, not required at runtime)
+opentelemetry-api>=1.44.0
+opentelemetry-sdk>=1.44.0
+opentelemetry-instrumentation-fastapi

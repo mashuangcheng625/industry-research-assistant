@@ -552,6 +552,30 @@ yarl==1.24.2
 zstandard==0.25.0
     # via langsmith
 
+# P1-13: OpenTelemetry (opt-in instrumentation)
+asgiref==3.12.1
+    # via opentelemetry-instrumentation-asgi
+opentelemetry-api==1.44.0
+    # via -r backend/requirements.txt
+opentelemetry-instrumentation==0.65b0
+    # via
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-asgi==0.65b0
+    # via opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-fastapi==0.65b0
+    # via -r backend/requirements.txt
+opentelemetry-sdk==1.44.0
+    # via -r backend/requirements.txt
+opentelemetry-semantic-conventions==0.65b0
+    # via
+    #   opentelemetry-instrumentation
+    #   opentelemetry-sdk
+opentelemetry-util-http==0.65b0
+    # via
+    #   opentelemetry-instrumentation-asgi
+    #   opentelemetry-instrumentation-fastapi
+
 # The following packages are considered to be unsafe in a requirements file:
 setuptools==80.9.0
     # via
