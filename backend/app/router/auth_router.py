@@ -1,5 +1,6 @@
 """用户认证路由"""
 from typing import Optional
+from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -231,3 +232,38 @@ async def change_password(
 async def logout(current_user: User = Depends(get_current_user_required)):
     """用户登出（前端清除 Token 即可）"""
     return {"message": "登出成功"}
+
+
+# ---------------------------------------------------------------------------
+# P2-18: refresh token
+# ---------------------------------------------------------------------------
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+@router.post("/refresh", response_model=TokenResponse)
+async def refresh_access_token(
+    refresh_data: RefreshRequest,
+    _: None = Depends(enforce_auth_rate_limit),
+):
+    """用 refresh token 换取新的 access token。
+
+    refresh token 有效期 7 天，access token 有效期 15 分钟（默认）。
+    refresh token 只能用于刷新 access token，不能用于鉴权。
+    """
+    from core.security import decode_refresh_token, create_access_token
+
+    token_data = decode_refresh_token(refresh_data.refresh_token)
+    if token_data is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="refresh token 无效或已过期",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    access_token = create_access_token(
+        data={"sub": token_data.user_id, "username": token_data.username}
+    )
+    return TokenResponse(access_token=access_token, token_type="bearer")

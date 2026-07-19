@@ -82,3 +82,35 @@ def decode_token(token: str) -> Optional[TokenData]:
         return TokenData(user_id=user_id, username=username)
     except JWTError:
         return None
+
+
+# ---------------------------------------------------------------------------
+# P2-18: refresh token
+# ---------------------------------------------------------------------------
+# Refresh tokens live longer than access tokens and carry a ``type``
+# claim (``"refresh"``) so the verification path can reject an access
+# token presented at the refresh endpoint.
+
+REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("JWT_REFRESH_TOKEN_EXPIRE_DAYS", "7"))
+
+
+def create_refresh_token(data: dict) -> str:
+    to_encode = data.copy()
+    to_encode["type"] = "refresh"
+    expire = datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    to_encode["exp"] = expire
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def decode_refresh_token(token: str) -> Optional[TokenData]:
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "refresh":
+            return None
+        user_id: str = payload.get("sub")
+        username: str = payload.get("username")
+        if not user_id:
+            return None
+        return TokenData(user_id=user_id, username=username)
+    except JWTError:
+        return None

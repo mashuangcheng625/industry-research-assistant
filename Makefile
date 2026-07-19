@@ -47,6 +47,22 @@ migrate-history:
 migrate-autogenerate:
 	cd backend && PYTHONPATH=app ../$(PYTHON) -m alembic -c alembic.ini revision --autogenerate -m "auto"
 
+migrate-downgrade:
+	cd backend && PYTHONPATH=app ../$(PYTHON) -m alembic -c alembic.ini downgrade -1
+
+# ---- Database backup / restore (P2-19) ----
+# Uses ``pg_dump`` / ``pg_restore`` against the PostgreSQL connection
+# configured in ``backend/.env``. Designed for manual use only.
+db-backup:
+	cd backend && \
+	export $$(grep -E '^(POSTGRES_HOST|POSTGRES_PORT|POSTGRES_USER|POSTGRES_PASSWORD|POSTGRES_DB)=' .env | grep -v '^#' | xargs) && \
+	PGPASSWORD=$$POSTGRES_PASSWORD pg_dump -h $$POSTGRES_HOST -p $$POSTGRES_PORT -U $$POSTGRES_USER -d $$POSTGRES_DB -Fc > ../backups/$$(date +%Y%m%d_%H%M%S)_industry_assistant.dump
+
+db-restore:
+	cd backend && test -n "$(FILE)" || (echo "Usage: make db-restore FILE=<path>" && false) && \
+	export $$(grep -E '^(POSTGRES_HOST|POSTGRES_PORT|POSTGRES_USER|POSTGRES_PASSWORD|POSTGRES_DB)=' .env | grep -v '^#' | xargs) && \
+	PGPASSWORD=$$POSTGRES_PASSWORD pg_restore -h $$POSTGRES_HOST -p $$POSTGRES_PORT -U $$POSTGRES_USER -d $$POSTGRES_DB -c --if-exists $(FILE)
+
 test-backend-unit:
 	cd backend && PYTHONPATH=app timeout 240s ../$(PYTHON) -m pytest -q -m "not integration" -W error::DeprecationWarning
 
