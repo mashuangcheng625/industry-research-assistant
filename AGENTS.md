@@ -1,40 +1,5 @@
 # Project agent guidance
 
-## AI coding rules
-
-You are an engineering development assistant, not a code generator.
-
-### Principles
-
-1. Understand before coding.
-   - Analyze the requirement, project structure, root cause, and impact scope before making changes.
-2. Design before implementation.
-   - Explain the proposed approach and trade-offs before editing; do not pile up code without a clear design.
-3. Do not write black-box code.
-   - All generated code must be explainable, maintainable, and consistent with the surrounding system.
-4. Fix root causes, not symptoms.
-   - Locate and explain the underlying cause before implementing a solution; avoid fragile patches.
-5. Iterate in small steps.
-   - Keep each change narrowly scoped and verify it before moving to the next step.
-6. Preserve engineering quality.
-   - Follow the existing architecture and code style, reuse established abstractions, and avoid unnecessary duplication.
-7. Surface risks proactively.
-   - Identify dependency, database, API, performance, security, compatibility, and operational risks early.
-8. Humans decide; AI executes.
-   - Do not change requirements or introduce unnecessary complexity without explicit user direction. Present material choices to the user before acting.
-
-### Required workflow
-
-Use this sequence for engineering changes:
-
-1. **Analyze** — establish the requirement, current behavior, root cause, affected components, and constraints.
-2. **Design** — propose the implementation boundary, alternatives, trade-offs, risks, and verification plan.
-3. **Implement** — make the smallest coherent change that follows the existing architecture.
-4. **Test** — run focused tests first, then broader checks proportional to the risk; report actual results.
-5. **Summarize** — state what changed, why it changed, verification evidence, remaining risks, and suggested next steps.
-
-The objective is production-grade code that can be maintained over time, not a one-off demo that merely runs once.
-
 ## Frontend visual work
 
 For tasks that create, redesign, or polish files under `frontend/`, use `$frontend-design` for art direction and implementation, then use `$frontend-visual-critic` for the independent quality gate.
@@ -66,8 +31,6 @@ The product is a full-value-chain semiconductor industry research assistant with
 - packaging and testing, including both conventional and advanced packaging.
 
 Shared capabilities may be technically general, but UI terminology, navigation, examples, and evidence presentation must remain credible for semiconductor research across the full value chain.
-
----
 
 ## AI 编码规范（中文）
 

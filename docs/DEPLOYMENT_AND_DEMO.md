@@ -24,6 +24,7 @@ flowchart LR
     B --> O["Ollama / OpenAI-compatible<br/>生成与 Embedding"]
     B --> P["/metrics"]
     P --> PM["Prometheus :9090<br/>可选 observability profile"]
+    PM --> G["Grafana :3000<br/>研究运行看板"]
     M --> E["etcd"]
     M --> S["MinIO"]
 ```
@@ -143,14 +144,45 @@ make demo-rag API_URL=http://127.0.0.1:8000/chat/completion
 ```
 
 `stop` 保留数据卷。`clean` 会二次确认后删除数据卷，不应用于故障排查的
-第一步。Milvus 向量可从受审 Markdown 重建；PostgreSQL 数据目前没有自动备份。
+第一步。Milvus 向量可从受审 Markdown 重建；PostgreSQL 提供手动
+`make db-backup` / `make db-restore FILE=...`，并在 CI 中执行隔离库破坏—恢复演练；
+尚未实现定时备份和异地保存。
+
+迁移往返验收会执行全量降级并删除应用表，因此只接受库名以
+`_migration_test` 结尾的专用空 PostgreSQL 数据库：
+
+```bash
+MIGRATION_TEST_DATABASE_URL=postgresql://user:password@host/industry_assistant_migration_test \
+  make validate-migrations
+```
+
+备份恢复演练会先用 Alembic 创建 schema，写入哨兵数据，执行 `pg_dump`，
+主动删除数据和表，再用 `pg_restore` 恢复并校验 schema drift、表数和行数。
+它只接受 `_backup_test` 结尾的专用空库：
+
+```bash
+BACKUP_TEST_DATABASE_URL=postgresql://user:password@host/industry_assistant_backup_test \
+  make validate-backup-restore
+```
+
+如果本地 PostgreSQL 数据卷来自旧版手写初始化 SQL，库中会有应用表但没有
+`alembic_version`。`migrate` 服务会失败关闭，不会擅自 `stamp head`。先执行备份，
+再根据是否需要保留本地数据选择显式迁移，或用 `./start-services.sh clean`
+二次确认后重建纯演示数据卷。
 
 ## 8. 已知部署边界
 
 - 容器已在干净 Python 3.12 / Node 22 基础镜像上真实构建并通过一次性 smoke；
-- 后端镜像约 318 MB，当前锁文件包含测试、绘图和 Milvus Lite 等非最小运行依赖；
+- 后端镜像约 344 MB，基础镜像固定为 Debian Bookworm，并内置与服务端同主版本的
+  PostgreSQL 15 客户端用于容器内备份恢复；当前锁文件仍包含测试、绘图和 Milvus Lite
+  等非最小运行依赖；
 - 前端生产依赖 `npm audit --omit=dev` 为 0 漏洞，开发依赖仍有 audit 项；
-- 前端主 bundle 约 2.56 MB，尚未做路由/组件代码分割；
-- 当前开发启动使用 SQLAlchemy `create_all`，没有经过验收的 Alembic 版本迁移链；
-  因此不能声称支持生产无停机 schema 升级；
-- 未实现 TLS、密钥托管、数据库备份、多副本、滚动发布和多 worker Prometheus 聚合。
+- 前端已完成路由级代码分割与 `echarts/core` 按需引入；修复 vendor 循环依赖后的
+  ECharts chunk 为 690.01 kB（gzip 235.05 kB）；
+- 已有覆盖 14 张表的 Alembic 迁移链和 upgrade/downgrade 命令；Compose 的一次性
+  `migrate` 服务成功后后端才启动，默认不再调用 SQLAlchemy `create_all`；
+- CI 门禁会在两个专用 PostgreSQL 库上分别验证往返迁移、ORM schema drift
+  和备份破坏—恢复；尚未验证生产数据量下的无停机 schema 升级；
+- 已支持单容器内 Prometheus multiprocess 聚合和 Grafana 自动装配；多实例由
+  Prometheus 分别 scrape 后求和，不共享 mmap 目录；
+- 未实现 TLS、生产级密钥托管、定时异地备份、多副本和滚动发布。

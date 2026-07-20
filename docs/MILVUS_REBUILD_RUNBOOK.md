@@ -72,6 +72,7 @@ curl --fail http://localhost:9091/healthz
 
 ```bash
 cd backend
+PYTHONPATH=app ../.venv/bin/python app/scripts/bootstrap_source_pipeline.py
 PYTHONPATH=app ../.venv/bin/python app/scripts/migrate_document_metadata.py
 PYTHONPATH=app ../.venv/bin/python app/scripts/ingest_approved_sources.py \
   --username source_pipeline \
@@ -79,6 +80,11 @@ PYTHONPATH=app ../.venv/bin/python app/scripts/ingest_approved_sources.py \
   --force \
   --chunk-size 1200
 ```
+
+`bootstrap_source_pipeline.py` 幂等创建不可登录的语料归属账号和四个知识库，
+不输出或保存可用密码。新空库必须先执行，已存在数据时可安全重复执行。
+当 `EMBEDDING_INGEST_MODE=hybrid` 时，每个知识库会同时生成
+`text_v4_1024_v1` 和 `bge_m3_1024_v1` 两个路由集合。
 
 入库必须使用 `candidates-v2.jsonl`：12 份 PDF 指向 `normalized-v2`，3 份 OpenROAD
 Markdown 继续指向 `normalized`。路径相对于 `data/semiconductor_sources` 解析。

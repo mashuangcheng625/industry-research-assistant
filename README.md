@@ -55,7 +55,7 @@ Runner 已完成 12/12 确定性端到端门禁，但真实在线数据源仍未
 
 | 能力 | 当前状态 | 可以证明什么 | 下一项验收 |
 | --- | --- | --- | --- |
-| 文档 RAG 与引用 | 已深度验证 | 真实 PDF、混合检索、逐主张引用、拒答与固定评测 | 独立 blind-v2 |
+| 文档 RAG 与引用 | 已深度验证 | 真实 PDF、混合检索、逐主张引用、拒答与固定评测 | 修正题集缺陷后的独立 blind-v3 |
 | Research Agent | 已验证控制面 | 规划、取消、超时、检查点、精确恢复和审核否决 | 多源成功终态与幂等性 |
 | 新闻与政策 | 已接入 | API、数据库模型、采集服务和前端列表存在 | 半导体时效性题集、去重和来源质量 |
 | 招投标 | 已接入 | 行业关键词、采集接口和独立页面存在 | 供应商归一、公告去重和需求信号评测 |
@@ -75,9 +75,9 @@ Runner 已完成 12/12 确定性端到端门禁，但真实在线数据源仍未
 | regression 检索 | 混合检索 + 相邻块 20/20 | 是固定回归集结果，不代表开放域 100% |
 | regression 端到端回答 | 16/20 严格质量通过，拒答 4/4 | P95 12.477 秒，本地 4B 模型 |
 | 并发压力 | 并发 4 时 8/8，P95 10.217 秒 | 并发 8 时 P95 19.919 秒，已接近饱和 |
-| 上下文压力 | 600,400 输入 token 中选取 3,002/6,000 | 证据预算生效；尚非统一总上下文预算 |
+| 上下文压力 | 600,400 输入 token 中选取 3,002/6,000 | 历史证据子预算通过；主 Chat/Agent 已增加 32K 总预算，待补同规模总预算报告 |
 | 多源联合研究 | 冻结脱敏 fixture 12/12 | 确定性 Runner 逐题执行，不代表线上数据质量 |
-| 自动化验证 | 后端 407/407，前端 lint/build 通过 | 406 项单元测试 + 1 项 Milvus Lite 集成测试 |
+| 自动化验证 | 后端 457 项，前端 lint/build 通过 | 453 项单元测试 + 4 项集成测试（Milvus Lite / Redis / Alembic / PostgreSQL 备份恢复） |
 
 对应报告见 [`reports/`](reports/)，评测口径见
 [`docs/RAG_EVALUATION_PROTOCOL.md`](docs/RAG_EVALUATION_PROTOCOL.md)。简历与项目介绍中的
@@ -216,12 +216,14 @@ docker compose --profile app exec backend \
 ## 验证命令
 
 ```bash
-make check                       # 依赖、368 项后端测试、前端、Compose、数据与评测隔离
-make validate-observability      # Prometheus 配置与 4 条告警规则
+make check                       # 依赖、457 项后端测试、前端、Compose、数据与评测隔离
+make validate-observability      # Prometheus 配置、4 条告警和 Grafana 看板
 make build-images                # 构建非 root 后端镜像与 Nginx 前端镜像
 make demo-rag                    # 正例、跨环节问题与无证据拒答
 make load-test-chat              # 带质量门槛的并发测试
 make stress-context-budget       # 长证据输入预算压力测试
+make validate-migrations         # 专用 _migration_test PostgreSQL 库的往返迁移验收
+make validate-backup-restore     # 专用 _backup_test PostgreSQL 库的破坏—恢复演练
 ```
 
 公开评测分为 40 题有标签 development/regression 和 40 题无答案 test/hidden；CI 会拒绝在
@@ -235,7 +237,7 @@ frontend/                React 前端与 Nginx 运行镜像
 data/                    来源注册表、规范化文本；原始 PDF 不提交
 sample-data/             可公开的开发/回归题和 questions-only 题集
 reports/                 消融、回答、并发、上下文和审计报告
-docker/                  Prometheus 配置和告警规则
+docker/                  Prometheus 配置、告警规则和 Grafana 看板
 docs/                    设计、运行手册、学习与面试材料
 docker-compose.yml       core / app / search / observability profiles
 ```
@@ -259,14 +261,22 @@ docker-compose.yml       core / app / search / observability profiles
 ## 已知边界
 
 - 语料规模不足以声称“覆盖全部半导体知识”；词法召回仍是内存扫描，不适合大规模生产索引；
-- 6,000-token 仅约束检索证据，尚未统一系统指令、问题、历史、记忆和输出预算；
+- 主聊天与 Research Agent 已使用默认 32,768-token 总预算统一计算指令、问题、历史、记忆、
+  证据和输出预留，证据仍保留 6,000-token 子上限；Memory 摘要、Text2SQL、语义裁判也已
+  接入同一预算，旧 ReAct/DR-G 兼容链路的直接模型调用也已统一；40 组跨调用链边界压力矩阵通过；
 - 本地 4B 语义裁判效果不稳定，默认关闭；它也不是形式化蕴含证明；
-- `/metrics` 是单进程语义，尚无多 worker 聚合与分布式 trace；
-- 数据库目前依赖自动建表，尚无 Alembic 迁移链；部署不包含 TLS、HA、备份和生产级密钥托管；
-- 旧评测曾发生标签暴露，因此当前分数只作阶段验收；下一轮可信泛化结论需要独立 blind-v2；
+- `/metrics` 已支持 Prometheus multiprocess 聚合，Grafana 自动装配研究运行看板；
+  OpenTelemetry 可按需导出 FastAPI、HTTPX 与 SQLAlchemy trace，但尚未配置默认 trace 后端；
+- 已提供覆盖 14 张表的 Alembic 迁移链，Compose 通过一次性 `migrate` 服务先迁移再启动后端；CI 门禁会在隔离 PostgreSQL 上验证迁移往返、ORM schema drift 与 `pg_dump` / `pg_restore` 破坏—恢复；
+- 尚未实现定时备份、异地保存、TLS、HA 和生产级密钥托管；
+- blind-v2 首次运行已完成，但暴露出知识库映射和金标来源缺陷，现仅作为已解盲诊断集；
+  下一轮可信泛化结论需要修正校验流程后由独立维护者制作 blind-v3；
 - 新闻、招投标、Text2SQL 和股票已通过冻结 fixture 的 12 题联合门禁，但缺少真实在线数据盲测；
-- 多源事实尚未统一 provenance 契约，新闻、SQL 行和行情数据不能复用 PDF 页码式引用；
-- 前端主 bundle 约 2.56 MB，仍需路由级代码分割；
+- 多源 `Evidence` 契约、适配器与 `CitationLocator` 已接入 Chat、Research Writer、API 响应和前端
+  来源卡片；评测器会校验统一 anchor 与 source kind，但真实在线多源盲测仍待完成；
+- 前端已完成路由级拆分和 `echarts/core` 按需注册；修复会导致生产白屏的 vendor
+  循环依赖后，ECharts chunk 从 1,139.07 kB（gzip 383.48 kB）降至 690.01 kB
+  （gzip 235.05 kB），仍高于 Vite 的 500 kB 提示线；
 - 仓库为公开仓库（MIT License），公开前的 5 项人工复核已于 2026-07-18 由项目负责人确认通过。
 
 完整闭环状态与后续优先级见

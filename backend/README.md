@@ -20,10 +20,14 @@ Compose 或 shell 历史。
 宿主机启动后端：
 
 ```bash
+make migrate-head
 cd backend
 PYTHONPATH=app ../.venv/bin/python -m uvicorn app_main:app \
   --host 127.0.0.1 --port 8000
 ```
+
+Schema 默认只由 Alembic 管理；`AUTO_CREATE_TABLES` 保留为临时原型兼容开关，
+完整演示和部署不应开启。
 
 完整容器演示：
 

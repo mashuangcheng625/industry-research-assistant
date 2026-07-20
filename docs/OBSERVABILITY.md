@@ -5,9 +5,10 @@
 可观测链路覆盖“模型请求 → Agent 任务 → 状态机阶段 → 研究终态 → checkpoint/互斥锁”。
 指标不使用 `session_id`、query、证据文本或原始异常作 label，避免高基数、数据泄漏和不可控的存储成本。
 
-`/metrics` 当前是进程内 Prometheus 指标。本地和单 worker 部署可直接使用；
-多 worker 模式下，每个 worker 只看到自己的计数。在没有配置 Prometheus Python multiprocess mode
-之前，不能把单个 worker 的 `/metrics` 误读为全局数据。
+`/metrics` 同时支持单 worker 默认 registry 和 Prometheus Python multiprocess registry。
+Compose 为后端配置独立 Linux mmap 目录，Counter/Histogram 在 worker 间求和，
+`industry_research_active_runs` 使用 `livesum`。启动器在创建 worker 前清理旧文件；
+优雅退出时注销当前 PID，scrape 时还会回收被强杀 worker 留下的 live Gauge。
 
 ## 2. 指标设计
 
@@ -39,16 +40,28 @@
 curl -s http://127.0.0.1:8000/metrics | grep '^industry_research_'
 ```
 
-启动可选 Prometheus profile：
+启动可选 Prometheus + Grafana profile：
 
 ```bash
 make validate-observability
-docker compose --profile observability up -d prometheus
+./start-services.sh observability
 ```
 
 Prometheus UI 位于 `http://127.0.0.1:9090`，配置通过
 `host.docker.internal:8000` 抓取宿主机后端。配置内含 Agent 超时、研究运行错误、checkpoint 失败和
 Redis 锁不可用四条告警规则。
+
+Grafana 位于 `http://127.0.0.1:3000`，会自动 provisioning Prometheus 数据源和
+`Semiconductor Research Agent Operations` 看板。看板覆盖活跃任务、通过/错误率、
+端到端与阶段 P95、LLM 延迟/token、checkpoint/锁故障和 Critic 审核结果。
+本地默认允许匿名 Viewer，不得直接沿用到公网部署。
+
+验证两个 worker 的聚合语义：
+
+```bash
+WEB_CONCURRENCY=2 ./start-services.sh app
+curl -s http://127.0.0.1:8000/metrics | grep '^industry_research_'
+```
 
 ## 4. 运行结果语义
 
@@ -62,6 +75,8 @@ Redis 锁不可用四条告警规则。
 ## 5. 生产边界
 
 - `/metrics` 未做应用层认证，生产环境应只向内网 Prometheus 暴露，或在反向代理层限制访问。
+- multiprocess 目录必须位于支持 mmap 的本地 Linux 文件系统，不能放在 WSL 的
+  Windows 挂载盘、网络文件系统或多 Pod 共享卷。多实例应由 Prometheus 分别 scrape 后求和。
 - token 指标依赖 OpenAI 兼容端点返回 usage；不返回时不会伪造估算值。
 - Histogram bucket 根据当前本地 4B 实验延迟设置，模型或硬件变更后需重新校准。
 - 指标适合聚合趋势与告警；单次故障定位仍需 checkpoint 状态和结构化日志。

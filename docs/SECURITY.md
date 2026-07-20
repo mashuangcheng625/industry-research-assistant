@@ -7,7 +7,9 @@
 - `/chat`、`/research`、`/documents`、`/search` 和 `/attachments` 需要有效 JWT；
 - 附件的上传、读取、列表、问答引用和删除均按 `user_id` 过滤；
 - 登录、注册、普通高成本请求和 Research Agent 使用不同限流额度；
-- 当前限流器为单进程语义。多 worker 或多实例部署必须迁移到 Redis 原子计数器，不能把单进程额度解释成集群额度。
+- Redis 可用时限流器通过单次 Lua 脚本原子执行有序集合的“清理—计数—写入—TTL”，
+  可在共享同一 Redis 的 worker / 实例之间执行统一配额。Redis 不可用或运行时失败时，
+  降级为进程内滑动窗口并保留本进程已放行记录；此时只能保证单进程额度，不能继续声称全局配额。
 
 ## JWT 配置
 
@@ -39,7 +41,7 @@ JWT_SECRET_KEY=<随机生成的高强度密钥>
 ## Text2SQL 安全（P1-1）
 
 `Text2SQLService.validate_sql` 的旧关键字黑名单已下线，全部改为
-[`SQLGuard`](/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/backend/app/core/text2sql_guard.py)
+[`SQLGuard`](../backend/app/core/text2sql_guard.py)
 AST 检查。守卫的硬性边界是：
 
 - 只允许顶层 `SELECT`，包括合法的 `WITH` / `UNION`，并对 CTE 内部再次校验，禁止 `WITH x AS (DELETE ...) SELECT ...`；
@@ -66,7 +68,7 @@ AST 检查。守卫的硬性边界是：
 ## 多源 Provider 可靠性（P1-2）
 
 新闻、招投标与股票行情三个外部数据源由
-[`ProviderReliability`](/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/backend/app/core/provider_reliability.py)
+[`ProviderReliability`](../backend/app/core/provider_reliability.py)
 包装后再发出请求，统一的硬性边界：
 
 - 每个外部调用都有显式 per-attempt 超时（可通过
@@ -96,15 +98,14 @@ Text2SQL 的 `execute_sql` 在 P1-1 阶段已通过 `SQLGuard` 拿到 AST
 ## 数据治理（P1-3）
 
 新闻、招投标两类外部采集的数据由
-[`data_governance`](/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/backend/app/core/data_governance.py)
+[`data_governance`](../backend/app/core/data_governance.py)
 统一处理，硬性边界：
 
 - **去重**：除原有的 `source_url` / `bid_id` 唯一索引外，新增
   `dedup_key` 列。`news_dedup_key` / `bidding_dedup_key` 通过 NFKC 归一化 +
   SHA-256 摘要产出稳定身份——同一资讯从不同聚合源采集时会折叠为
-  一行；新增 `create_all` 自动建表的部署会同时获得 `dedup_key`
-  与 `parties` 列（`JSONB`），已有部署需要 `ALTER TABLE` 一次性补列
-  （参见 `docs/SECURITY.md` 的「数据迁移」备注）。
+  一行；`dedup_key` 与 `parties` 列（`JSONB`）由 Alembic 迁移链统一管理，
+  Compose 不再使用手写初始化 SQL 或默认 `create_all` 创建竞争 schema。
 - **实体归一**：`normalise_party_name` 把
   `中芯国际集成电路制造（上海）有限公司` 与
   `中芯国际集成电路制造(上海)股份有限公司` 都归一到
@@ -135,7 +136,7 @@ Text2SQL 的 `execute_sql` 在 P1-1 阶段已通过 `SQLGuard` 拿到 AST
 ## 多源 Critic（P1-4）
 
 `multi_source_research` 端到端在渲染最终答案前跑过
-[`critic_checks`](/home/xiaoma/projects/大模型项目/llm-application-portfolio/industry-research-assistant/backend/app/core/critic_checks.py)
+[`critic_checks`](../backend/app/core/critic_checks.py)
 六项确定性检查，避免把 LLM Critic 当作唯一防线：
 
 - **时效（freshness）**：每条 `Evidence` 必须有 `published_at` 或 `as_of`；

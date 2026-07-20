@@ -58,17 +58,18 @@ make validate-sources
 
 | 检查项 | 结果 |
 | --- | ---: |
-| 后端单元 + Milvus Lite 集成测试 | 407/407 通过（406 unit + 1 integration） |
+| 后端测试 | 457 项（453 unit + Milvus Lite / Redis / Alembic / PostgreSQL 备份恢复 4 integration） |
 | 全语料 Milvus Lite smoke | 15 份资料 / 36 任务 / 5256 切片，4/4 库对账通过 |
 | Python 编译检查 | 通过 |
 | Python 依赖一致性 | `pip check` 通过 |
 | SQLAlchemy/Pydantic 弃用警告 | 0 |
-| 前端 ESLint | 0 error / 0 warning |
+| 前端 ESLint | 0 error / 1 个 Fast Refresh 非阻断 warning |
 | 前端生产构建 | 通过 |
 | 干净后端/前端容器构建 | 通过 |
 | 容器 readiness（存储 + 生成模型 + Embedding） | 通过 |
 
-前端构建仍提示主 JavaScript bundle 约 2.56 MB，代码分割属于后续性能工作，
+前端已完成路由级代码分割和 `echarts/core` 按需注册。2026-07-20 最终生产构建中 ECharts
+vendor chunk 为 690.01 kB（gzip 235.05 kB），较原始全量 chunk 减少约 39%；仍高于 500 kB 提示线，
 不能把“构建通过”等同于“前端性能达标”。
 
 后端日常安装使用 `requirements-lock.txt` 中的 Python 3.12 传递依赖锁定；
@@ -94,4 +95,5 @@ Milvus 2.6.17 + PyMilvus 2.6.14。Compose 使用独立的 v2.6 etcd/MinIO/Milvus
 原始 PDF 不进 Git 不代表数据来源不可追溯：版本库保留来源 URL、许可信息、
 内容哈希、本地路径和处理状态，下载后通过哈希校验再进入解析流程。
 
-在确认代码、原始研报与测试数据的公开授权前，仅维护私有远端，不开放公开访问。
+仓库已公开并采用 MIT License；代码归属与 5 项公开前人工复核已于 2026-07-18
+由项目负责人确认。原始 PDF、私有答案、密钥和运行时数据继续保持 Git 忽略。

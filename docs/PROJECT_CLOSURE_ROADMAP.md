@@ -116,13 +116,17 @@ PDF 解析、结构恢复、清洗与质量检查
 - 所有简历数字都对应仓库命令和机器可读报告；
 - 私有评测答案、公司资料和未经授权代码不进入公开仓库。
 
-## 5. 当前基线（2026-07-17）
+## 5. 当前基线（2026-07-20）
+
+本节保留早期实验指标作为演进记录，同时以 2026-07-20 的代码、README 和 CI 更新工程状态。
+历史报告中的旧分支名、构建体积和测试数量不再代表当前仓库。
 
 ### 已有能力
 
 - 覆盖四个半导体产业方向的知识库与研究工作流；
 - 研究运行、阶段、Agent、LLM、checkpoint、取消与 Redis 锁已暴露低基数 Prometheus 指标，
-  可选 Compose profile 包含 7 天存储与四条可靠性告警；
+  支持单容器多 worker 聚合；可选 Compose profile 包含 7 天存储、四条告警和
+  自动 provisioning 的 Grafana 看板；
 - 12 份 PDF、1327 页完成 v2 规范化，失败 0；
 - 15 份获批资料完成无密钥全语料 Milvus Lite smoke：36 个文档领域任务、
   5256 个切片、4 个 collection 对账通过、0 重复 chunk ID；
@@ -149,20 +153,23 @@ PDF 解析、结构恢复、清洗与质量检查
 - 当前端到端回答结果只覆盖 regression，不代表 test/hidden 回答质量；
 - 现有 test/hidden 标签曾经由聚合数据和生成脚本暴露，已有分数只能作为
   受污染的阶段验收，不是盲测；
-- 后续大改应由独立复核者在代码冻结后新建 blind-v2，问题和答案都不对调参者可见；
+- blind-v2 首次运行后因题集映射与来源缺陷转为已解盲诊断集；后续大改应由独立复核者
+  在代码冻结后新建 blind-v3，问题和答案都不对调参者可见；
 - 当前公开语料规模仍小，系统能力不能表述为覆盖全部半导体知识。
 
 ### 已知缺口
 
-- 私有远端和 CI 已建立；P0 分支 `7f674a3` 的 GitHub Actions 后端、前端与干净镜像构建全部通过；
-- 后端 Python 3.12 传递依赖已锁定，161 条 unit 与 1 条 Milvus Lite integration
-  由带硬超时的 `make check` 验证通过；
+- 仓库已公开并采用 MIT License；`main` 的 GitHub Actions 后端、前端与干净镜像构建全部通过；
+- 后端 Python 3.12 传递依赖已锁定，453 条 unit 与 4 条 integration
+  （Milvus Lite / Redis / Alembic / PostgreSQL 备份恢复）由带硬超时的 `make check` 验证；
 - 公开评测已分离为 40 题有标签开发集与 40 题无标签问题集，公开 CI
   会拒绝 test/hidden 答案字段；完整 80 题键仅在 Git 忽略目录。
-- 前端 ESLint 已为 0 error / 0 warning，生产构建通过；
-- 前端主 bundle 约 2.56 MB，缺少代码分割；
-- Milvus 2.6.17 配置、独立数据卷和 Lite 集成测试已完成，但 Docker Hub TLS
-  超时导致 Standalone 镜像未拉取完，全量重建待执行；
+- 前端 ESLint 为 0 error / 1 个 Fast Refresh 非阻断 warning，生产构建通过；
+- 前端已完成路由级拆分与 ECharts 按需注册；最终生产 chunk 为 690.01 kB
+  （gzip 235.05 kB）；
+- Milvus 2.6.17 配置、独立数据卷、Lite 集成测试和真实双路向量重建均已完成；
+  5,256 个证据块分别写入百炼 `text-embedding-v4` 与本地 `bge-m3`，共 10,512 个
+  1,024 维向量、8 个物理集合；逐文档对账无重复或数量差异；
 - 非 root 后端镜像和 Nginx 前端镜像已完成干净构建；应用镜像已针对现有存储、生成模型与
   embedding 模型通过 readiness 冒烟，但这不替代全新 Milvus 2.6.17 数据卷的重建验收；
 - 旧 Milvus 2.3 设计库与 PostgreSQL 不一致：`nist-ir-8577.md` 多 138 个重复
@@ -179,11 +186,15 @@ PDF 解析、结构恢复、清洗与质量检查
   `approved` 的成功路径；
 - 本地 4B 模型在并发 4 左右已接近饱和；并发 8 的 P95 19.919 秒，
   不能作为生产容量承诺；
-- 6,000-token 限制目前只覆盖检索证据，系统指令、问题、历史、记忆和回答
-  尚未共享统一的总上下文预算；
-- `/metrics` 当前是单进程语义，多 worker 聚合与分布式 trace 尚未实现；
+- 主聊天、Research Agent、Memory 摘要、Text2SQL、语义裁判和旧 ReAct/DR-G 兼容链路均已
+  接入 32K `ContextBudget`，统一计算输入和输出预留；10 条调用路径、40 组边界压力矩阵通过；
+- `CitationLocator` 已接入 Evidence 序列化、Chat、Research Writer/API 和前端来源卡片；
+- Redis 限流已通过单次 Lua 脚本原子执行共享配额；Redis 故障时降级为保留本进程历史的
+  本地窗口，此时不再具备全局配额语义；
+- 已有 Alembic 迁移链、CI 往返迁移/备份恢复门禁、Prometheus multiprocess、
+  Grafana 看板和 opt-in OpenTelemetry；定时异地备份、默认 trace 后端、TLS、HA 和密钥托管尚未完成；
 - README 已补齐业务闭环、评测设计、真实指标、复现入口和系统边界；
-- 需要确认公司版权代码、数据与报告的公开授权范围。
+- 代码归属与公开前人工复核已由项目负责人确认；原始 PDF、私有答案和密钥继续不进入仓库。
 
 ## 6. 下一版目标指标
 
@@ -195,7 +206,7 @@ PDF 解析、结构恢复、清洗与质量检查
 | 解析 | 基准 PDF 解析完成率 | 100% |
 | 检索 | regression 严格通过 | 不低于 20/20 |
 | 检索 | test 严格通过 | 不低于 18/20 |
-| 检索 | 新 blind-v2 严格通过 | 不低于 85% |
+| 检索 | 新 blind-v3 严格通过 | 先完成来源与知识库映射预校验，再设冻结阈值 |
 | 引用 | 金标来源已召回时的正确引用率 | 不低于 95% |
 | 拒答 | 无证据题正确拒答率 | 不低于 95% |
 | 性能 | 预热后端到端 P95 | 不高于 15 秒 |

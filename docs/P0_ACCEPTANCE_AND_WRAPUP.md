@@ -5,11 +5,15 @@
 文档不替代现有 `docs/ENGINEERING_BASELINE.md` 与 `docs/RELEASE_AND_OWNERSHIP_CHECKLIST.md`，
 仅作为 P0 关闭时的"快照"，供下一任 Agent 或 README 读者快速了解当前质量门禁与剩余风险。
 
+> **历史快照说明：** 本文中的分支、构建体积、未完成项和发布步骤记录 2026-07-18
+> 当时的状态，不作为当前项目事实来源。当前状态以 `README.md`、
+> `docs/ENGINEERING_BASELINE.md` 和最新 GitHub Actions 为准。
+
 ## 一、P0 验收结论（自动可验证）
 
 | 项目 | 期望 | 实际 | 备注 |
 | --- | --- | --- | --- |
-| 后端单元 + 集成测试 | 全绿 | 407/407（406 unit + 1 Milvus Lite integration） | `make test-backend` |
+| 后端单元 + 集成测试 | 全绿 | 457 项（453 unit + 4 integration） | `make test-backend-unit` / `make test-backend-integration` |
 | Evidence 契约测试 | 全绿 | 48/48 | `make test-evidence-contract` |
 | 前端 ESLint | 0 error / 0 warning | 0/0 | `make lint-frontend` |
 | 前端生产构建 | 通过 | 通过，dist 2.56 MB | `make build-frontend` |
@@ -55,7 +59,8 @@ DOCKER=/mnt/e/env/docker/resources/bin/docker.exe make validate-compose
 实测结果：
 
 - 后端 + 评测：全部通过，单次脚本耗时约 40 秒。
-- 前端：lint 0 警告、build 通过、chunk 2.56 MB（已知 P2 限制：`manualChunks` 路由级拆分待做）。
+- 前端：lint 0 error / 1 个 Fast Refresh 非阻断 warning，build 通过；已完成路由级拆分，
+  ECharts chunk 为 690.01 kB（gzip 235.05 kB），仍需继续降低首屏预加载体积。
 - `validate-compose`：1 秒内通过（Docker v29.6.1 + Compose v5.2.0）。
 
 ## 三、收尾动作（本会话内完成）
