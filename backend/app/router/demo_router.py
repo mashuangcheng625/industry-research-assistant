@@ -106,7 +106,10 @@ async def readiness_check() -> JSONResponse:
         async with httpx.AsyncClient(timeout=3.0) as client:
             resp = await client.get(os.environ.get("LOCAL_LLM_BASE_URL", "http://127.0.0.1:11434/v1") + "/models")
         if resp.status_code == 200:
-            models = [m.get("name", "") for m in resp.json().get("data", [])[:5]]
+            models = [
+                m.get("name") or m.get("id", "")
+                for m in resp.json().get("data", [])[:5]
+            ]
             checks["ollama"] = {"ok": True, "detail": f"models={models}", "latency_ms": _ms(t0)}
         else:
             checks["ollama"] = {"ok": False, "detail": f"HTTP {resp.status_code}", "latency_ms": _ms(t0)}

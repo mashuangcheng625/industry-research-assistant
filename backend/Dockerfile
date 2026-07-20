@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12-slim-bookworm
 
 WORKDIR /app
 
@@ -7,19 +7,24 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONPATH=/app/app
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -y libgomp1 \
+    && apt-get install --no-install-recommends -y libgomp1 postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements-lock.txt /app/requirements-lock.txt
 RUN pip install --no-cache-dir -r /app/requirements-lock.txt
 
 COPY app /app/app
+COPY sample-data /app/sample-data
+COPY alembic /app/alembic
+COPY alembic.ini /app/alembic.ini
 
 RUN useradd --create-home --uid 10001 appuser \
+    && mkdir -p /tmp/prometheus_multiproc \
     && chown -R appuser:appuser /app
+RUN chown appuser:appuser /tmp/prometheus_multiproc
 USER appuser
-WORKDIR /app/app
+WORKDIR /app
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app_main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "/app/app/scripts/run_backend.py"]

@@ -5,7 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from dotenv import load_dotenv
 import logging
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 # 加载环境变量
 from pathlib import Path as _Path
@@ -27,6 +26,7 @@ from router.news_router import router as news_router
 from router.demo_router import router as demo_router
 from core.database import engine, Base
 from core.health import check_readiness
+from core.metrics import mark_current_process_dead, render_metrics
 from core.runtime_config import cors_origins, env_bool
 from core.security import validate_security_config
 # 导入所有模型以确保它们被注册
@@ -44,7 +44,7 @@ async def lifespan(app: FastAPI):
 
     validate_security_config()
 
-    if env_bool("AUTO_CREATE_TABLES", True):
+    if env_bool("AUTO_CREATE_TABLES", False):
         Base.metadata.create_all(bind=engine)
 
     # 初始化定时任务调度器并检查数据
@@ -56,17 +56,19 @@ async def lifespan(app: FastAPI):
         except Exception as e:
             logger.error(f"定时任务调度器启动失败: {e}")
 
-    yield
-
-    # 关闭时执行
-    logger.info("应用关闭中...")
-    if env_bool("ENABLE_SCHEDULER", True):
-        try:
-            from service.scheduler_service import get_scheduler_service
-            scheduler = get_scheduler_service()
-            scheduler.stop()
-        except Exception as e:
-            logger.error(f"定时任务调度器关闭失败: {e}")
+    try:
+        yield
+    finally:
+        # 关闭时执行
+        logger.info("应用关闭中...")
+        if env_bool("ENABLE_SCHEDULER", True):
+            try:
+                from service.scheduler_service import get_scheduler_service
+                scheduler = get_scheduler_service()
+                scheduler.stop()
+            except Exception as e:
+                logger.error(f"定时任务调度器关闭失败: {e}")
+        mark_current_process_dead()
 
 
 app = FastAPI(
@@ -128,10 +130,11 @@ async def readiness():
 
 @app.get("/metrics", include_in_schema=False)
 async def prometheus_metrics():
-    """Expose process-local Prometheus metrics without application data labels."""
+    """Expose process or configured multi-worker aggregate metrics."""
+    payload, content_type = render_metrics()
     return Response(
-        content=generate_latest(),
-        headers={"Content-Type": CONTENT_TYPE_LATEST},
+        content=payload,
+        headers={"Content-Type": content_type},
     )
 
 if __name__ == '__main__':

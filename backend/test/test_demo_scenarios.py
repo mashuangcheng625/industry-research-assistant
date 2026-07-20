@@ -110,6 +110,16 @@ def test_sync_readiness_probe_does_not_block_event_loop() -> None:
 
     asyncio.run(exercise())
 
+    with patch("service.milvus_service.MilvusService", autospec=True) as service:
+        service.return_value.list_collections.return_value = ["cloud", "local"]
+        result = demo_router._probe_milvus()
+
+    assert result == {
+        "ok": True,
+        "detail": "collections=2",
+        "collections": ["cloud", "local"],
+    }
+
 
 def test_sync_readiness_probe_fails_fast_on_timeout() -> None:
     from router import demo_router
@@ -121,7 +131,6 @@ def test_sync_readiness_probe_fails_fast_on_timeout() -> None:
             )
 
     assert asyncio.run(exercise())["detail"] == "timeout"
-
 
 
 # ---------------------------------------------------------------------------

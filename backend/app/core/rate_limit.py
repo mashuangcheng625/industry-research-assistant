@@ -19,6 +19,7 @@ import logging
 import os
 import threading
 import time
+import uuid
 from collections import defaultdict, deque
 from typing import Optional, Protocol
 
@@ -76,21 +77,30 @@ class RedisSlidingWindowLimiter:
     """Sliding-window rate limiter backed by a Redis sorted set.
 
     Each ``key`` maps to a sorted set in Redis whose members are
-    nanosecond-precision timestamps. The window is enforced by
-    ``ZREMRANGEBYSCORE`` before ``ZCARD`` is checked, so every call
-    is atomic from the limiter's perspective (two Redis commands per
-    ``allow`` invocation).
+    unique request IDs scored by timestamp. One Lua script removes expired
+    members, checks the quota, inserts an allowed request and refreshes the
+    key TTL atomically. If Redis is unavailable, the limiter degrades to a
+    process-local sliding window instead of disabling rate limiting.
     """
 
-    SCRIPT_ZADD_COUNT = """
-    redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', ARGV[1])
-    local n = redis.call('ZCARD', KEYS[1])
-    if tonumber(n) >= tonumber(ARGV[2]) then
-        local oldest = redis.call('ZRANGE', KEYS[1], 0, 0, 'WITHSCORES')[2]
-        return {1, math.ceil(tonumber(ARGV[3]) - (tonumber(ARGV[4]) - tonumber(oldest)))}
+    ATOMIC_ALLOW_SCRIPT = """
+    local cutoff = tonumber(ARGV[1])
+    local limit = tonumber(ARGV[2])
+    local window = tonumber(ARGV[3])
+    local current = tonumber(ARGV[4])
+
+    redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', cutoff)
+    local count = redis.call('ZCARD', KEYS[1])
+    if count >= limit then
+        local oldest_result = redis.call('ZRANGE', KEYS[1], 0, 0, 'WITHSCORES')
+        local oldest = tonumber(oldest_result[2]) or cutoff
+        local retry_after = math.max(1, math.ceil(window - (current - oldest)))
+        return {0, retry_after}
     end
-    redis.call('ZADD', KEYS[1], ARGV[4], ARGV[4] .. ':' .. redis.call('INCR', KEYS[1] .. ':seq'))
-    return {0, 0}
+
+    redis.call('ZADD', KEYS[1], current, ARGV[5])
+    redis.call('EXPIRE', KEYS[1], math.ceil(window))
+    return {1, 0}
     """
 
     def __init__(self, limit: int, window_seconds: int = 60, redis_client=None):
@@ -100,25 +110,36 @@ class RedisSlidingWindowLimiter:
         self.window_seconds = window_seconds
         self._redis = redis_client
         self._enabled = redis_client is not None
+        self._local_fallback = SlidingWindowRateLimiter(limit, window_seconds)
 
     def allow(self, key: str, *, now: float | None = None) -> tuple[bool, int]:
         if not self._enabled:
-            return True, 0  # fail-open when Redis is not configured
-        current = now or time.time()
+            return self._local_fallback.allow(key, now=now)
+        current = time.time() if now is None else now
         cutoff = current - self.window_seconds
         try:
             redis_key = f"ratelimit:{key}"
-            self._redis.zremrangebyscore(redis_key, "-inf", cutoff)
-            count = self._redis.zcard(redis_key)
-            if count >= self.limit:
-                oldest = float((self._redis.zrange(redis_key, 0, 0, withscores=True) or [(b"", cutoff)])[0][1])
-                retry_after = max(1, int(self.window_seconds - (current - oldest)))
-                return False, retry_after
-            self._redis.zadd(redis_key, {f"{current}:{self._redis.incr(redis_key + ':seq')}": current})
-            return True, 0
+            member = f"{current}:{uuid.uuid4().hex}"
+            result = self._redis.eval(
+                self.ATOMIC_ALLOW_SCRIPT,
+                1,
+                redis_key,
+                cutoff,
+                self.limit,
+                self.window_seconds,
+                current,
+                member,
+            )
+            allowed = bool(int(result[0]))
+            retry_after = max(0, int(result[1]))
+            if allowed:
+                # Keep the degraded per-process window warm so a Redis outage
+                # cannot immediately grant a second full local quota.
+                self._local_fallback.allow(key, now=now)
+            return allowed, retry_after
         except Exception as exc:  # noqa: BLE001
-            logger.warning("Redis rate limit check failed, falling back to pass: %s", exc)
-            return True, 0  # fail-open on Redis errors
+            logger.warning("Redis rate limit check failed, using process-local fallback: %s", exc)
+            return self._local_fallback.allow(key, now=now)
 
 
 # ---------------------------------------------------------------------------

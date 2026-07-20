@@ -12,7 +12,7 @@ import sys
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import pool
+from sqlalchemy import create_engine, pool
 
 # Let the migration find the ``app`` package without hard-coding an
 # absolute path. The ``alembic.ini`` file already prepends ``.`` to
@@ -44,6 +44,17 @@ import models  # noqa: E402 — registers all table mappings via side-effects
 
 target_metadata = Base.metadata
 
+# Alembic 1.18 moved autogenerate comparison into plugins. ORM comments are
+# developer documentation rather than executable schema, so the drift gate
+# intentionally enables every structural plugin while excluding comments.
+AUTOGENERATE_PLUGINS = (
+    "alembic.autogenerate.schemas",
+    "alembic.autogenerate.tables",
+    "alembic.autogenerate.types",
+    "alembic.autogenerate.constraints",
+    "alembic.autogenerate.defaults",
+)
+
 
 def run_migrations_offline() -> None:
     url = config.get_main_option("sqlalchemy.url") or ""
@@ -52,18 +63,32 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        autogenerate_plugins=AUTOGENERATE_PLUGINS,
     )
     with context.begin_transaction():
         context.run_migrations()
 
 
 def run_migrations_online() -> None:
-    from core.database import engine  # noqa: E402 — local import to avoid circularity
+    configured_url = config.get_main_option("sqlalchemy.url") or ""
+    if configured_url:
+        connectable = create_engine(configured_url, poolclass=pool.NullPool)
+    else:
+        from core.database import engine  # noqa: E402 — local import to avoid circularity
 
-    with engine.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        connectable = engine
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            autogenerate_plugins=AUTOGENERATE_PLUGINS,
+        )
         with context.begin_transaction():
             context.run_migrations()
+
+    if configured_url:
+        connectable.dispose()
 
 
 if context.is_offline_mode():

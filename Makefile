@@ -10,7 +10,6 @@ STRUCTURED_PORT ?= 8001
 STRUCTURED_ANSWER_REPORT ?= reports/semiconductor_rag_answers_regression_structured_grounding_latest.json
 SEMANTIC_PORT ?= 8002
 SEMANTIC_ANSWER_REPORT ?= reports/semiconductor_rag_answers_regression_semantic_entailment_latest.json
-PROMETHEUS_IMAGE ?= prom/prometheus:v3.13.1
 LOAD_CONCURRENCY ?= 2
 LOAD_REQUESTS ?= 8
 LOAD_WARMUP ?= 1
@@ -21,7 +20,7 @@ MULTI_SOURCE_FIXTURE ?= sample-data/multi_source_advanced_packaging_fixture.json
 MULTI_SOURCE_EVAL ?= sample-data/multi_source_advanced_packaging_eval.json
 MULTI_SOURCE_REPORT ?= /tmp/industry-research-multi-source-report.json
 
-.PHONY: setup-backend test-backend test-backend-unit test-backend-integration test-evidence-contract check-backend-deps check-backend-import lint-frontend build-frontend build-images validate-compose validate-observability validate-sources validate-baseline smoke-ingest-lite audit-ingestion ablate-retrieval-development evaluate-answers-regression demo-rag load-test-chat stress-context-budget run-backend-structured evaluate-answers-regression-structured run-backend-semantic evaluate-answers-regression-semantic build-eval-public validate-eval validate-eval-private evaluate-multi-source check migrate-head migrate-history migrate-autogenerate
+.PHONY: setup-backend test-backend test-backend-unit test-backend-integration test-evidence-contract check-backend-deps check-backend-import lint-frontend build-frontend build-images validate-compose validate-observability validate-sources validate-baseline smoke-ingest-lite audit-ingestion ablate-retrieval-development evaluate-answers-regression demo-rag load-test-chat stress-context-budget run-backend-structured evaluate-answers-regression-structured run-backend-semantic evaluate-answers-regression-semantic build-eval-public validate-eval validate-eval-private evaluate-multi-source check migrate-head migrate-history migrate-autogenerate validate-migrations validate-backup-restore
 
 setup-backend:
 	python3 -m venv .venv
@@ -49,6 +48,12 @@ migrate-autogenerate:
 
 migrate-downgrade:
 	cd backend && PYTHONPATH=app ../$(PYTHON) -m alembic -c alembic.ini downgrade -1
+
+validate-migrations:
+	cd backend && PYTHONPATH=app ../$(PYTHON) app/scripts/validate_migration_roundtrip.py
+
+validate-backup-restore:
+	cd backend && PYTHONPATH=app ../$(PYTHON) app/scripts/validate_backup_restore.py
 
 # ---- Database backup / restore (P2-19) ----
 # Uses ``pg_dump`` / ``pg_restore`` against the PostgreSQL connection
@@ -93,12 +98,14 @@ validate-compose:
 	$(COMPOSE) config --quiet
 
 validate-observability:
-	$(DOCKER) run --rm --entrypoint /bin/promtool \
-		-v "$(CURDIR)/docker/prometheus:/etc/prometheus:ro" \
-		$(PROMETHEUS_IMAGE) check config /etc/prometheus/prometheus.yml
-	$(DOCKER) run --rm --entrypoint /bin/promtool \
-		-v "$(CURDIR)/docker/prometheus:/etc/prometheus:ro" \
-		$(PROMETHEUS_IMAGE) check rules /etc/prometheus/alerts.yml
+	$(COMPOSE) --profile observability run --rm --no-deps \
+		--entrypoint /bin/promtool prometheus \
+		check config /etc/prometheus/prometheus.yml
+	$(COMPOSE) --profile observability run --rm --no-deps \
+		--entrypoint /bin/promtool prometheus \
+		check rules /etc/prometheus/alerts.yml
+	cd backend && PYTHONPATH=app ../$(PYTHON) -m pytest -q \
+		test/test_observability_assets.py test/test_prometheus_multiprocess.py
 
 validate-sources:
 	PYTHONPATH=backend/app $(PYTHON) backend/app/scripts/validate_source_manifest.py \
@@ -150,8 +157,8 @@ load-test-chat:
 
 stress-context-budget:
 	cd backend && PYTHONPATH=app ../$(PYTHON) app/scripts/stress_context_budget.py \
-		--documents 200 --repetitions-per-document 500 --budget 6000 \
-		--output ../reports/context_budget_stress_2026-07-17.json
+		--documents 200 --repetitions-per-document 500 --budget 6000 --total-budget 32768 \
+		--output ../reports/context_budget_stress_2026-07-20.json
 
 run-backend-structured:
 	cd backend && RAG_STRUCTURED_GROUNDING_ENABLED=true PYTHONPATH=app ../$(PYTHON) \

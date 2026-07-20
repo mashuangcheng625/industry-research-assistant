@@ -78,21 +78,62 @@ def _openai_compatible_model(base_url: str, model: str, api_key: str) -> None:
         raise LookupError("configured model is not advertised by endpoint")
 
 
+def _openai_compatible_embedding(
+    base_url: str,
+    model: str,
+    api_key: str,
+    dimensions: int,
+) -> None:
+    """Verify an embedding endpoint through the operation used by the application.
+
+    Some OpenAI-compatible providers, including Bailian, do not expose embedding
+    models through ``GET /models``. A minimal embedding request therefore gives a
+    more accurate readiness signal than model discovery.
+    """
+    timeout = float(os.getenv("READINESS_TIMEOUT_SECONDS", "3"))
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    body = json.dumps({
+        "model": model,
+        "input": "readiness probe",
+        "dimensions": dimensions,
+        "encoding_format": "float",
+    }).encode("utf-8")
+    request = Request(
+        f"{base_url.rstrip('/')}/embeddings",
+        data=body,
+        headers=headers,
+        method="POST",
+    )
+    with urlopen(request, timeout=timeout) as response:
+        payload = json.loads(response.read().decode("utf-8"))
+    data = payload.get("data", [])
+    embedding = data[0].get("embedding") if data and isinstance(data[0], dict) else None
+    if not isinstance(embedding, list) or not embedding:
+        raise ValueError("embedding endpoint returned no vector")
+
+
 def readiness_checks() -> dict[str, Callable[[], None]]:
     """Build checks dynamically so tests and storage-only deployments stay offline-safe."""
     checks = dict(STORAGE_CHECKS)
     if env_bool("READINESS_CHECK_MODELS", False):
-        llm_base = os.getenv("LOCAL_LLM_BASE_URL", "http://127.0.0.1:11434/v1")
-        llm_model = os.getenv("LOCAL_LLM_MODEL", "industry-qwen3:4b")
-        llm_key = os.getenv("LOCAL_LLM_API_KEY", "ollama")
-        embedding_base = os.getenv("EMBEDDING_BASE_URL", llm_base)
-        embedding_model = os.getenv("EMBEDDING_MODEL", "bge-m3")
-        embedding_key = os.getenv("EMBEDDING_API_KEY", "ollama")
+        from service.embedding_router import get_embedding_route
+        from service.llm_router import resolve_llm_endpoint
+
+        llm_endpoint = resolve_llm_endpoint()
+        embedding_endpoint = get_embedding_route("cloud")
         checks["generation_model"] = lambda: _openai_compatible_model(
-            llm_base, llm_model, llm_key
+            llm_endpoint.base_url, llm_endpoint.model, llm_endpoint.api_key
         )
-        checks["embedding_model"] = lambda: _openai_compatible_model(
-            embedding_base, embedding_model, embedding_key
+        checks["embedding_model"] = lambda: _openai_compatible_embedding(
+            embedding_endpoint.base_url,
+            embedding_endpoint.model,
+            embedding_endpoint.api_key,
+            embedding_endpoint.dimensions,
         )
     return checks
 

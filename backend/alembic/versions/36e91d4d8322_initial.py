@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 # revision identifiers, used by Alembic.
@@ -22,7 +23,7 @@ def upgrade() -> None:
     # Users
     op.create_table(
         "users",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("username", sa.String(50), nullable=False),
         sa.Column("email", sa.String(100), nullable=False),
         sa.Column("hashed_password", sa.String(255), nullable=False),
@@ -34,8 +35,8 @@ def upgrade() -> None:
     # chat_sessions (FK -> users)
     op.create_table(
         "chat_sessions",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column("user_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
         sa.Column("title", sa.String(255)),
         sa.Column("session_type", sa.String(50)),
         sa.Column("created_at", sa.DateTime()),
@@ -44,8 +45,8 @@ def upgrade() -> None:
     # knowledge_bases (FK -> users)
     op.create_table(
         "knowledge_bases",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column("user_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
         sa.Column("name", sa.String(255), nullable=False),
         sa.Column("description", sa.Text()),
         sa.Column("document_count", sa.Integer(), default=0),
@@ -55,9 +56,9 @@ def upgrade() -> None:
     # research_checkpoints (FK -> users)
     op.create_table(
         "research_checkpoints",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("session_id", sa.String(64), nullable=False),
-        sa.Column("user_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
         sa.Column("query", sa.Text(), nullable=False),
         sa.Column("phase", sa.String(32), nullable=False),
         sa.Column("iteration", sa.Integer()),
@@ -72,8 +73,8 @@ def upgrade() -> None:
     # chat_messages (FK -> chat_sessions)
     op.create_table(
         "chat_messages",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column("session_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("chat_sessions.id", ondelete="CASCADE")),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("session_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("chat_sessions.id", ondelete="CASCADE")),
         sa.Column("role", sa.String(20), nullable=False),
         sa.Column("content", sa.Text(), nullable=False),
         sa.Column("thinking", sa.Text()),
@@ -84,9 +85,9 @@ def upgrade() -> None:
     # documents (FK -> knowledge_bases + users)
     op.create_table(
         "documents",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column("knowledge_base_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("knowledge_bases.id", ondelete="CASCADE")),
-        sa.Column("user_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("knowledge_base_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("knowledge_bases.id", ondelete="CASCADE")),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
         sa.Column("filename", sa.String(255), nullable=False),
         sa.Column("file_type", sa.String(50)),
         sa.Column("file_size", sa.BigInteger()),
@@ -116,9 +117,9 @@ def upgrade() -> None:
     # long_term_memories (FK -> users + chat_sessions)
     op.create_table(
         "long_term_memories",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column("user_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
-        sa.Column("session_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("chat_sessions.id", ondelete="SET NULL")),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("session_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("chat_sessions.id", ondelete="SET NULL")),
         sa.Column("summary", sa.Text(), nullable=False),
         sa.Column("key_insights", sa.JSON()),
         sa.Column("milvus_ids", sa.ARRAY(sa.Text())),
@@ -128,10 +129,10 @@ def upgrade() -> None:
     # chat_attachments (FK -> chat_messages + chat_sessions + users)
     op.create_table(
         "chat_attachments",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
-        sa.Column("message_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("chat_messages.id", ondelete="CASCADE")),
-        sa.Column("session_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("chat_sessions.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("user_id", sa.dialects.postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("message_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("chat_messages.id", ondelete="CASCADE")),
+        sa.Column("session_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("chat_sessions.id", ondelete="CASCADE"), nullable=False),
+        sa.Column("user_id", postgresql.UUID(as_uuid=True), sa.ForeignKey("users.id", ondelete="CASCADE")),
         sa.Column("filename", sa.String(255), nullable=False),
         sa.Column("file_type", sa.String(50), nullable=False),
         sa.Column("file_size", sa.BigInteger(), nullable=False),
@@ -145,7 +146,7 @@ def upgrade() -> None:
     # ---- domain tables (no FK dependencies) ----
     op.create_table(
         "industry_stats",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("industry_name", sa.String(100), nullable=False),
         sa.Column("metric_name", sa.String(100), nullable=False),
         sa.Column("metric_value", sa.Float(), nullable=False),
@@ -162,7 +163,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "company_data",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("company_name", sa.String(200), nullable=False),
         sa.Column("stock_code", sa.String(20)),
         sa.Column("industry", sa.String(100)),
@@ -176,13 +177,13 @@ def upgrade() -> None:
         sa.Column("year", sa.Integer()),
         sa.Column("quarter", sa.Integer()),
         sa.Column("data_source", sa.String(200)),
-        sa.Column("extra_data", sa.dialects.postgresql.JSONB()),
+        sa.Column("extra_data", postgresql.JSONB()),
         sa.Column("created_at", sa.DateTime()),
         sa.Column("updated_at", sa.DateTime()),
     )
     op.create_table(
         "policy_data",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("policy_name", sa.String(500), nullable=False),
         sa.Column("policy_number", sa.String(100)),
         sa.Column("department", sa.String(200), nullable=False),
@@ -193,16 +194,16 @@ def upgrade() -> None:
         sa.Column("category", sa.String(100)),
         sa.Column("industry", sa.String(100)),
         sa.Column("summary", sa.Text()),
-        sa.Column("key_points", sa.dialects.postgresql.JSONB()),
+        sa.Column("key_points", postgresql.JSONB()),
         sa.Column("full_text_url", sa.Text()),
         sa.Column("impact_level", sa.String(20)),
-        sa.Column("affected_entities", sa.dialects.postgresql.JSONB()),
+        sa.Column("affected_entities", postgresql.JSONB()),
         sa.Column("created_at", sa.DateTime()),
         sa.Column("updated_at", sa.DateTime()),
     )
     op.create_table(
         "industry_news",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("industry_id", sa.String(50)),
         sa.Column("title", sa.String(500), nullable=False),
         sa.Column("content", sa.Text()),
@@ -220,7 +221,7 @@ def upgrade() -> None:
     )
     op.create_table(
         "bidding_info",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("industry_id", sa.String(50)),
         sa.Column("bid_id", sa.String(100)),
         sa.Column("title", sa.String(500), nullable=False),
@@ -232,14 +233,14 @@ def upgrade() -> None:
         sa.Column("source", sa.String(200)),
         sa.Column("collected_at", sa.DateTime()),
         sa.Column("dedup_key", sa.String(64)),
-        sa.Column("parties", sa.dialects.postgresql.JSONB()),
+        sa.Column("parties", postgresql.JSONB()),
         sa.Column("is_read", sa.Boolean(), default=False),
         sa.Column("created_at", sa.DateTime()),
         sa.Column("updated_at", sa.DateTime()),
     )
     op.create_table(
         "news_collection_tasks",
-        sa.Column("id", sa.dialects.postgresql.UUID(as_uuid=True), primary_key=True),
+        sa.Column("id", postgresql.UUID(as_uuid=True), primary_key=True),
         sa.Column("task_type", sa.String(50), nullable=False),
         sa.Column("status", sa.String(20)),
         sa.Column("total_collected", sa.Integer()),

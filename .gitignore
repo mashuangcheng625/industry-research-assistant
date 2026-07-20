@@ -85,3 +85,4 @@ backend/test/*.png
 *.sqlite
 *.sqlite3
 backend/uploads/
+backups/

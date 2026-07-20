@@ -41,9 +41,9 @@ start_app() {
 
 start_observability() {
     check_docker
-    info "启动 Prometheus"
-    "${COMPOSE[@]}" --profile observability up -d --wait --wait-timeout 120 prometheus
-    success "Prometheus 已就绪: http://localhost:9090"
+    info "启动 Prometheus 和 Grafana"
+    "${COMPOSE[@]}" --profile observability up -d --wait --wait-timeout 180 prometheus grafana
+    success "Prometheus: http://localhost:9090，Grafana: http://localhost:3000"
 }
 
 show_status() {
@@ -75,7 +75,7 @@ show_help() {
 
   core          启动核心中间件并等待健康
   app           构建并启动中间件、后端和前端
-  observability 启动可选 Prometheus
+  observability 启动可选 Prometheus 和 Grafana
   stop          停止所有 profile 的容器，保留数据卷
   status        查看所有 profile 状态
   logs [name]   跟踪全部或指定服务日志

@@ -9,7 +9,12 @@ from unittest.mock import patch
 import pytest
 from pymilvus import connections
 
-from core.health import _openai_compatible_model, check_readiness, readiness_checks
+from core.health import (
+    _openai_compatible_embedding,
+    _openai_compatible_model,
+    check_readiness,
+    readiness_checks,
+)
 from core.runtime_config import cors_origins, env_bool
 from service.milvus_service import MilvusService
 
@@ -67,6 +72,24 @@ def test_openai_compatible_model_readiness_requires_configured_model():
         _openai_compatible_model("http://model.test/v1", "bge-m3", "test-key")
         with pytest.raises(LookupError):
             _openai_compatible_model("http://model.test/v1", "missing", "test-key")
+
+        context.read.return_value = json.dumps(
+            {"data": [{"embedding": [0.25, 0.75]}]}
+        ).encode()
+        _openai_compatible_embedding(
+            "http://model.test/v1", "text-embedding-v4", "test-key", 1024
+        )
+
+        request = mocked_urlopen.call_args.args[0]
+        assert request.full_url == "http://model.test/v1/embeddings"
+        assert request.method == "POST"
+        assert json.loads(request.data)["dimensions"] == 1024
+
+        context.read.return_value = json.dumps({"data": []}).encode()
+        with pytest.raises(ValueError):
+            _openai_compatible_embedding(
+                "http://model.test/v1", "text-embedding-v4", "test-key", 1024
+            )
 
 
 @pytest.mark.integration

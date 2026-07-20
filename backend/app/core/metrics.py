@@ -1,6 +1,21 @@
 """Low-cardinality Prometheus metrics for the research execution path."""
 
-from prometheus_client import Counter, Gauge, Histogram
+from __future__ import annotations
+
+import os
+from pathlib import Path
+import re
+
+from prometheus_client import (
+    CONTENT_TYPE_LATEST,
+    REGISTRY,
+    CollectorRegistry,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
+    multiprocess,
+)
 
 
 RUNS = Counter(
@@ -11,6 +26,7 @@ RUNS = Counter(
 ACTIVE_RUNS = Gauge(
     "industry_research_active_runs",
     "Research SSE generators currently executing.",
+    multiprocess_mode="livesum",
 )
 RUN_DURATION = Histogram(
     "industry_research_run_duration_seconds",
@@ -86,6 +102,40 @@ REVIEW_OUTCOMES = Counter(
     "Terminal review outcomes.",
     ("status", "reason"),
 )
+
+
+def render_metrics() -> tuple[bytes, str]:
+    """Render either the process registry or the configured worker aggregate."""
+    metrics_dir = os.getenv("PROMETHEUS_MULTIPROC_DIR")
+    if metrics_dir:
+        _remove_dead_worker_gauges(metrics_dir)
+        registry = CollectorRegistry()
+        multiprocess.MultiProcessCollector(registry)
+    else:
+        registry = REGISTRY
+    return generate_latest(registry), CONTENT_TYPE_LATEST
+
+
+def _remove_dead_worker_gauges(metrics_dir: str) -> None:
+    """Reap live gauges left by abruptly terminated workers in this container."""
+    for gauge_file in Path(metrics_dir).glob("gauge_live*_*.db"):
+        match = re.search(r"_(\d+)\.db$", gauge_file.name)
+        if not match:
+            continue
+        pid = int(match.group(1))
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            multiprocess.mark_process_dead(pid, path=metrics_dir)
+        except PermissionError:
+            # A PID outside this container/user namespace must not be reaped.
+            continue
+
+
+def mark_current_process_dead() -> None:
+    """Remove live-gauge files when a worker shuts down gracefully."""
+    if os.getenv("PROMETHEUS_MULTIPROC_DIR"):
+        multiprocess.mark_process_dead(os.getpid())
 
 
 def safe_phase(value: object) -> str:

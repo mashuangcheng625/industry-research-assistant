@@ -1,5 +1,22 @@
 services:
   # ==================== 应用（可选 app profile） ====================
+  migrate:
+    profiles: ["app"]
+    image: industry-research-assistant-backend:local
+    command: ["python", "/app/app/scripts/run_migrations.py"]
+    restart: "no"
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+      POSTGRES_DB: industry_assistant
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - industry_network
+
   backend:
     profiles: ["app"]
     build:
@@ -70,9 +87,11 @@ services:
       ALLOW_INSECURE_DEMO_SECRET: ${ALLOW_INSECURE_DEMO_SECRET:-true}
       RATE_LIMIT_ENABLED: "true"
       CORS_ALLOW_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
-      AUTO_CREATE_TABLES: "true"
+      AUTO_CREATE_TABLES: "false"
       ENABLE_SCHEDULER: "false"
       READINESS_CHECK_MODELS: "true"
+      WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
+      PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus_multiproc
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
@@ -80,8 +99,8 @@ services:
     volumes:
       - ./data/semiconductor_sources:/data/semiconductor_sources:ro
     depends_on:
-      postgres:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_healthy
       milvus:
@@ -117,7 +136,7 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://127.0.0.1/health"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -138,7 +157,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/init-db:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -278,6 +296,33 @@ services:
     networks:
       - industry_network
 
+  grafana:
+    image: grafana/grafana:13.1.0
+    container_name: industry_grafana
+    restart: unless-stopped
+    profiles: ["observability"]
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-local-demo-change-before-production}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - industry_network
+
 volumes:
   postgres_data:
   redis_data:
@@ -287,6 +332,7 @@ volumes:
   milvus_v26_data:
   es_data:
   prometheus_data:
+  grafana_data:
 
 networks:
   industry_network:
