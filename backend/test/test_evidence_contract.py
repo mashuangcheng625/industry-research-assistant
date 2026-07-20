@@ -19,13 +19,16 @@ if str(APP_DIR) not in sys.path:
     sys.path.insert(0, str(APP_DIR))
 
 from service.evidence_contract import (  # noqa: E402
+    CitationLocator,
     Evidence,
     validate_evidence,
     validate_evidence_collection,
     VALID_SOURCE_KINDS,
     VALID_QUALITY_TIERS,
     _compute_hash,
+    with_citation_locator,
 )
+from service.multi_source_research import MultiSourceResearchRunner  # noqa: E402
 from service.evidence_adapters.document_adapter import (  # noqa: E402
     adapt_document_chunk,
     adapt_document_chunks,
@@ -253,10 +256,57 @@ class EvidenceContractTests(unittest.TestCase):
         d = e.to_dict()
         self.assertEqual(d["source_kind"], "document")
         self.assertEqual(d["title"], "Test")
+        self.assertEqual(d["citation_locator"], {
+            "anchor": "p. 3",
+            "reference_url": "https://example.org/doc",
+            "source_kind": "document",
+        })
 
         j = e.to_json()
         back = json.loads(j)
         self.assertEqual(back["evidence_id"], e.evidence_id)
+
+    def test_legacy_references_gain_additive_citation_locator(self):
+        knowledge = with_citation_locator({
+            "id": 1,
+            "source": "knowledge",
+            "document_name": "先进封装手册",
+            "content": "TSV 是关键互连结构。",
+            "page": 12,
+            "chunk_index": 3,
+            "link": "local://kb/packaging/doc-1",
+        })
+        web = with_citation_locator({
+            "id": 2,
+            "source": "web",
+            "title": "产业新闻",
+            "content": "先进封装产能扩张。",
+            "link": "https://example.org/news/1",
+        })
+
+        self.assertEqual(knowledge["citation_locator"]["anchor"], "p. 12")
+        self.assertEqual(knowledge["source_kind"], "document")
+        self.assertEqual(web["citation_locator"]["source_kind"], "web_search")
+        self.assertIn("example.org", web["citation_locator"]["anchor"])
+
+    def test_multi_source_response_serializes_unified_locator(self):
+        runner = MultiSourceResearchRunner({
+            "documents": [{
+                "doc_id": "doc-1",
+                "document_name": "先进封装手册",
+                "content": "先进封装使用 TSV 和微凸点互连。",
+                "page": 18,
+                "chunk_index": 2,
+            }],
+        })
+
+        result = runner.run("先进封装 TSV")
+
+        self.assertFalse(result["refused"])
+        citation = result["citations"][0]
+        self.assertEqual(citation["locator"]["page"], 18)
+        self.assertEqual(citation["citation_locator"]["anchor"], "p. 18")
+        self.assertEqual(citation["citation_locator"]["source_kind"], "document")
 
     def test_validate_evidence_collection_produces_report(self):
         """validate_evidence_collection 生成正确汇总。"""

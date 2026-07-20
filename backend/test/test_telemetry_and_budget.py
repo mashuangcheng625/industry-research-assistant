@@ -210,3 +210,49 @@ def test_context_budget_chain() -> None:
     b = ContextBudget(total_cap=10000)
     b.add(system_prompt=100).add(question=50).add(evidence=500)
     assert b.used == 650
+
+
+def test_context_budget_reserves_only_available_output() -> None:
+    from core.context_budget import ContextBudget
+
+    budget = ContextBudget(total_cap=1000).add(system_prompt=400, question=300)
+
+    assert budget.reserve_output(500, minimum=128) == 300
+    assert budget.output_tokens == 300
+    assert budget.total_with_output == 1000
+    assert budget.fits is True
+
+
+def test_context_budget_rejects_when_minimum_output_does_not_fit() -> None:
+    from core.context_budget import ContextBudget, ContextBudgetExceeded
+
+    budget = ContextBudget(total_cap=1000).add(system_prompt=950)
+
+    with pytest.raises(ContextBudgetExceeded) as exc_info:
+        budget.reserve_output(500, minimum=128)
+
+    assert exc_info.value.summary["remaining"] == 50
+    assert budget.output_tokens == 0
+
+
+def test_context_budget_from_rendered_prompt_counts_template_overhead() -> None:
+    from core.context_budget import ContextBudget
+
+    question = "什么是 UCIe？"
+    history = "user: 上一个问题"
+    evidence = "[1] UCIe is a die-to-die interconnect standard."
+    rendered = f"回答规则：必须引用。\n{history}\n{evidence}\n用户问题：{question}"
+
+    budget = ContextBudget.from_rendered_prompt(
+        rendered,
+        question=question,
+        history=history,
+        evidence=evidence,
+        total_cap=5000,
+    )
+
+    assert budget.system_prompt_tokens > 0
+    assert budget.question_tokens > 0
+    assert budget.history_tokens > 0
+    assert budget.evidence_tokens > 0
+    assert budget.summary()["total_with_output"] == budget.used

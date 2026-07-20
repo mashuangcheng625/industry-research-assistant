@@ -17,6 +17,7 @@ from datetime import datetime
 
 from .base import BaseAgent
 from ..state import ResearchState, ResearchPhase
+from service.evidence_contract import CitationLocator
 
 # 网页文本提取库（可选依赖）
 try:
@@ -349,6 +350,7 @@ URL: {url}
                                 "is_supplementary": True,  # 标记为补充搜索获得
                                 "related_sections": [],
                                 "metadata": fact.get("_source_metadata", {}),
+                                "citation_locator": fact.get("citation_locator"),
                             }
                             state["facts"].append(fact_entry)
 
@@ -688,7 +690,8 @@ URL: {url}
                     "verified": False,
                     "related_hypothesis": fact.get("related_hypothesis"),
                     "hypothesis_support": fact.get("hypothesis_support"),
-                    "metadata": fact.get("_source_metadata", {})
+                    "metadata": fact.get("_source_metadata", {}),
+                    "citation_locator": fact.get("citation_locator"),
                 }
                 state["facts"].append(fact_entry)
                 added_facts += 1
@@ -854,8 +857,16 @@ URL: {url}
                 "kb_id": matched.get("kb_id"),
                 "doc_id": matched.get("doc_id"),
                 "chunk_index": matched.get("chunk_index"),
+                "page": matched.get("page"),
                 "retrieval_score": matched.get("score"),
             }
+            grounded["citation_locator"] = CitationLocator.from_reference({
+                "source_kind": "document" if matched.get("is_local") else "web_search",
+                "title": grounded["source_name"],
+                "source_url": grounded["source_url"],
+                "content": grounded.get("content", ""),
+                "metadata": grounded["_source_metadata"],
+            }).to_dict()
             return grounded
 
         # 不保留本次检索结果之外的 URL，防止把模型幻觉当作引用。
@@ -973,6 +984,7 @@ URL: {url}
                         "search_depth": depth,
                         "search_type": search_type,
                         "metadata": fact.get("_source_metadata", {}),
+                        "citation_locator": fact.get("citation_locator"),
                     }
                     state["facts"].append(fact_entry)
                     added_facts += 1
@@ -1163,7 +1175,8 @@ URL: {url}
                     'is_local': True,
                     'kb_id': r.get('selected_kb'),
                     'doc_id': r.get('document_id'),
-                    'chunk_index': r.get('chunk_index')
+                    'chunk_index': r.get('chunk_index'),
+                    'page': r.get('page')
                 })
 
             self.logger.info(f"Local search returned {len(formatted_results)} results for: {query[:30]}...")

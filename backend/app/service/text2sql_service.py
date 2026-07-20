@@ -18,6 +18,7 @@ from enum import Enum
 from openai import OpenAI
 
 from core.text2sql_guard import SQLGuard, GUARD_OK, GuardResult
+from core.context_budget import ContextBudget, ContextBudgetExceeded
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -339,13 +340,29 @@ class Text2SQLService:
             intent=intent
         )
 
+        system_prompt = (
+            "你是一个专业的 SQL 专家，擅长将自然语言转换为安全的 SQL 查询。"
+            "请只返回 JSON 格式的响应，不要添加任何额外文字。"
+        )
+
         try:
+            context_budget = ContextBudget.from_rendered_prompt(
+                f"{system_prompt}\n{prompt}",
+                question=question,
+                evidence=self.SCHEMA_DEFINITION,
+            )
+            max_tokens = context_budget.reserve_output(
+                int(os.environ.get("TEXT2SQL_MAX_OUTPUT_TOKENS", "1024")),
+                minimum=int(os.environ.get("TEXT2SQL_MIN_OUTPUT_TOKENS", "128")),
+            )
+            logging.info("Text2SQL context budget: %s", context_budget.summary())
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "你是一个专业的 SQL 专家，擅长将自然语言转换为安全的 SQL 查询。请只返回 JSON 格式的响应，不要添加任何额外文字。"},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
+                max_tokens=max_tokens,
                 temperature=0.1
             )
 
@@ -371,6 +388,16 @@ class Text2SQLService:
                 "confidence": result.get("confidence", 0.5)
             }
 
+        except ContextBudgetExceeded as e:
+            logging.warning("Text2SQL context budget exceeded: %s", e.summary)
+            return {
+                "sql": "",
+                "explanation": "问题和数据库结构超过模型上下文预算，请缩小查询范围后重试。",
+                "expected_columns": [],
+                "visualization_hint": "none",
+                "confidence": 0.0,
+                "context_budget": e.summary,
+            }
         except ValueError as e:
             logging.error(f"Failed to extract JSON from response: {e}")
             return {

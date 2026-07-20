@@ -23,10 +23,9 @@ Usage::
 
     from core.context_budget import ContextBudget
 
-    budget = ContextBudget()                # uses env or 32,768 default
-    budget.add(system_prompt=1280, question=245, evidence=4100)
-    assert budget.has_budget_for(500) is True   # output budget check
-    print(budget.remaining)                     # tokens still available
+    budget = ContextBudget.from_texts(system_prompt=system, question=question)
+    effective_max_tokens = budget.reserve_output(2048, minimum=256)
+    print(effective_max_tokens)                 # provider max_tokens
     print(budget.summary())                     # dict for logs/metrics
 """
 
@@ -34,15 +33,30 @@ from __future__ import annotations
 
 import logging
 import os
-from dataclasses import dataclass, field
-from typing import Callable, Dict, Optional
+from dataclasses import dataclass
+from typing import Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_TOTAL_TOKENS = 32_768
 DEFAULT_ENCODING = "cl100k_base"
+DEFAULT_MESSAGE_OVERHEAD_TOKENS = 16
 
 _encoding_cache: Dict[str, object] = {}
+
+
+class ContextBudgetExceeded(ValueError):
+    """Raised before an LLM call when the minimum output cannot fit."""
+
+    def __init__(self, summary: Dict[str, int | bool], minimum_output_tokens: int):
+        self.summary = summary
+        self.minimum_output_tokens = minimum_output_tokens
+        super().__init__(
+            "context budget exhausted: "
+            f"remaining={summary.get('remaining', 0)}, "
+            f"minimum_output={minimum_output_tokens}, "
+            f"total_cap={summary.get('total_cap', 0)}"
+        )
 
 
 def _get_encoding(name: str):
@@ -114,6 +128,14 @@ class ContextBudget:
     def remaining_output(self) -> int:
         return max(0, self.remaining - self.output_tokens)
 
+    @property
+    def total_with_output(self) -> int:
+        return self.used + self.output_tokens
+
+    @property
+    def fits(self) -> bool:
+        return self.total_with_output <= self.total_cap
+
     def add(self, **kw: int) -> "ContextBudget":
         """Add tokens to a named bucket. Unknown keys are ignored."""
 
@@ -139,6 +161,24 @@ class ContextBudget:
 
         return self.remaining >= tokens
 
+    def reserve_output(self, requested: int, *, minimum: int = 256) -> int:
+        """Reserve output tokens without exceeding the request-wide cap.
+
+        The requested limit is reduced to the remaining budget. If even the
+        smaller of ``requested`` and ``minimum`` cannot fit, fail before the
+        provider is called instead of relying on provider-specific overflow
+        behaviour.
+        """
+
+        requested_tokens = max(1, int(requested))
+        minimum_tokens = max(1, int(minimum))
+        required_tokens = min(requested_tokens, minimum_tokens)
+        if self.remaining < required_tokens:
+            raise ContextBudgetExceeded(self.summary(), required_tokens)
+
+        self.output_tokens = min(requested_tokens, self.remaining)
+        return self.output_tokens
+
     @staticmethod
     def from_texts(
         *,
@@ -148,26 +188,71 @@ class ContextBudget:
         memory: str = "",
         evidence: str = "",
         total_cap: Optional[int] = None,
+        message_overhead_tokens: int = DEFAULT_MESSAGE_OVERHEAD_TOKENS,
     ) -> "ContextBudget":
         """Factory that takes raw texts and returns a populated budget."""
 
         cap = total_cap or _env_total_cap()
         budget = ContextBudget(total_cap=cap)
         return (
-            budget.add_text(system_prompt, bucket="system_prompt")
+            budget.add(system_prompt=max(0, int(message_overhead_tokens)))
+            .add_text(system_prompt, bucket="system_prompt")
             .add_text(question, bucket="question")
             .add_text(history, bucket="history")
             .add_text(memory, bucket="memory")
             .add_text(evidence, bucket="evidence")
         )
 
-    def summary(self) -> Dict[str, int]:
+    @staticmethod
+    def from_rendered_prompt(
+        rendered_prompt: str,
+        *,
+        question: str = "",
+        history: str = "",
+        memory: str = "",
+        evidence: str = "",
+        total_cap: Optional[int] = None,
+        message_overhead_tokens: int = DEFAULT_MESSAGE_OVERHEAD_TOKENS,
+    ) -> "ContextBudget":
+        """Account for a fully rendered single-message prompt by bucket.
+
+        Dynamic sections are counted independently. Everything else in the
+        rendered prompt is attributed to ``system_prompt`` as template and
+        instruction overhead. Tokenization is not perfectly additive at text
+        boundaries, so the larger of the rendered total and bucket sum is
+        retained as a conservative request estimate.
+        """
+
+        cap = total_cap or _env_total_cap()
+        question_tokens = _estimate_tokens(question)
+        history_tokens = _estimate_tokens(history)
+        memory_tokens = _estimate_tokens(memory)
+        evidence_tokens = _estimate_tokens(evidence)
+        dynamic_tokens = question_tokens + history_tokens + memory_tokens + evidence_tokens
+        rendered_tokens = _estimate_tokens(rendered_prompt)
+
+        return ContextBudget(
+            system_prompt_tokens=(
+                max(0, rendered_tokens - dynamic_tokens)
+                + max(0, int(message_overhead_tokens))
+            ),
+            question_tokens=question_tokens,
+            history_tokens=history_tokens,
+            memory_tokens=memory_tokens,
+            evidence_tokens=evidence_tokens,
+            total_cap=cap,
+        )
+
+    def summary(self) -> Dict[str, int | bool]:
         """Return a dict suitable for logging and metrics."""
 
         return {
             "total_cap": self.total_cap,
             "used": self.used,
             "remaining": self.remaining,
+            "output": self.output_tokens,
+            "total_with_output": self.total_with_output,
+            "fits": self.fits,
             "system_prompt": self.system_prompt_tokens,
             "question": self.question_tokens,
             "history": self.history_tokens,
@@ -187,4 +272,9 @@ def _env_total_cap() -> int:
         return DEFAULT_TOTAL_TOKENS
 
 
-__all__ = ["ContextBudget", "DEFAULT_TOTAL_TOKENS"]
+__all__ = [
+    "ContextBudget",
+    "ContextBudgetExceeded",
+    "DEFAULT_MESSAGE_OVERHEAD_TOKENS",
+    "DEFAULT_TOTAL_TOKENS",
+]

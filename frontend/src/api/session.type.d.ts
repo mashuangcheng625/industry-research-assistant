@@ -113,5 +113,19 @@ declare namespace API {
     link: string
     content: string
     source: 'web' | 'knowledge'
+    source_kind?:
+      | 'document'
+      | 'news'
+      | 'policy'
+      | 'bidding'
+      | 'sql_row'
+      | 'market_quote'
+      | 'web_search'
+    locator?: Record<string, unknown>
+    citation_locator?: {
+      anchor: string
+      reference_url?: string | null
+      source_kind: string
+    }
   }
 }

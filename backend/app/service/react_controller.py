@@ -16,12 +16,14 @@ ReAct Controller - Reasoning + Acting 循环决策框架
 import json
 import logging
 import asyncio
+import os
 import re
 from typing import Dict, Any, List, Optional, AsyncGenerator, Callable, Tuple
 from dataclasses import dataclass, field
 from enum import Enum
 from abc import ABC, abstractmethod
 from openai import OpenAI
+from core.context_budget import ContextBudget, ContextBudgetExceeded
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 
@@ -362,6 +364,42 @@ class ReActController:
         self.max_steps = max_steps
         self.model = model
         self.client = OpenAI(api_key=llm_api_key, base_url=llm_base_url)
+        self.context_budget_summaries: Dict[str, Dict[str, int | bool]] = {}
+
+    def _reserve_completion_output(
+        self,
+        *,
+        phase: str,
+        system_prompt: str,
+        user_prompt: str,
+        question: str = "",
+        history: str = "",
+        evidence: str = "",
+    ) -> int:
+        """Apply the shared request-wide budget before a legacy ReAct call."""
+        budget = ContextBudget.from_rendered_prompt(
+            f"{system_prompt}\n{user_prompt}",
+            question=question,
+            history=history,
+            evidence=evidence,
+        )
+        phase_key = phase.upper()
+        requested = int(os.environ.get(
+            f"REACT_{phase_key}_MAX_OUTPUT_TOKENS",
+            os.environ.get("REACT_MAX_OUTPUT_TOKENS", "1024"),
+        ))
+        minimum = int(os.environ.get(
+            f"REACT_{phase_key}_MIN_OUTPUT_TOKENS",
+            os.environ.get("REACT_MIN_OUTPUT_TOKENS", "128"),
+        ))
+        try:
+            max_tokens = budget.reserve_output(requested, minimum=minimum)
+        except ContextBudgetExceeded as exc:
+            self.context_budget_summaries[phase] = exc.summary
+            raise
+        self.context_budget_summaries[phase] = budget.summary()
+        logging.info("ReAct %s context budget: %s", phase, budget.summary())
+        return max_tokens
 
     def _format_tools_description(self) -> str:
         """格式化工具描述"""
@@ -394,16 +432,26 @@ class ReActController:
             Thought 对象，包含推理结果和下一步动作
         """
         prompt = self._build_prompt(context)
+        system_prompt = "你是一个专业的行业研究助手，擅长使用各种工具进行深度研究。请严格按照 JSON 格式响应，所有工具调用必须提供完整的params参数。"
 
         try:
+            max_tokens = self._reserve_completion_output(
+                phase="think",
+                system_prompt=system_prompt,
+                user_prompt=prompt,
+                question=context.query,
+                history=context.get_history_summary(),
+                evidence=context.get_collected_data_summary(),
+            )
             response = await asyncio.to_thread(
                 self.client.chat.completions.create,
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "你是一个专业的行业研究助手，擅长使用各种工具进行深度研究。请严格按照 JSON 格式响应，所有工具调用必须提供完整的params参数。"},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
                 response_format={"type": "json_object"},
+                max_tokens=max_tokens,
                 temperature=0.2  # 降低温度以获得更稳定的输出
             )
 
@@ -566,16 +614,24 @@ class ReActController:
             ResearchPlan 对象
         """
         prompt = self.PLAN_PROMPT.format(query=context.query)
+        system_prompt = "你是一个专业的研究规划师，擅长将复杂问题分解为可执行的搜索任务。请严格按照 JSON 格式响应。"
 
         try:
+            max_tokens = self._reserve_completion_output(
+                phase="plan",
+                system_prompt=system_prompt,
+                user_prompt=prompt,
+                question=context.query,
+            )
             response = await asyncio.to_thread(
                 self.client.chat.completions.create,
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "你是一个专业的研究规划师，擅长将复杂问题分解为可执行的搜索任务。请严格按照 JSON 格式响应。"},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
                 response_format={"type": "json_object"},
+                max_tokens=max_tokens,
                 temperature=0.3
             )
 
@@ -678,16 +734,26 @@ class ReActController:
             collected_summary=context.get_collected_data_summary(),
             executed_queries=", ".join(context.executed_queries) if context.executed_queries else "无"
         )
+        system_prompt = "你是一个专业的研究评估师，擅长评估信息完整性。请严格按照 JSON 格式响应。"
 
         try:
+            max_tokens = self._reserve_completion_output(
+                phase="reflect",
+                system_prompt=system_prompt,
+                user_prompt=prompt,
+                question=context.query,
+                history=", ".join(context.executed_queries),
+                evidence=context.get_collected_data_summary(),
+            )
             response = await asyncio.to_thread(
                 self.client.chat.completions.create,
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "你是一个专业的研究评估师，擅长评估信息完整性。请严格按照 JSON 格式响应。"},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
                 response_format={"type": "json_object"},
+                max_tokens=max_tokens,
                 temperature=0.2
             )
 

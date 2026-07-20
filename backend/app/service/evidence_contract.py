@@ -132,7 +132,9 @@ class Evidence:
 
     def to_dict(self) -> dict:
         """转为字典，用于 JSON 序列化和 API 响应。"""
-        return asdict(self)
+        payload = asdict(self)
+        payload["citation_locator"] = CitationLocator.from_evidence(self).to_dict()
+        return payload
 
     def to_json(self, indent: int = 2) -> str:
         """转为格式化的 JSON 字符串。"""
@@ -368,10 +370,68 @@ class CitationLocator:
 
         return cls(anchor=evidence.title[:50], reference_url=evidence.url, source_kind=kind)
 
+    @classmethod
+    def from_reference(cls, reference: dict[str, Any]) -> "CitationLocator":
+        """Normalize an existing API/fact reference without removing legacy fields."""
+        existing = reference.get("citation_locator")
+        if isinstance(existing, dict) and existing.get("anchor"):
+            return cls(
+                anchor=str(existing["anchor"]),
+                reference_url=existing.get("reference_url"),
+                source_kind=str(existing.get("source_kind") or "unknown"),
+            )
+
+        metadata = reference.get("metadata") or reference.get("_source_metadata") or {}
+        if not isinstance(metadata, dict):
+            metadata = {}
+        raw_locator = reference.get("locator") or {}
+        locator = dict(raw_locator) if isinstance(raw_locator, dict) else {}
+        for key in (
+            "page", "chunk_index", "doc_id", "kb_id", "notice_id",
+            "row_id", "row_hash", "table_name", "stock_code",
+        ):
+            value = reference.get(key, metadata.get(key))
+            if value is not None and key not in locator:
+                locator[key] = value
+
+        url = reference.get("url") or reference.get("link") or reference.get("source_url")
+        source_kind = reference.get("source_kind")
+        if source_kind not in VALID_SOURCE_KINDS:
+            origin = metadata.get("evidence_origin")
+            source = reference.get("source")
+            if source == "knowledge" or origin == "local_knowledge_base" or str(url or "").startswith("local://"):
+                source_kind = "document"
+            else:
+                source_kind = "web_search"
+
+        title = str(
+            reference.get("title")
+            or reference.get("document_name")
+            or reference.get("source_name")
+            or "未命名来源"
+        )
+        evidence = Evidence.create(
+            source_kind=str(source_kind),
+            title=title,
+            publisher=str(reference.get("publisher") or reference.get("source_name") or title),
+            content=str(reference.get("content") or reference.get("snippet") or title),
+            url=str(url) if url else None,
+            locator=locator,
+        )
+        return cls.from_evidence(evidence)
+
+
+def with_citation_locator(reference: dict[str, Any]) -> dict[str, Any]:
+    """Return an additive, JSON-safe reference carrying unified provenance."""
+    payload = dict(reference)
+    citation_locator = CitationLocator.from_reference(payload)
+    if payload.get("source_kind") not in VALID_SOURCE_KINDS:
+        payload["source_kind"] = citation_locator.source_kind
+    payload["citation_locator"] = citation_locator.to_dict()
+    return payload
+
 
 def _domain_from_url(url: str) -> str:
     import re
     m = re.search(r"https?://([^/]+)", url)
     return m.group(1) if m else url[:40]
-
-

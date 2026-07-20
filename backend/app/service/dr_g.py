@@ -21,6 +21,7 @@ from typing import Dict, Any, AsyncGenerator, List, Optional, Tuple
 from urllib.parse import urlparse
 from collections import Counter
 import logging
+from core.context_budget import ContextBudget, ContextBudgetExceeded
 
 # --- Configuration ---
 SEARCH_API_KEY = os.getenv("BOCHA_API_KEY", "")
@@ -36,6 +37,29 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 
 # --- 搜索缓存 ---
 _search_cache: Dict[str, Tuple[List, float]] = {}
+
+
+def _reserve_legacy_output(
+    *,
+    prefix: str,
+    system_prompt: str,
+    user_prompt: str,
+    question: str = "",
+    evidence: str = "",
+    memory: str = "",
+) -> tuple[int, Dict[str, int | bool]]:
+    """Reserve provider output for direct DR-G/Qwen compatibility calls."""
+    budget = ContextBudget.from_rendered_prompt(
+        f"{system_prompt}\n{user_prompt}",
+        question=question,
+        evidence=evidence,
+        memory=memory,
+    )
+    requested = int(os.environ.get(f"{prefix}_MAX_OUTPUT_TOKENS", "1024"))
+    minimum = int(os.environ.get(f"{prefix}_MIN_OUTPUT_TOKENS", "128"))
+    max_tokens = budget.reserve_output(requested, minimum=minimum)
+    logging.info("%s context budget: %s", prefix, budget.summary())
+    return max_tokens, budget.summary()
 
 
 def get_query_hash(query: str) -> str:
@@ -583,25 +607,33 @@ class ResearchService:
 请开始撰写您的研究报告：
 """
 
-        yield serialize_event({"type": "thinking_start"})
-
-        client = OpenAI(
-            api_key=self.llm_api_key,
-            base_url=self.llm_base_url,
-        )
-
         reasoning_content = ""
         answer_content = ""
         is_answering = False
 
         try:
+            system_prompt = "You are an expert research assistant."
+            max_tokens, _budget_summary = _reserve_legacy_output(
+                prefix="DRG_REPORT",
+                system_prompt=system_prompt,
+                user_prompt=synthesis_prompt,
+                question=query,
+                evidence=final_memory_context,
+                memory=f"{insights_section}\n{charts_section}",
+            )
+            yield serialize_event({"type": "thinking_start"})
+            client = OpenAI(
+                api_key=self.llm_api_key,
+                base_url=self.llm_base_url,
+            )
             stream = await self._run_sync(
                 lambda: client.chat.completions.create(
                     model="deepseek-r1",
                     messages=[
-                        {'role': 'system', 'content': 'You are an expert research assistant.'},
+                        {'role': 'system', 'content': system_prompt},
                         {'role': 'user', 'content': synthesis_prompt}
                     ],
+                    max_tokens=max_tokens,
                     stream=True
                 )
             )
@@ -638,6 +670,14 @@ class ResearchService:
 
             yield serialize_event({"type": "complete"})
 
+        except ContextBudgetExceeded as e:
+            logging.warning("DR-G report context budget exceeded: %s", e.summary)
+            yield serialize_event({
+                "type": "error",
+                "code": "context_budget_exceeded",
+                "content": "研究资料超过模型上下文预算，请缩小资料范围后重试。",
+                "context_budget": e.summary,
+            })
         except Exception as e:
             logging.error(f"Report generation error: {e}")
             yield serialize_event({"type": "error", "content": f"报告生成出错: {str(e)}"})
@@ -768,6 +808,11 @@ def qwen_llm(prompt, model="qwen-max", response_format=None, system_message_cont
     """调用 Qwen LLM"""
     logging.info(f"Calling Qwen LLM: {prompt[:100]}...")
     try:
+        max_tokens, _budget_summary = _reserve_legacy_output(
+            prefix="DRG_QWEN",
+            system_prompt=system_message_content,
+            user_prompt=prompt,
+        )
         client = OpenAI(api_key=LLM_API_KEY, base_url=LLM_BASE_URL)
 
         completion_args = {
@@ -777,6 +822,7 @@ def qwen_llm(prompt, model="qwen-max", response_format=None, system_message_cont
                 {'role': 'user', 'content': prompt}
             ],
             "temperature": 0.2,
+            "max_tokens": max_tokens,
         }
         if response_format:
             completion_args["response_format"] = response_format

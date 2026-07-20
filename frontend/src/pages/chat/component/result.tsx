@@ -47,13 +47,19 @@ const SourceList = (props: { item: API.ChatItem }) => {
         ?.filter((item) => item.source === 'web')
         .map((item) => ({
           ...item,
-          hostname: findHost(item.link)?.name,
+          verificationLink: item.citation_locator?.reference_url || item.link,
+          hostname: findHost(
+            item.citation_locator?.reference_url || item.link,
+          )?.name,
         })),
       knowledge: item.reference
         ?.filter((item) => item.source === 'knowledge')
         .map((item) => ({
           ...item,
-          hostname: findHost(item.link)?.name,
+          verificationLink: item.citation_locator?.reference_url || item.link,
+          hostname: findHost(
+            item.citation_locator?.reference_url || item.link,
+          )?.name,
         })),
     }
   }, [item.reference])
@@ -77,8 +83,9 @@ const SourceList = (props: { item: API.ChatItem }) => {
                     : item.hostname || '知识库来源'
               // 确保链接有效
               const validLink =
-                item.link && item.link.startsWith('http')
-                  ? item.link
+                item.verificationLink &&
+                item.verificationLink.startsWith('http')
+                  ? item.verificationLink
                   : undefined
               return (
                 <div
@@ -92,7 +99,7 @@ const SourceList = (props: { item: API.ChatItem }) => {
                     <div className={styles.title}>{displayTitle}</div>
                   </div>
                   <div className={styles.sourceUrl}>
-                    {item.hostname || '知识库'}
+                    {item.citation_locator?.anchor || item.hostname || '知识库'}
                   </div>
                 </div>
               )
@@ -108,12 +115,12 @@ const SourceList = (props: { item: API.ChatItem }) => {
               // 从链接中提取域名作为备用
               let domainName = ''
               try {
-                if (item.link) {
-                  const url = new URL(item.link)
+                if (item.verificationLink) {
+                  const url = new URL(item.verificationLink)
                   domainName = url.hostname.replace(/^www\./, '')
                 }
               } catch {
-                domainName = item.link || ''
+                domainName = item.verificationLink || ''
               }
               // 截断标题，保留合理长度
               const displayTitle =
@@ -128,8 +135,9 @@ const SourceList = (props: { item: API.ChatItem }) => {
                     : domainName || '公开信息来源'
               // 确保链接有效
               const validLink =
-                item.link && item.link.startsWith('http')
-                  ? item.link
+                item.verificationLink &&
+                item.verificationLink.startsWith('http')
+                  ? item.verificationLink
                   : undefined
               return (
                 <div
@@ -143,7 +151,9 @@ const SourceList = (props: { item: API.ChatItem }) => {
                     <div className={styles.title}>{displayTitle}</div>
                   </div>
                   <div className={styles.sourceUrl}>
-                    {domainName || '来源信息缺失'}
+                    {item.citation_locator?.anchor ||
+                      domainName ||
+                      '来源信息缺失'}
                   </div>
                 </div>
               )

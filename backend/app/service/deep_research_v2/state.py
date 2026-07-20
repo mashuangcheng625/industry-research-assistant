@@ -53,6 +53,7 @@ class Fact:
     related_sections: List[str] = field(default_factory=list)  # 关联章节ID
     verified: bool = False
     metadata: Dict[str, Any] = field(default_factory=dict)
+    citation_locator: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -244,5 +245,6 @@ def fact_to_dict(fact: Fact) -> Dict[str, Any]:
         "extracted_at": fact.extracted_at.isoformat(),
         "related_sections": fact.related_sections,
         "verified": fact.verified,
-        "metadata": fact.metadata
+        "metadata": fact.metadata,
+        "citation_locator": fact.citation_locator,
     }

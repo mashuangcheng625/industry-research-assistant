@@ -23,7 +23,7 @@ from core.critic_checks import (
     CriticReport,
     run_critic_checks,
 )
-from service.evidence_contract import Evidence
+from service.evidence_contract import CitationLocator, Evidence
 from service.evidence_adapters.bidding_adapter import adapt_bidding_item
 from service.evidence_adapters.document_adapter import adapt_document_chunk
 from service.evidence_adapters.market_adapter import adapt_stock_quote
@@ -206,6 +206,7 @@ class MultiSourceResearchRunner:
                     "source_kind": evidence.source_kind,
                     "title": evidence.title,
                     "locator": locator,
+                    "citation_locator": CitationLocator.from_evidence(evidence).to_dict(),
                     "as_of": evidence.as_of,
                     "published_at": evidence.published_at,
                 })

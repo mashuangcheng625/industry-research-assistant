@@ -38,6 +38,7 @@ except ImportError:
 
 from .state import ResearchState, ResearchPhase, create_initial_state
 from .agents import ChiefArchitect, DeepScout, CodeWizard, CriticMaster, LeadWriter, DataAnalyst
+from service.evidence_contract import with_citation_locator
 
 # 导入检查点服务
 try:
@@ -69,6 +70,34 @@ logger = logging.getLogger("DeepResearchGraph")
 
 class ResearchCancelled(Exception):
     """Internal control-flow signal; cancellation is not a workflow failure."""
+
+
+def _build_ui_references(
+    facts: List[Dict[str, Any]],
+    references: List[Dict[str, Any]],
+) -> List[Dict[str, Any]]:
+    """Map persisted research references to the additive chat reference contract."""
+    ui_references = []
+    for idx, ref in enumerate(references):
+        fact = next((item for item in facts if item.get("source_url") == ref.get("url")), None)
+        title = ref.get("source") or ref.get("marker") or ""
+        if not title and fact:
+            content = fact.get("content", "")
+            title = content[:50] + "..." if len(content) > 50 else content
+        if not title:
+            title = f"来源 {idx + 1}"
+
+        ui_references.append(with_citation_locator({
+            "id": ref.get("id", idx + 1),
+            "title": title,
+            "link": ref.get("url", ""),
+            "content": fact.get("content", "")[:200] if fact else "",
+            "source": "web",
+            "source_kind": ref.get("source_kind") or (fact or {}).get("source_kind"),
+            "citation_locator": ref.get("citation_locator") or (fact or {}).get("citation_locator"),
+            "metadata": (fact or {}).get("metadata", {}),
+        }))
+    return ui_references
 
 
 class DeepResearchGraph:
@@ -603,26 +632,7 @@ class DeepResearchGraph:
 
             # 构建前端友好的 references - 确保有 title 和 link 字段
             raw_references = state.get("references", [])
-            ui_references = []
-            for idx, ref in enumerate(raw_references):
-                # 从 facts 中查找对应的详细信息
-                fact = next((f for f in facts if f.get("source_url") == ref.get("url")), None)
-                # 确定标题：优先用 source/marker，否则用 fact 的内容
-                title = ref.get("source") or ref.get("marker") or ""
-                if not title and fact:
-                    content = fact.get("content", "")
-                    title = content[:50] + "..." if len(content) > 50 else content
-                if not title:
-                    title = f"来源 {idx + 1}"
-
-                ui_references.append({
-                    "id": ref.get("id", idx + 1),
-                    "title": title,
-                    "link": ref.get("url", ""),
-                    "content": fact.get("content", "")[:200] if fact else "",
-                    "source": "web"
-                })
-            ui_state["references"] = ui_references
+            ui_state["references"] = _build_ui_references(facts, raw_references)
 
             # 打印详细日志
             kg = ui_state.get("knowledge_graph", {})
@@ -900,22 +910,7 @@ class DeepResearchGraph:
             # 构建前端友好的 references
             final_facts = state.get("facts", [])
             final_raw_refs = state.get("references", [])
-            final_ui_refs = []
-            for idx, ref in enumerate(final_raw_refs):
-                fact = next((f for f in final_facts if f.get("source_url") == ref.get("url")), None)
-                title = ref.get("source") or ref.get("marker") or ""
-                if not title and fact:
-                    content = fact.get("content", "")
-                    title = content[:50] + "..." if len(content) > 50 else content
-                if not title:
-                    title = f"来源 {idx + 1}"
-                final_ui_refs.append({
-                    "id": ref.get("id", idx + 1),
-                    "title": title,
-                    "link": ref.get("url", ""),
-                    "content": fact.get("content", "")[:200] if fact else "",
-                    "source": "web"
-                })
+            final_ui_refs = _build_ui_references(final_facts, final_raw_refs)
 
             yield {
                 "type": "research_complete",

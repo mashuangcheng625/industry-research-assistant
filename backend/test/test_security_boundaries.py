@@ -1,7 +1,7 @@
 """Security configuration, rate-limit and protected-route tests."""
 from pathlib import Path
 import sys
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
@@ -86,30 +86,77 @@ def test_upload_filename_discards_client_path_components():
 # ---------------------------------------------------------------------------
 
 
-def test_redis_sliding_window_limiter_fails_open_when_client_is_none() -> None:
-    """Without a Redis client the limiter must pass every request (fail-open)."""
+def test_redis_sliding_window_limiter_uses_local_fallback_without_client() -> None:
+    """A directly constructed Redis limiter must not become unbounded."""
 
     from core.rate_limit import RedisSlidingWindowLimiter
 
-    limiter = RedisSlidingWindowLimiter(5, window_seconds=10, redis_client=None)
-    ok, retry = limiter.allow("user")
-    assert ok is True
-    assert retry == 0
+    limiter = RedisSlidingWindowLimiter(1, window_seconds=10, redis_client=None)
+    assert limiter.allow("user", now=1) == (True, 0)
+    allowed, retry = limiter.allow("user", now=2)
+    assert allowed is False
+    assert retry > 0
+
+
+def test_redis_sliding_window_limiter_executes_one_atomic_script() -> None:
+    """The shared quota check must be one Redis operation, not a
+    check-then-write sequence that races across workers.
+    """
+
+    from core.rate_limit import RedisSlidingWindowLimiter
+
+    client = Mock()
+    client.eval.return_value = [1, 0]
+    limiter = RedisSlidingWindowLimiter(2, window_seconds=10, redis_client=client)
+
+    assert limiter.allow("user", now=100) == (True, 0)
+    client.eval.assert_called_once()
+    args = client.eval.call_args.args
+    assert args[1] == 1
+    assert args[2] == "ratelimit:user"
+    assert "ZREMRANGEBYSCORE" in args[0]
+    assert "ZADD" in args[0]
+    assert "EXPIRE" in args[0]
+    client.zremrangebyscore.assert_not_called()
+    client.zcard.assert_not_called()
+    client.zadd.assert_not_called()
+
+
+def test_redis_sliding_window_limiter_propagates_script_retry_after() -> None:
+    from core.rate_limit import RedisSlidingWindowLimiter
+
+    client = Mock()
+    client.eval.return_value = [0, 7]
+    limiter = RedisSlidingWindowLimiter(2, window_seconds=10, redis_client=client)
+
+    assert limiter.allow("user", now=100) == (False, 7)
+
+
+def test_redis_sliding_window_limiter_degrades_to_local_limit_on_error() -> None:
+    """Redis failure reduces the guarantee to one process, but must not
+    disable rate limiting or reset the process-local window.
+    """
+
+    from core.rate_limit import RedisSlidingWindowLimiter
+
+    client = Mock()
+    client.eval.side_effect = ([1, 0], RuntimeError("redis unavailable"))
+    limiter = RedisSlidingWindowLimiter(1, window_seconds=10, redis_client=client)
+
+    assert limiter.allow("user", now=1) == (True, 0)
+    allowed, retry = limiter.allow("user", now=2)
+    assert allowed is False
+    assert retry > 0
 
 
 def test_get_rate_limiter_returns_local_when_no_redis() -> None:
-    """Without REDIS_URL the factory must return the process-local variant."""
+    """An unavailable Redis client must select the process-local variant."""
 
-    import os
-    redis_url = os.environ.pop("REDIS_URL", None)
-    try:
-        from core.rate_limit import get_rate_limiter, SlidingWindowRateLimiter
+    from core.rate_limit import get_rate_limiter, SlidingWindowRateLimiter
 
+    with patch("core.redis_client.get_redis_client", return_value=None):
         limiter = get_rate_limiter(10)
-        assert isinstance(limiter, SlidingWindowRateLimiter)
-    finally:
-        if redis_url:
-            os.environ["REDIS_URL"] = redis_url
+    assert isinstance(limiter, SlidingWindowRateLimiter)
 
 
 def test_sliding_window_limiter_can_exhaust_and_recover() -> None:
@@ -184,4 +231,3 @@ def test_text2sql_service_appends_row_cap_to_legitimate_select() -> None:
     assert normalized is not None
     # the guard's normalized SQL is what ``execute_sql`` would actually run
     assert normalized.endswith("LIMIT 10")
-

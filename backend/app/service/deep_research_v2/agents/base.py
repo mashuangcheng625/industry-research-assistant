@@ -14,6 +14,7 @@ from typing import Dict, Any, Optional, List, Union
 from datetime import datetime
 from openai import OpenAI
 
+from core.context_budget import ContextBudget
 from core.metrics import LLM_CALLS, LLM_DURATION, LLM_TOKENS
 from ..state import ResearchState, AgentLog
 
@@ -131,6 +132,20 @@ class BaseAgent(ABC):
         outcome = "error"
 
         try:
+            requested_output_tokens = self._effective_max_tokens(max_tokens)
+            context_budget = ContextBudget.from_texts(
+                system_prompt=system_prompt,
+                question=user_prompt,
+            )
+            effective_output_tokens = context_budget.reserve_output(
+                requested_output_tokens,
+                minimum=max(
+                    1,
+                    int(os.getenv("CONTEXT_BUDGET_MIN_OUTPUT_TOKENS", "256")),
+                ),
+            )
+            self.logger.info("agent context budget: %s", context_budget.summary())
+
             kwargs = {
                 "model": self.model,
                 "messages": [
@@ -138,7 +153,7 @@ class BaseAgent(ABC):
                     {"role": "user", "content": user_prompt}
                 ],
                 "temperature": temperature,
-                "max_tokens": self._effective_max_tokens(max_tokens)
+                "max_tokens": effective_output_tokens,
             }
 
             if json_mode:

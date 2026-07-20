@@ -264,7 +264,13 @@ def execute_cases(cases: list[dict[str, Any]], fixture: dict[str, Any]) -> list[
             for kind in expected_kinds
         )
         citations = run["citations"]
-        locators_ok = all(bool(citation.get("locator")) for citation in citations)
+        locators_ok = all(
+            bool(citation.get("locator"))
+            and bool((citation.get("citation_locator") or {}).get("anchor"))
+            and (citation.get("citation_locator") or {}).get("source_kind")
+            == citation.get("source_kind")
+            for citation in citations
+        )
         citation_ids = {citation["source_id"] for citation in citations}
         refusal_ok = run["refused"] == bool(case.get("expected_refusal"))
         inference_ok = bool(run["inference_labeled"])

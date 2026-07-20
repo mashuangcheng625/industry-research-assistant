@@ -15,7 +15,7 @@ from service.deep_research_v2.agents.architect import ChiefArchitect  # noqa: E4
 from service.deep_research_v2.agents.critic import CriticMaster  # noqa: E402
 from service.deep_research_v2.agents.scout import DeepScout  # noqa: E402
 from service.deep_research_v2.agents.writer import LeadWriter  # noqa: E402
-from service.deep_research_v2.graph import DeepResearchGraph  # noqa: E402
+from service.deep_research_v2.graph import DeepResearchGraph, _build_ui_references  # noqa: E402
 from service.deep_research_v2.state import ResearchPhase, create_initial_state  # noqa: E402
 from service.llm_router import resolve_llm_endpoint  # noqa: E402
 
@@ -249,6 +249,8 @@ class AgentSourceRoutingTests(unittest.TestCase):
             grounded["_source_metadata"]["evidence_origin"],
             "local_knowledge_base",
         )
+        self.assertEqual(grounded["citation_locator"]["anchor"], "chunk 4")
+        self.assertEqual(grounded["citation_locator"]["source_kind"], "document")
 
     def test_scout_grounds_multiple_chunks_from_one_document(self):
         config = reload_config()
@@ -295,10 +297,41 @@ class AgentSourceRoutingTests(unittest.TestCase):
             marker="证据来源",
             source="同一文档",
             url=url,
+            citation_locator={
+                "anchor": "chunk 4",
+                "reference_url": url,
+                "source_kind": "document",
+            },
         )
         self.assertTrue(first_added)
         self.assertFalse(second_added)
         self.assertEqual(len(state["references"]), 1)
+        self.assertEqual(state["references"][0]["citation_locator"]["anchor"], "chunk 4")
+
+    def test_research_ui_reference_preserves_unified_locator(self):
+        url = "local://kb/semiconductor_packaging_testing/doc-1"
+        locator = {
+            "anchor": "chunk 4",
+            "reference_url": url,
+            "source_kind": "document",
+        }
+        references = _build_ui_references(
+            [{
+                "source_url": url,
+                "source_name": "先进封装手册",
+                "content": "TSV 是关键互连结构。",
+                "citation_locator": locator,
+            }],
+            [{
+                "id": 1,
+                "source": "先进封装手册",
+                "url": url,
+                "citation_locator": locator,
+            }],
+        )
+
+        self.assertEqual(references[0]["link"], url)
+        self.assertEqual(references[0]["citation_locator"], locator)
 
     def test_critic_cannot_pass_with_critical_issue(self):
         config = reload_config()

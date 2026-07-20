@@ -10,6 +10,7 @@
 
 import os
 import json
+import logging
 import uuid
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime
@@ -23,10 +24,12 @@ from models.chat import ChatSession, ChatMessage, LongTermMemory
 from service.embedding_service import generate_embedding
 from service.llm_router import resolve_llm_endpoint
 from service.milvus_service import get_milvus_service, MilvusService
+from core.context_budget import ContextBudget
 
 # 记忆触发阈值
 MEMORY_TOKEN_THRESHOLD = 10000  # 超过此 token 数触发记忆压缩
 MEMORY_COLLECTION_NAME = "long_term_memories"  # Milvus 集合名称
+logger = logging.getLogger(__name__)
 
 
 class MemoryService:
@@ -112,6 +115,7 @@ class MemoryService:
         if len(conversation_text) > 30000:
             conversation_text = conversation_text[:30000] + "\n...(对话过长，已截断)"
 
+        system_prompt = "你是一个专业的对话分析助手，擅长总结对话内容并提取关键信息。"
         prompt = f"""请分析以下对话，并按JSON格式输出总结信息：
 
 对话内容：
@@ -130,12 +134,22 @@ class MemoryService:
 }}"""
 
         try:
+            context_budget = ContextBudget.from_rendered_prompt(
+                f"{system_prompt}\n{prompt}",
+                history=conversation_text,
+            )
+            max_tokens = context_budget.reserve_output(
+                int(os.environ.get("MEMORY_MAX_OUTPUT_TOKENS", "1024")),
+                minimum=int(os.environ.get("MEMORY_MIN_OUTPUT_TOKENS", "128")),
+            )
+            logger.info("memory summary context budget: %s", context_budget.summary())
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=[
-                    {"role": "system", "content": "你是一个专业的对话分析助手，擅长总结对话内容并提取关键信息。"},
+                    {"role": "system", "content": system_prompt},
                     {"role": "user", "content": prompt}
                 ],
+                max_tokens=max_tokens,
                 temperature=0.3,
             )
 

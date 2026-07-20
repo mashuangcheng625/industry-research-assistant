@@ -15,6 +15,7 @@ from datetime import datetime
 
 from .base import BaseAgent
 from ..state import ResearchState, ResearchPhase
+from service.evidence_contract import CitationLocator, with_citation_locator
 
 
 class LeadWriter(BaseAgent):
@@ -235,10 +236,14 @@ class LeadWriter(BaseAgent):
     @staticmethod
     def _allowed_source_urls(state: ResearchState) -> set[str]:
         return {
-            fact.get("source_url")
+            fact.get("source_url") or (fact.get("citation_locator") or {}).get("reference_url")
             for fact in state.get("facts", [])
-            if fact.get("source_url")
+            if fact.get("source_url") or (fact.get("citation_locator") or {}).get("reference_url")
         }
+
+    @staticmethod
+    def _fact_citation_locator(fact: Dict[str, Any]) -> dict[str, Any]:
+        return CitationLocator.from_reference(fact).to_dict()
 
     @staticmethod
     def _append_reference_if_new(
@@ -247,15 +252,25 @@ class LeadWriter(BaseAgent):
         marker: str | None,
         source: str | None,
         url: str,
+        citation_locator: dict[str, Any] | None = None,
     ) -> bool:
         """按 URL 去重追加引用，返回本次是否真正新增。"""
-        if not url or any(ref.get("url") == url for ref in state.get("references", [])):
+        if not url:
+            return False
+        existing = next(
+            (ref for ref in state.get("references", []) if ref.get("url") == url),
+            None,
+        )
+        if existing is not None:
+            if citation_locator and not existing.get("citation_locator"):
+                existing["citation_locator"] = citation_locator
             return False
         state.setdefault("references", []).append({
             "id": len(state["references"]) + 1,
             "marker": marker,
             "source": source,
             "url": url,
+            "citation_locator": citation_locator,
         })
         return True
 
@@ -350,10 +365,12 @@ class LeadWriter(BaseAgent):
         # 格式化事实
         facts_text = []
         for fact in related_facts:
+            citation_locator = self._fact_citation_locator(fact)
             facts_text.append(
                 f"- {fact.get('content')} "
                 f"(来源: {fact.get('source_name')}, "
                 f"URL: {fact.get('source_url') or '无'}, "
+                f"定位: {citation_locator['anchor']}, "
                 f"可信度: {fact.get('credibility_score')})"
             )
 
@@ -414,12 +431,17 @@ class LeadWriter(BaseAgent):
                 if not url or url in seen_urls:
                     continue
                 seen_urls.add(url)
-                evidence_sources.append((fact.get("source_name") or "本地知识库", url))
+                evidence_sources.append((
+                    fact.get("source_name") or "本地知识库",
+                    url,
+                    self._fact_citation_locator(fact),
+                ))
                 if len(evidence_sources) >= 3:
                     break
-            if evidence_sources and not any(url in section_content for _, url in evidence_sources):
+            if evidence_sources and not any(url in section_content for _, url, _ in evidence_sources):
                 source_lines = "\n".join(
-                    f"- [{name}]({url})" for name, url in evidence_sources
+                    f"- [{name} · {locator['anchor']}]({url})"
+                    for name, url, locator in evidence_sources
                 )
                 section_content += f"\n\n**证据来源**\n\n{source_lines}"
 
@@ -438,12 +460,13 @@ class LeadWriter(BaseAgent):
                     url=citation_url,
                 )
 
-            for source_name, source_url in evidence_sources:
+            for source_name, source_url, citation_locator in evidence_sources:
                 self._append_reference_if_new(
                     state,
                     marker=source_name,
                     source=source_name,
                     url=source_url,
+                    citation_locator=citation_locator,
                 )
 
             # 发送章节内容到"过程报告" - 包含完整内容用于流式显示
@@ -480,10 +503,18 @@ class LeadWriter(BaseAgent):
         # 收集所有来源
         all_sources = []
         for ref in state["references"]:
-            all_sources.append(f"- {ref.get('source')} ({ref.get('url', 'N/A')})")
+            locator = ref.get("citation_locator") or {}
+            all_sources.append(
+                f"- {ref.get('source')} · {locator.get('anchor', '定位未提供')} "
+                f"({ref.get('url', 'N/A')})"
+            )
 
         for fact in state["facts"]:
-            source_entry = f"- {fact.get('source_name')} ({fact.get('source_url', 'N/A')})"
+            locator = self._fact_citation_locator(fact)
+            source_entry = (
+                f"- {fact.get('source_name')} · {locator['anchor']} "
+                f"({fact.get('source_url', 'N/A')})"
+            )
             if source_entry not in all_sources:
                 all_sources.append(source_entry)
 
@@ -522,8 +553,17 @@ class LeadWriter(BaseAgent):
             for ref in result.get("references", []):
                 if ref.get("url") not in self._allowed_source_urls(state):
                     continue
-                if ref not in state["references"]:
-                    state["references"].append(ref)
+                if any(existing.get("url") == ref.get("url") for existing in state["references"]):
+                    continue
+                fact = next(
+                    (item for item in state["facts"] if item.get("source_url") == ref.get("url")),
+                    {},
+                )
+                state["references"].append(with_citation_locator({
+                    **ref,
+                    "source": ref.get("source") or ref.get("title") or fact.get("source_name"),
+                    "citation_locator": fact.get("citation_locator"),
+                }))
         else:
             # JSON 解析失败时的备选方案：使用已有章节内容组装报告
             self.logger.warning(f"[LeadWriter] ⚠️ JSON 解析失败，使用章节内容作为备选")
