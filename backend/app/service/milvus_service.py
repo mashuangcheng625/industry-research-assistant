@@ -49,6 +49,10 @@ class MilvusService:
             print(f"连接 Milvus 失败: {e}")
             raise
 
+    def list_collections(self) -> List[str]:
+        """返回当前连接中可见的集合名称。"""
+        return utility.list_collections()
+
     def create_collection(self, collection_name: str) -> Collection:
         """
         创建集合（如果不存在）

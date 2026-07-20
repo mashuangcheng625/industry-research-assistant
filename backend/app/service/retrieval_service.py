@@ -720,6 +720,9 @@ def _retrieve_content_single(
                 "neighbor_of": result.get("neighbor_of"),
                 "query_hit_count": len(result.get("query_hits", set())),
                 "document_coverage_score": result.get("document_coverage_score", 0.0),
+                "query_relevance_scores": list(
+                    result.get("query_relevance_scores", [])
+                ),
                 "query_variant_count": len(query_variants),
                 "retrieval_route": route.name,
                 "embedding_model": route.model,
@@ -761,6 +764,18 @@ def _fuse_hybrid_results(
         for rank, result in enumerate(results, start=1):
             key = _hybrid_result_key(result)
             existing = merged.get(key, {})
+            existing_relevance = list(existing.get("query_relevance_scores", []))
+            incoming_relevance = list(result.get("query_relevance_scores", []))
+            relevance_count = max(len(existing_relevance), len(incoming_relevance))
+            merged_relevance = [
+                max(
+                    float(existing_relevance[index])
+                    if index < len(existing_relevance) else 0.0,
+                    float(incoming_relevance[index])
+                    if index < len(incoming_relevance) else 0.0,
+                )
+                for index in range(relevance_count)
+            ]
             route_scores = dict(existing.get("route_scores", {}))
             route_scores[route_name] = float(result.get("score", 0))
             retrieval_routes = set(existing.get("retrieval_routes", []))
@@ -771,6 +786,11 @@ def _fuse_hybrid_results(
                 + 1.0 / (rrf_k + rank),
                 "route_scores": route_scores,
                 "retrieval_routes": sorted(retrieval_routes),
+                "query_relevance_scores": merged_relevance,
+                "query_variant_count": max(
+                    int(existing.get("query_variant_count", 1)),
+                    int(result.get("query_variant_count", 1)),
+                ),
             }
 
     candidates = sorted(
@@ -789,9 +809,22 @@ def _fuse_hybrid_results(
         candidate["rerank_score"] = float(score)
         candidate["score"] = float(score)
     candidates.sort(key=lambda item: float(item.get("score", 0)), reverse=True)
-    for index, candidate in enumerate(candidates[:top_k], start=1):
+    query_count = max(
+        (int(candidate.get("query_variant_count", 1)) for candidate in candidates),
+        default=1,
+    )
+    selected = _select_facet_diverse_results(
+        candidates,
+        query_count=query_count,
+        top_k=top_k,
+        max_chunks_per_document=max(
+            min(query_count, top_k),
+            int(os.getenv("RAG_MAX_CHUNKS_PER_DOCUMENT", "3")),
+        ),
+    )
+    for index, candidate in enumerate(selected, start=1):
         candidate["id"] = index
-    return candidates[:top_k]
+    return selected
 
 
 def retrieve_content(

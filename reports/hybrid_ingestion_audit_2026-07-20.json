@@ -1,0 +1,210 @@
+{
+  "audited_at": "2026-07-20T06:36:19+00:00",
+  "username": "source_pipeline",
+  "read_only": true,
+  "embedding_routes": [
+    {
+      "route": "cloud",
+      "provider": "bailian",
+      "model": "text-embedding-v4",
+      "dimensions": 1024,
+      "version": "v1",
+      "configured": true
+    },
+    {
+      "route": "local",
+      "provider": "ollama",
+      "model": "bge-m3",
+      "dimensions": 1024,
+      "version": "v1",
+      "configured": true
+    }
+  ],
+  "knowledge_bases": {
+    "semiconductor_chip_design_eda_ip": {
+      "postgres_status_counts": {
+        "completed": 12
+      },
+      "postgres_completed_documents": 12,
+      "postgres_chunks": 3258,
+      "routes": {
+        "cloud": {
+          "route": "cloud",
+          "provider": "bailian",
+          "model": "text-embedding-v4",
+          "dimensions": 1024,
+          "collection": "kb_semiconductor_chip_design_eda_ip_text_v4_1024_v1",
+          "collection_exists": true,
+          "postgres_chunks": 3258,
+          "milvus_documents": 12,
+          "milvus_queried_chunks": 3258,
+          "milvus_num_entities": 3258,
+          "duplicate_chunk_ids": 0,
+          "duplicate_doc_chunk_keys": 0,
+          "invalid_doc_ids": 0,
+          "per_document_mismatch": [],
+          "limit_reached": false,
+          "passed": true
+        },
+        "local": {
+          "route": "local",
+          "provider": "ollama",
+          "model": "bge-m3",
+          "dimensions": 1024,
+          "collection": "kb_semiconductor_chip_design_eda_ip_bge_m3_1024_v1",
+          "collection_exists": true,
+          "postgres_chunks": 3258,
+          "milvus_documents": 12,
+          "milvus_queried_chunks": 3258,
+          "milvus_num_entities": 3258,
+          "duplicate_chunk_ids": 0,
+          "duplicate_doc_chunk_keys": 0,
+          "invalid_doc_ids": 0,
+          "per_document_mismatch": [],
+          "limit_reached": false,
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "semiconductor_materials_equipment": {
+      "postgres_status_counts": {
+        "completed": 8
+      },
+      "postgres_completed_documents": 8,
+      "postgres_chunks": 627,
+      "routes": {
+        "cloud": {
+          "route": "cloud",
+          "provider": "bailian",
+          "model": "text-embedding-v4",
+          "dimensions": 1024,
+          "collection": "kb_semiconductor_materials_equipment_text_v4_1024_v1",
+          "collection_exists": true,
+          "postgres_chunks": 627,
+          "milvus_documents": 8,
+          "milvus_queried_chunks": 627,
+          "milvus_num_entities": 627,
+          "duplicate_chunk_ids": 0,
+          "duplicate_doc_chunk_keys": 0,
+          "invalid_doc_ids": 0,
+          "per_document_mismatch": [],
+          "limit_reached": false,
+          "passed": true
+        },
+        "local": {
+          "route": "local",
+          "provider": "ollama",
+          "model": "bge-m3",
+          "dimensions": 1024,
+          "collection": "kb_semiconductor_materials_equipment_bge_m3_1024_v1",
+          "collection_exists": true,
+          "postgres_chunks": 627,
+          "milvus_documents": 8,
+          "milvus_queried_chunks": 627,
+          "milvus_num_entities": 627,
+          "duplicate_chunk_ids": 0,
+          "duplicate_doc_chunk_keys": 0,
+          "invalid_doc_ids": 0,
+          "per_document_mismatch": [],
+          "limit_reached": false,
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "semiconductor_process": {
+      "postgres_status_counts": {
+        "completed": 8
+      },
+      "postgres_completed_documents": 8,
+      "postgres_chunks": 692,
+      "routes": {
+        "cloud": {
+          "route": "cloud",
+          "provider": "bailian",
+          "model": "text-embedding-v4",
+          "dimensions": 1024,
+          "collection": "kb_semiconductor_process_text_v4_1024_v1",
+          "collection_exists": true,
+          "postgres_chunks": 692,
+          "milvus_documents": 8,
+          "milvus_queried_chunks": 692,
+          "milvus_num_entities": 692,
+          "duplicate_chunk_ids": 0,
+          "duplicate_doc_chunk_keys": 0,
+          "invalid_doc_ids": 0,
+          "per_document_mismatch": [],
+          "limit_reached": false,
+          "passed": true
+        },
+        "local": {
+          "route": "local",
+          "provider": "ollama",
+          "model": "bge-m3",
+          "dimensions": 1024,
+          "collection": "kb_semiconductor_process_bge_m3_1024_v1",
+          "collection_exists": true,
+          "postgres_chunks": 692,
+          "milvus_documents": 8,
+          "milvus_queried_chunks": 692,
+          "milvus_num_entities": 692,
+          "duplicate_chunk_ids": 0,
+          "duplicate_doc_chunk_keys": 0,
+          "invalid_doc_ids": 0,
+          "per_document_mismatch": [],
+          "limit_reached": false,
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "semiconductor_packaging_testing": {
+      "postgres_status_counts": {
+        "completed": 8
+      },
+      "postgres_completed_documents": 8,
+      "postgres_chunks": 679,
+      "routes": {
+        "cloud": {
+          "route": "cloud",
+          "provider": "bailian",
+          "model": "text-embedding-v4",
+          "dimensions": 1024,
+          "collection": "kb_semiconductor_packaging_testing_text_v4_1024_v1",
+          "collection_exists": true,
+          "postgres_chunks": 679,
+          "milvus_documents": 8,
+          "milvus_queried_chunks": 679,
+          "milvus_num_entities": 679,
+          "duplicate_chunk_ids": 0,
+          "duplicate_doc_chunk_keys": 0,
+          "invalid_doc_ids": 0,
+          "per_document_mismatch": [],
+          "limit_reached": false,
+          "passed": true
+        },
+        "local": {
+          "route": "local",
+          "provider": "ollama",
+          "model": "bge-m3",
+          "dimensions": 1024,
+          "collection": "kb_semiconductor_packaging_testing_bge_m3_1024_v1",
+          "collection_exists": true,
+          "postgres_chunks": 679,
+          "milvus_documents": 8,
+          "milvus_queried_chunks": 679,
+          "milvus_num_entities": 679,
+          "duplicate_chunk_ids": 0,
+          "duplicate_doc_chunk_keys": 0,
+          "invalid_doc_ids": 0,
+          "per_document_mismatch": [],
+          "limit_reached": false,
+          "passed": true
+        }
+      },
+      "passed": true
+    }
+  },
+  "passed": true
+}

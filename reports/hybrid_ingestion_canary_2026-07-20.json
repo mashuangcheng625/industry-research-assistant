@@ -1,0 +1,35 @@
+{
+  "started_at": "2026-07-20T06:22:01+00:00",
+  "finished_at": "2026-07-20T06:22:14+00:00",
+  "elapsed_seconds": 13.434,
+  "queue": "../data/semiconductor_sources/review/candidates-v2.jsonl",
+  "chunk_size": 1200,
+  "force": false,
+  "retry_incomplete": false,
+  "selected_domains": [
+    "chip_design_eda_ip",
+    "materials_equipment",
+    "packaging_testing",
+    "wafer_fabrication"
+  ],
+  "selected_candidate_ids": [
+    "openroad-orfs-overview-bea7dcd7"
+  ],
+  "attempted": 1,
+  "status_counts": {
+    "completed": 1
+  },
+  "total_chunks": 15,
+  "results": [
+    {
+      "candidate_id": "openroad-orfs-overview-bea7dcd7",
+      "domain": "chip_design_eda_ip",
+      "collection": "kb_semiconductor_chip_design_eda_ip",
+      "document": "openroad-orfs-overview-bea7dcd7.md",
+      "status": "completed",
+      "chunk_count": 15,
+      "message": "成功处理 15 个切片，写入路由: cloud, local",
+      "elapsed_ms": 13365.1
+    }
+  ]
+}

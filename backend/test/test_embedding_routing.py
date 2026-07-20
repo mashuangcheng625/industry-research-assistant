@@ -55,6 +55,8 @@ class EmbeddingRoutingTests(unittest.TestCase):
                 "content_with_weight": "shared cloud text",
                 "chunk_index": 0,
                 "score": 0.9,
+                "query_relevance_scores": [0.9, 0.1],
+                "query_variant_count": 2,
             },
             {
                 "id": 2,
@@ -64,6 +66,8 @@ class EmbeddingRoutingTests(unittest.TestCase):
                 "content_with_weight": "cloud only",
                 "chunk_index": 0,
                 "score": 0.8,
+                "query_relevance_scores": [0.8, 0.0],
+                "query_variant_count": 2,
             },
         ]
         local_results = [
@@ -75,6 +79,8 @@ class EmbeddingRoutingTests(unittest.TestCase):
                 "content_with_weight": "shared local text",
                 "chunk_index": 0,
                 "score": 0.7,
+                "query_relevance_scores": [0.7, 0.2],
+                "query_variant_count": 2,
             },
             {
                 "id": 2,
@@ -84,6 +90,8 @@ class EmbeddingRoutingTests(unittest.TestCase):
                 "content_with_weight": "local only",
                 "chunk_index": 0,
                 "score": 0.6,
+                "query_relevance_scores": [0.0, 0.95],
+                "query_variant_count": 2,
             },
         ]
 
@@ -98,14 +106,16 @@ class EmbeddingRoutingTests(unittest.TestCase):
         }
         with patch.dict(os.environ, environment, clear=True), \
              patch("service.retrieval_service._retrieve_content_single", side_effect=fake_single), \
-             patch("service.retrieval_service.rerank_scores", return_value=[0.2, 0.9, 0.4]):
-            results = retrieve_content("kb_demo", "question", top_k=3)
+             patch("service.retrieval_service.rerank_scores", return_value=[0.9, 0.8, 0.1]):
+            results = retrieve_content("kb_demo", "question", top_k=2)
 
-        self.assertEqual(len(results), 3)
+        self.assertEqual(len(results), 2)
         self.assertEqual(results[0]["score"], 0.9)
         shared = next(result for result in results if result["chunk_id"] == "shared")
         self.assertEqual(shared["retrieval_routes"], ["cloud", "local"])
         self.assertIsNone(shared["degraded_route"])
+        self.assertEqual(shared["query_relevance_scores"], [0.9, 0.2])
+        self.assertIn("local-only", {result["chunk_id"] for result in results})
 
     def test_hybrid_surfaces_single_route_degradation(self):
         local_result = [{

@@ -4,7 +4,8 @@
     "knowledge_base": "semiconductor_chip_design_eda_ip",
     "question": "RISC-V 非特权指令集规范如何描述 V 向量扩展？",
     "expected_retrieval": true,
-    "expected_terms": ["RISC-V Instruction Set Manual"]
+    "expected_terms": ["Vector Extension"],
+    "gold_sources": ["riscv-unprivileged-20260120.md"]
   },
   {
     "id": "real-materials-nist-001",
