@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import Markdown from '@/components/markdown'
-import ReactECharts from 'echarts-for-react'
+import { echarts } from '@/lib/echarts'
+import ReactEChartsCore from 'echarts-for-react/lib/core'
 import styles from './process-report.module.scss'
 
 export interface SectionDraft {
@@ -50,7 +51,8 @@ function ChartRenderer({ chart, inline = false }: { chart: ChartData; inline?: b
       <div className={`${styles.chartCard} ${inline ? styles.inlineChart : ''}`}>
         <div className={styles.chartTitle}>📊 {chart.title}</div>
         <div className={styles.echartsWrapper}>
-          <ReactECharts
+          <ReactEChartsCore
+            echarts={echarts}
             option={chart.echarts_option}
             style={{ height: '300px', width: '100%' }}
             opts={{ renderer: 'canvas' }}

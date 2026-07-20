@@ -10,16 +10,17 @@
  */
 
 import { Table } from 'antd'
+import type { EChartsType } from 'echarts/core'
 import { useEffect, useRef, useState } from 'react'
 import styles from './chart.module.scss'
 import type { ChartConfig, ChartType } from './types'
 
 // 动态加载 ECharts
-let echarts: typeof import('echarts') | null = null
+let echarts: typeof import('@/lib/echarts').echarts | null = null
 
 async function loadECharts() {
   if (!echarts) {
-    echarts = await import('echarts')
+    echarts = (await import('@/lib/echarts')).echarts
   }
   return echarts
 }
@@ -39,7 +40,7 @@ function EChartsRenderer(props: {
 }) {
   const { config, width = '100%', height = 400 } = props
   const chartRef = useRef<HTMLDivElement>(null)
-  const chartInstance = useRef<ReturnType<typeof echarts.init> | null>(null)
+  const chartInstance = useRef<EChartsType | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

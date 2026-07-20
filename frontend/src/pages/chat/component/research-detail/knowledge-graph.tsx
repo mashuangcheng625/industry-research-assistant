@@ -1,5 +1,6 @@
 import { ShareAltOutlined } from '@ant-design/icons'
-import ReactECharts from 'echarts-for-react'
+import { echarts } from '@/lib/echarts'
+import ReactEChartsCore from 'echarts-for-react/lib/core'
 import styles from './knowledge-graph.module.scss'
 
 interface GraphNode {
@@ -150,7 +151,8 @@ export default function KnowledgeGraph({ data }: KnowledgeGraphProps) {
         知识图谱 · {data.stats?.entitiesCount || data.nodes.length} 个实体 · {data.stats?.relationsCount || data.edges.length} 条关系
       </div>
       <div className={styles.chartContainer}>
-        <ReactECharts
+        <ReactEChartsCore
+          echarts={echarts}
           option={option}
           style={{ height: '100%', width: '100%' }}
           opts={{ renderer: 'canvas' }}

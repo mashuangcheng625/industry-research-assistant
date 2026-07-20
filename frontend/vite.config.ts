@@ -27,24 +27,15 @@ export default defineConfig(({ mode }) => {
     },
 
     build: {
-      // P1-10: route-level splitting via React.lazy (see router/routes.tsx)
-      // is complemented by vendor splitting so the initial entry chunk
-      // shrinks to ~300 KB while antd / react / echarts stay in their
-      // own cacheable bundles.
+      // Route-level splitting is defined with React.lazy in router/routes.tsx.
+      // Keep only the large, isolated charting stack in a manual chunk. Splitting
+      // React, Ant Design and their shared helpers into separate manual chunks
+      // creates a circular ESM dependency and can crash before React mounts.
       rollupOptions: {
         output: {
           manualChunks(id: string) {
-            if (id.includes('node_modules/antd') || id.includes('node_modules/@ant-design')) {
-              return 'vendor-antd'
-            }
-            if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/scheduler')) {
-              return 'vendor-react'
-            }
             if (id.includes('node_modules/echarts') || id.includes('node_modules/zrender')) {
               return 'vendor-echarts'
-            }
-            if (id.includes('node_modules')) {
-              return 'vendor-libs'
             }
           },
         },
