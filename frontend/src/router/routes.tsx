@@ -1,10 +1,10 @@
-import { Spin } from 'antd'
-import { Suspense, lazy } from 'react'
+import { lazy } from 'react'
 import { AuthGuard } from '@/components/auth-guard'
 import { BaseLayout } from '@/layout/base'
 import NotFound from '@/pages/404'
 import LoginPage from '@/pages/auth/login'
 import Index from '@/pages/index'
+import { LazyRoute } from './lazy-route'
 import {
   Navigate,
   Outlet,
@@ -26,22 +26,6 @@ const DatabasePage    = lazy(() => import('@/pages/database'))
 const NewsPage        = lazy(() => import('@/pages/news'))
 const BiddingPage     = lazy(() => import('@/pages/bidding'))
 
-const Lazy: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Suspense fallback={<Spin size="large" style={{ display: 'block', margin: '80px auto' }} />}>
-    {children}
-  </Suspense>
-)
-
-function withLazy(Component: React.ComponentType) {
-  return function LazyWrapper() {
-    return (
-      <Lazy>
-        <Component />
-      </Lazy>
-    )
-  }
-}
-
 export type IRouteObject = {
   children?: IRouteObject[]
   name?: string
@@ -60,33 +44,61 @@ export const routes: IRouteObject[] = [
     children: [
       {
         path: '',
-        Component: withLazy(NewChat),
+        element: (
+          <LazyRoute>
+            <NewChat />
+          </LazyRoute>
+        ),
       },
       {
         path: ':id',
-        Component: withLazy(Chat),
+        element: (
+          <LazyRoute>
+            <Chat />
+          </LazyRoute>
+        ),
       },
     ],
   },
   {
     path: '/knowledge',
-    Component: withLazy(KnowledgePage),
+    element: (
+      <LazyRoute>
+        <KnowledgePage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/memory',
-    Component: withLazy(MemoryPage),
+    element: (
+      <LazyRoute>
+        <MemoryPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/database',
-    Component: withLazy(DatabasePage),
+    element: (
+      <LazyRoute>
+        <DatabasePage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/news',
-    Component: withLazy(NewsPage),
+    element: (
+      <LazyRoute>
+        <NewsPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/bidding',
-    Component: withLazy(BiddingPage),
+    element: (
+      <LazyRoute>
+        <BiddingPage />
+      </LazyRoute>
+    ),
   },
   {
     path: '/404',
@@ -104,9 +116,9 @@ export const router = createBrowserRouter(
     {
       path: '/demo',
       element: (
-        <Lazy>
+        <LazyRoute>
           <DemoPage />
-        </Lazy>
+        </LazyRoute>
       ),
     },
     {
