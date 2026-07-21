@@ -77,7 +77,7 @@ Runner 已完成 12/12 确定性端到端门禁，但真实在线数据源仍未
 | 并发压力 | 并发 4 时 8/8，P95 10.217 秒 | 并发 8 时 P95 19.919 秒，已接近饱和 |
 | 上下文压力 | 600,400 输入 token 中选取 3,002/6,000 | 历史证据子预算通过；主 Chat/Agent 已增加 32K 总预算，待补同规模总预算报告 |
 | 多源联合研究 | 冻结脱敏 fixture 12/12 | 确定性 Runner 逐题执行，不代表线上数据质量 |
-| 自动化验证 | 后端 457 项，前端 lint/build 通过 | 453 项单元测试 + 4 项集成测试（Milvus Lite / Redis / Alembic / PostgreSQL 备份恢复） |
+| 自动化验证 | 后端 469 项，前端 lint/build 通过 | 459 项单元测试 + 10 项集成测试（含 Redis 持久队列故障恢复） |
 
 对应报告见 [`reports/`](reports/)，评测口径见
 [`docs/RAG_EVALUATION_PROTOCOL.md`](docs/RAG_EVALUATION_PROTOCOL.md)。简历与项目介绍中的
@@ -139,6 +139,13 @@ RRF 融合；这一点不会在项目介绍中夸大。
 
 同步检索和模型调用由线程池迭代，避免流式响应阻塞 Uvicorn 事件循环。服务暴露 liveness、
 readiness 和 Prometheus 指标；readiness 可选择校验生成模型与 embedding 模型是否真实可用。
+
+### 6. 持久化长任务
+
+文档入库、附件解析和非流式深度研究通过 Redis Streams 投递给独立 Worker。
+队列提供超时、指数退避重试、持久化取消、状态查询和 `XAUTOCLAIM` 崩溃恢复；API
+与 Worker 使用共享上传卷，不依赖容器私有 `/tmp`。设计与故障语义见
+[`docs/PERSISTENT_TASKS.md`](docs/PERSISTENT_TASKS.md)。
 
 ## 快速复现
 
@@ -216,8 +223,8 @@ docker compose --profile app exec backend \
 ## 验证命令
 
 ```bash
-make check                       # 依赖、457 项后端测试、前端、Compose、数据与评测隔离
-make validate-observability      # Prometheus 配置、4 条告警和 Grafana 看板
+make check                       # 依赖、469 项后端测试、前端、Compose、数据与评测隔离
+make validate-observability      # Prometheus 配置、7 条告警和 Grafana 看板
 make build-images                # 构建非 root 后端镜像与 Nginx 前端镜像
 make demo-rag                    # 正例、跨环节问题与无证据拒答
 make load-test-chat              # 带质量门槛的并发测试

@@ -57,6 +57,8 @@ def test_model_readiness_is_opt_in_and_checks_both_models():
             "generation_model",
             "embedding_model",
         }
+    with patch.dict(os.environ, {"READINESS_CHECK_TASK_WORKER": "true"}, clear=True):
+        assert set(readiness_checks()) == {"postgres", "redis", "milvus", "task_worker"}
 
 
 def test_openai_compatible_model_readiness_requires_configured_model():

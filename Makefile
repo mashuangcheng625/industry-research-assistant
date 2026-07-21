@@ -83,7 +83,7 @@ check-backend-deps:
 
 check-backend-import:
 	PYTHONPATH=backend/app $(PYTHON) -W error::DeprecationWarning -c \
-		"import app_main; paths = {getattr(route, 'path', '') for route in app_main.app.routes}; assert {'/health/live', '/health/ready', '/metrics'} <= paths"
+		"import app_main; paths = set(app_main.app.openapi()['paths']); assert {'/health/live', '/health/ready', '/metrics', '/tasks', '/tasks/{task_id}', '/research/tasks'} <= paths"
 
 lint-frontend:
 	cd frontend && npm run lint

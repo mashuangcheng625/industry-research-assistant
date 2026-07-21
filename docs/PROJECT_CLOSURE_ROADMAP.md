@@ -160,11 +160,11 @@ PDF 解析、结构恢复、清洗与质量检查
 ### 已知缺口
 
 - 仓库已公开并采用 MIT License；`main` 的 GitHub Actions 后端、前端与干净镜像构建全部通过；
-- 后端 Python 3.12 传递依赖已锁定，453 条 unit 与 4 条 integration
-  （Milvus Lite / Redis / Alembic / PostgreSQL 备份恢复）由带硬超时的 `make check` 验证；
+- 后端 Python 3.12 传递依赖已锁定，459 条 unit 与 10 条 integration
+  （含 Redis Streams 持久任务故障恢复）由带硬超时的 `make check` 验证；
 - 公开评测已分离为 40 题有标签开发集与 40 题无标签问题集，公开 CI
   会拒绝 test/hidden 答案字段；完整 80 题键仅在 Git 忽略目录。
-- 前端 ESLint 为 0 error / 1 个 Fast Refresh 非阻断 warning，生产构建通过；
+- 前端 ESLint 为 0 error / 0 warning，生产构建通过；
 - 前端已完成路由级拆分与 ECharts 按需注册；最终生产 chunk 为 690.01 kB
   （gzip 235.05 kB）；
 - Milvus 2.6.17 配置、独立数据卷、Lite 集成测试和真实双路向量重建均已完成；
@@ -191,7 +191,7 @@ PDF 解析、结构恢复、清洗与质量检查
 - `CitationLocator` 已接入 Evidence 序列化、Chat、Research Writer/API 和前端来源卡片；
 - Redis 限流已通过单次 Lua 脚本原子执行共享配额；Redis 故障时降级为保留本进程历史的
   本地窗口，此时不再具备全局配额语义；
-- 已有 Alembic 迁移链、CI 往返迁移/备份恢复门禁、Prometheus multiprocess、
+- 已有 Alembic 迁移链、CI 往返迁移/备份恢复门禁、Redis Streams 持久任务 Worker、Prometheus multiprocess、
   Grafana 看板和 opt-in OpenTelemetry；定时异地备份、默认 trace 后端、TLS、HA 和密钥托管尚未完成；
 - README 已补齐业务闭环、评测设计、真实指标、复现入口和系统边界；
 - 代码归属与公开前人工复核已由项目负责人确认；原始 PDF、私有答案和密钥继续不进入仓库。

@@ -19,6 +19,9 @@ from core.redis_client import cache  # 导入 Redis 缓存
 from core.metrics import CANCEL_REQUESTS, RUN_LOCK_OPERATIONS
 from core.research_control import request_research_cancel
 from core.rate_limit import enforce_research_rate_limit
+from core.async_tasks import get_task_queue
+from redis.exceptions import RedisError
+from models.user import User
 from router.auth_router import get_current_user_required
 
 # V2 导入
@@ -80,6 +83,13 @@ class ResearchRequest(BaseModel):
             return 'local' in self.search_modes
         return self.search_local if self.search_local is not None else False
 
+
+class ResearchTaskAccepted(BaseModel):
+    task_id: str
+    session_id: str
+    status: str = "queued"
+    status_url: str
+
 # 获取服务实例
 def get_research_service():
     """获取研究服务实例"""
@@ -135,6 +145,42 @@ def release_research_run_lock(session_id: str, owner_token: str) -> None:
         RUN_LOCK_OPERATIONS.labels(operation="release", outcome="success").inc()
     else:
         RUN_LOCK_OPERATIONS.labels(operation="release", outcome="owner_mismatch").inc()
+
+
+@router.post("/tasks", response_model=ResearchTaskAccepted, status_code=202)
+async def enqueue_research(
+    request: ResearchRequest,
+    current_user: User = Depends(get_current_user_required),
+):
+    """Queue a durable V2 research run for polling clients."""
+    if request.version != "v2":
+        raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="persistent research tasks require version=v2")
+    session_id = request.session_id or str(uuid.uuid4())
+    try:
+        task_id = await get_task_queue().enqueue(
+            "research.run",
+            {
+                "query": request.query,
+                "session_id": session_id,
+                "max_iterations": request.max_iterations or 3,
+                "kb_name": request.kb_name,
+                "search_web": request.get_search_web(),
+                "search_local": request.get_search_local(),
+            },
+            owner_id=str(current_user.id),
+            max_retries=int(os.getenv("RESEARCH_TASK_MAX_RETRIES", "1")),
+            timeout_seconds=int(os.getenv("RESEARCH_TASK_TIMEOUT_SECONDS", "1800")),
+        )
+    except (RedisError, ValueError) as exc:
+        raise HTTPException(
+            status_code=HTTP_503_SERVICE_UNAVAILABLE,
+            detail="persistent research queue unavailable",
+        ) from exc
+    return ResearchTaskAccepted(
+        task_id=task_id,
+        session_id=session_id,
+        status_url=f"/tasks/{task_id}",
+    )
 
 @router.post("/stream", status_code=HTTP_200_OK)
 async def stream_research(

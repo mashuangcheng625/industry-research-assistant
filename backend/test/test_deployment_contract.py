@@ -40,6 +40,23 @@ def test_compose_runs_migrations_before_backend_startup():
     assert services["migrate"]["image"] == services["backend"]["image"]
 
 
+def test_compose_runs_persistent_worker_with_shared_upload_storage():
+    compose = yaml.safe_load(
+        (REPOSITORY_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    )
+    services = compose["services"]
+    worker = services["task-worker"]
+
+    assert worker["command"] == ["python", "/app/app/scripts/run_task_worker.py"]
+    assert worker["image"] == services["backend"]["image"]
+    assert worker["depends_on"]["redis"] == {"condition": "service_healthy"}
+    assert "task_uploads:/data/task_uploads" in worker["volumes"]
+    assert "task_uploads:/data/task_uploads" in services["backend"]["volumes"]
+    assert services["backend"]["depends_on"]["task-worker"] == {
+        "condition": "service_healthy"
+    }
+
+
 def test_compose_postgres_has_no_competing_schema_initializer():
     compose = yaml.safe_load(
         (REPOSITORY_ROOT / "docker-compose.yml").read_text(encoding="utf-8")

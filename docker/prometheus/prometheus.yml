@@ -12,3 +12,7 @@ scrape_configs:
       - targets:
           - host.docker.internal:8000
 
+  - job_name: industry-task-worker
+    static_configs:
+      - targets:
+          - task-worker:8001

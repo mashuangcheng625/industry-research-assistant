@@ -33,3 +33,26 @@ groups:
         annotations:
           summary: Redis could not guarantee exclusive research execution
 
+      - alert: PersistentTaskWorkerDown
+        expr: up{job="industry-task-worker"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: The persistent background-task worker is unavailable
+
+      - alert: PersistentTaskBacklogHigh
+        expr: industry_background_task_queue_depth > 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Persistent background-task backlog has remained above 20
+
+      - alert: PersistentTaskFailuresDetected
+        expr: increase(industry_background_tasks_total{outcome="error"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: A persistent background-task attempt failed or timed out

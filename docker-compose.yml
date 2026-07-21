@@ -25,7 +25,7 @@ services:
     image: industry-research-assistant-backend:local
     container_name: industry_backend
     restart: unless-stopped
-    environment:
+    environment: &app-environment
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
       POSTGRES_USER: postgres
@@ -90,20 +90,31 @@ services:
       AUTO_CREATE_TABLES: "false"
       ENABLE_SCHEDULER: "false"
       READINESS_CHECK_MODELS: "true"
+      READINESS_CHECK_TASK_WORKER: "true"
       WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
       PROMETHEUS_MULTIPROC_DIR: /tmp/prometheus_multiproc
+      KNOWLEDGE_UPLOAD_DIR: /data/task_uploads/knowledge
+      ATTACHMENT_UPLOAD_DIR: /data/task_uploads/attachments
+      TASK_QUEUE_PREFIX: ${TASK_QUEUE_PREFIX:-industry:tasks}
+      TASK_QUEUE_RETENTION_SECONDS: ${TASK_QUEUE_RETENTION_SECONDS:-604800}
+      TASK_QUEUE_VISIBILITY_TIMEOUT_SECONDS: ${TASK_QUEUE_VISIBILITY_TIMEOUT_SECONDS:-1860}
+      TASK_WORKER_HEARTBEAT_TTL_SECONDS: ${TASK_WORKER_HEARTBEAT_TTL_SECONDS:-20}
+      RESEARCH_TASK_TIMEOUT_SECONDS: ${RESEARCH_TASK_TIMEOUT_SECONDS:-1800}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     ports:
       - "8000:8000"
     volumes:
       - ./data/semiconductor_sources:/data/semiconductor_sources:ro
+      - task_uploads:/data/task_uploads
     depends_on:
       migrate:
         condition: service_completed_successfully
       redis:
         condition: service_healthy
       milvus:
+        condition: service_healthy
+      task-worker:
         condition: service_healthy
     healthcheck:
       test:
@@ -114,6 +125,39 @@ services:
       interval: 15s
       timeout: 8s
       start_period: 30s
+      retries: 5
+    networks:
+      - industry_network
+
+  task-worker:
+    profiles: ["app"]
+    image: industry-research-assistant-backend:local
+    container_name: industry_task_worker
+    command: ["python", "/app/app/scripts/run_task_worker.py"]
+    restart: unless-stopped
+    environment:
+      <<: *app-environment
+      ENABLE_SCHEDULER: "false"
+      PROMETHEUS_MULTIPROC_DIR: ""
+      TASK_WORKER_CONCURRENCY: ${TASK_WORKER_CONCURRENCY:-2}
+      TASK_WORKER_METRICS_PORT: 8001
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data/semiconductor_sources:/data/semiconductor_sources:ro
+      - task_uploads:/data/task_uploads
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_healthy
+      milvus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "/app/app/scripts/check_task_worker.py"]
+      interval: 10s
+      timeout: 5s
+      start_period: 10s
       retries: 5
     networks:
       - industry_network
@@ -333,6 +377,7 @@ volumes:
   es_data:
   prometheus_data:
   grafana_data:
+  task_uploads:
 
 networks:
   industry_network:

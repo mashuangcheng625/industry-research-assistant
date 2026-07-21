@@ -98,6 +98,7 @@ class DocumentUploadResponse(BaseModel):
     """文档上传响应"""
     status: str = Field(default="success", description="API状态")
     id: str = Field(..., description="文档ID")
+    task_id: str = Field(..., description="持久化处理任务ID")
     filename: str = Field(..., description="文件名")
     process_status: str = Field(..., description="处理状态")
     message: str = Field(..., description="消息")

@@ -74,6 +74,16 @@ def test_operations_dashboard_queries_only_bounded_research_metrics():
     assert all("session_id" not in expression for expression in expressions)
 
 
+def test_operations_dashboard_includes_persistent_task_health():
+    expressions = [
+        target["expr"]
+        for panel in _dashboard()["panels"]
+        for target in panel.get("targets", [])
+    ]
+    assert any("industry_background_task_queue_depth" in value for value in expressions)
+    assert any("industry_background_tasks_total" in value for value in expressions)
+
+
 def test_compose_grafana_is_read_only_by_default_and_uses_prometheus():
     compose = yaml.safe_load(
         (REPOSITORY_ROOT / "docker-compose.yml").read_text(encoding="utf-8")

@@ -58,15 +58,15 @@ make validate-sources
 
 | 检查项 | 结果 |
 | --- | ---: |
-| 后端测试 | 457 项（453 unit + Milvus Lite / Redis / Alembic / PostgreSQL 备份恢复 4 integration） |
+| 后端测试 | 469 项（459 unit + 10 integration，含 Redis 持久队列故障恢复） |
 | 全语料 Milvus Lite smoke | 15 份资料 / 36 任务 / 5256 切片，4/4 库对账通过 |
 | Python 编译检查 | 通过 |
 | Python 依赖一致性 | `pip check` 通过 |
 | SQLAlchemy/Pydantic 弃用警告 | 0 |
-| 前端 ESLint | 0 error / 1 个 Fast Refresh 非阻断 warning |
+| 前端 ESLint | 0 error / 0 warning |
 | 前端生产构建 | 通过 |
 | 干净后端/前端容器构建 | 通过 |
-| 容器 readiness（存储 + 生成模型 + Embedding） | 通过 |
+| 容器 readiness（存储 + 生成模型 + Embedding + Task Worker） | 通过 |
 
 前端已完成路由级代码分割和 `echarts/core` 按需注册。2026-07-20 最终生产构建中 ECharts
 vendor chunk 为 690.01 kB（gzip 235.05 kB），较原始全量 chunk 减少约 39%；仍高于 500 kB 提示线，

@@ -44,7 +44,7 @@ make validate-observability
 - regression 端到端：严格质量 16/20，SLA 20/20，拒答 4/4，P95 12.477 秒；
 - 并发 4：8/8、P95 10.217 秒；并发 8：16/16、P95 19.919 秒；
 - 上下文压力：600,400 输入 token，证据预算内选取 3,002/6,000；
-- 后端测试：457 项（453 unit + Milvus Lite / Redis / Alembic / PostgreSQL 备份恢复 4 integration）；前端 lint/build 通过；Prometheus 4 条规则有效；
+- 后端测试：469 项（459 unit + 10 integration，含 Redis 持久任务故障恢复）；前端 lint/build 通过；Prometheus 7 条规则有效；
 - Agent 真实运行：取消和精确恢复已验证；另一次完整审核因 1 critical、2 major 正确进入
   `research_review_failed`，没有被错误放行。
 

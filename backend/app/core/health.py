@@ -26,6 +26,21 @@ def _redis() -> None:
     get_redis_client().ping()
 
 
+def _task_worker() -> None:
+    """Require at least one unexpired worker heartbeat."""
+    from core.redis_client import get_redis_client
+
+    client = get_redis_client()
+    prefix = os.getenv("TASK_QUEUE_PREFIX", "industry:tasks")
+    workers_key = f"{prefix}:workers"
+    workers = client.smembers(workers_key)
+    for worker in workers:
+        if client.exists(f"{prefix}:worker:{worker}"):
+            return
+        client.srem(workers_key, worker)
+    raise ConnectionError("no live persistent task worker heartbeat")
+
+
 def _milvus() -> None:
     from pymilvus import connections, utility
 
@@ -120,6 +135,8 @@ def _openai_compatible_embedding(
 def readiness_checks() -> dict[str, Callable[[], None]]:
     """Build checks dynamically so tests and storage-only deployments stay offline-safe."""
     checks = dict(STORAGE_CHECKS)
+    if env_bool("READINESS_CHECK_TASK_WORKER", False):
+        checks["task_worker"] = _task_worker
     if env_bool("READINESS_CHECK_MODELS", False):
         from service.embedding_router import get_embedding_route
         from service.llm_router import resolve_llm_endpoint

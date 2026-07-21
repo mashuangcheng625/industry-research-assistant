@@ -19,9 +19,9 @@ COPY alembic /app/alembic
 COPY alembic.ini /app/alembic.ini
 
 RUN useradd --create-home --uid 10001 appuser \
-    && mkdir -p /tmp/prometheus_multiproc \
+    && mkdir -p /tmp/prometheus_multiproc /data/task_uploads/knowledge /data/task_uploads/attachments \
     && chown -R appuser:appuser /app
-RUN chown appuser:appuser /tmp/prometheus_multiproc
+RUN chown -R appuser:appuser /tmp/prometheus_multiproc /data/task_uploads
 USER appuser
 WORKDIR /app
 

@@ -115,6 +115,7 @@ class AttachmentResponse(BaseModel):
     status: str = Field(..., description="处理状态: pending, processing, completed, failed")
     error_message: Optional[str] = Field(None, description="错误信息")
     created_at: datetime = Field(..., description="创建时间")
+    task_id: Optional[str] = Field(None, description="上传时返回的持久化处理任务ID")
 
 class AttachmentListResponse(BaseModel):
     """附件列表响应"""

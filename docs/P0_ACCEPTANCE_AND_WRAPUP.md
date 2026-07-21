@@ -13,7 +13,7 @@
 
 | 项目 | 期望 | 实际 | 备注 |
 | --- | --- | --- | --- |
-| 后端单元 + 集成测试 | 全绿 | 457 项（453 unit + 4 integration） | `make test-backend-unit` / `make test-backend-integration` |
+| 后端单元 + 集成测试 | 全绿 | 469 项（459 unit + 10 integration） | `make test-backend-unit` / `make test-backend-integration` |
 | Evidence 契约测试 | 全绿 | 48/48 | `make test-evidence-contract` |
 | 前端 ESLint | 0 error / 0 warning | 0/0 | `make lint-frontend` |
 | 前端生产构建 | 通过 | 通过，dist 2.56 MB | `make build-frontend` |
@@ -59,7 +59,7 @@ DOCKER=/mnt/e/env/docker/resources/bin/docker.exe make validate-compose
 实测结果：
 
 - 后端 + 评测：全部通过，单次脚本耗时约 40 秒。
-- 前端：lint 0 error / 1 个 Fast Refresh 非阻断 warning，build 通过；已完成路由级拆分，
+- 前端：lint 0 error / 0 warning，build 通过；已完成路由级拆分，
   ECharts chunk 为 690.01 kB（gzip 235.05 kB），仍需继续降低首屏预加载体积。
 - `validate-compose`：1 秒内通过（Docker v29.6.1 + Compose v5.2.0）。
 

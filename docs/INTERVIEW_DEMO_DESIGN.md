@@ -201,8 +201,8 @@ Completed    false
 
 | 展示项 | 当前口径 | 证据 |
 | --- | ---: | --- |
-| 单元测试 | 453 项 | `make test-backend-unit` |
-| Milvus Lite / Redis / Alembic / PostgreSQL 备份恢复集成测试 | 4 项 | `make test-backend-integration` |
+| 单元测试 | 459 项 | `make test-backend-unit` |
+| Milvus Lite / Redis 限流与持久任务 / Alembic / PostgreSQL 备份恢复集成测试 | 10 项 | `make test-backend-integration` |
 | 真实模型 Hybrid 冒烟 | 5/5 | `reports/p1-5-model-smoke.json` |
 | regression 检索 | 20/20 | baseline manifest 指向的冻结报告 |
 | regression 端到端严格质量 | 16/20 | baseline manifest 指向的冻结报告 |

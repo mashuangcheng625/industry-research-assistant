@@ -24,6 +24,7 @@ from router.memory_router import router as memory_router
 from router.database_router import router as database_router
 from router.news_router import router as news_router
 from router.demo_router import router as demo_router
+from router.task_router import router as task_router
 from core.database import engine, Base
 from core.health import check_readiness
 from core.metrics import mark_current_process_dead, render_metrics
@@ -103,6 +104,7 @@ app.include_router(chat_router)
 app.include_router(research_router)
 app.include_router(news_router)
 app.include_router(demo_router)
+app.include_router(task_router)
 
 @app.get("/hello")
 async def hello_world():

@@ -3,10 +3,12 @@ import os
 from pathlib import Path
 from typing import List, Optional
 from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks, Form
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
+from redis.exceptions import RedisError
 from sqlalchemy.orm import Session
 
 from core.database import get_db
+from core.async_tasks import get_task_queue
 from models.chat import ChatAttachment, ChatSession
 from models.user import User
 from router.auth_router import get_current_user_required
@@ -20,7 +22,7 @@ router = APIRouter(
 )
 
 # 文件上传目录
-UPLOAD_DIR = "/tmp/chat_attachments"
+UPLOAD_DIR = os.getenv("ATTACHMENT_UPLOAD_DIR", "/tmp/chat_attachments")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 MAX_ATTACHMENT_BYTES = int(os.getenv("MAX_UPLOAD_BYTES", str(20 * 1024 * 1024)))
 
@@ -55,66 +57,8 @@ def attachment_to_response(att: ChatAttachment) -> AttachmentResponse:
     )
 
 
-async def process_attachment(attachment_id: str, file_path: str, db_session_factory):
-    """后台处理附件（提取文本内容）"""
-    import logging
-    logger = logging.getLogger("AttachmentProcessor")
-
-    db = db_session_factory()
-    try:
-        att = db.query(ChatAttachment).filter(ChatAttachment.id == attachment_id).first()
-        if not att:
-            return
-
-        att.status = "processing"
-        db.commit()
-
-        try:
-            content_text = ""
-            ext = get_file_extension(att.filename)
-
-            # 简单的文本提取（可以扩展为使用 DocMind）
-            if ext in {'.txt', '.md', '.py', '.js', '.ts', '.json', '.yaml', '.yml', '.xml', '.csv', '.html'}:
-                # 直接读取文本文件
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    content_text = f.read()
-            elif ext == '.pdf':
-                # PDF 需要特殊处理，这里暂时跳过
-                # 可以后续集成 DocMind 或 PyPDF2
-                content_text = f"[PDF 文件: {att.filename}]"
-            elif ext in {'.docx', '.doc'}:
-                # Word 文档需要特殊处理
-                content_text = f"[Word 文档: {att.filename}]"
-            elif ext in {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'}:
-                # 图片文件
-                content_text = f"[图片: {att.filename}]"
-            else:
-                content_text = f"[文件: {att.filename}]"
-
-            # 限制内容长度
-            if len(content_text) > 50000:
-                content_text = content_text[:50000] + "\n...[内容已截断]"
-
-            att.content_text = content_text
-            att.status = "completed"
-            att.error_message = None
-
-        except Exception as e:
-            logger.error(f"处理附件失败: {e}")
-            att.status = "failed"
-            att.error_message = str(e)
-
-        db.commit()
-
-    except Exception as e:
-        logger.error(f"附件处理异常: {e}")
-    finally:
-        db.close()
-
-
 @router.post("", response_model=AttachmentResponse, status_code=status.HTTP_201_CREATED)
 async def upload_attachment(
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     session_id: str = Form(...),
     current_user: User = Depends(get_current_user_required),
@@ -199,16 +143,28 @@ async def upload_attachment(
     db.commit()
     db.refresh(att)
 
-    # 后台处理附件
-    from core.database import SessionLocal
-    background_tasks.add_task(
-        process_attachment,
-        str(att.id),
-        file_path,
-        SessionLocal
-    )
+    try:
+        task_id = await get_task_queue().enqueue(
+            "attachment.process",
+            {"attachment_id": str(att.id), "file_path": file_path},
+            owner_id=str(current_user.id),
+            max_retries=2,
+            timeout_seconds=int(os.getenv("ATTACHMENT_TASK_TIMEOUT_SECONDS", "300")),
+        )
+    except (RedisError, ValueError) as exc:
+        att.status = "failed"
+        att.error_message = "持久化任务队列不可用"
+        db.commit()
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="附件已拒绝接收：持久化任务队列不可用",
+        ) from exc
 
-    return attachment_to_response(att)
+    response = attachment_to_response(att)
+    response.task_id = task_id
+    return response
 
 
 @router.get("/{attachment_id}", response_model=AttachmentResponse)

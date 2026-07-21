@@ -3,10 +3,12 @@ import os
 from datetime import datetime
 from typing import List
 from uuid import UUID, uuid4
-from fastapi import APIRouter, BackgroundTasks, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from redis.exceptions import RedisError
 from sqlalchemy.orm import Session
 
 from core.database import get_db
+from core.async_tasks import get_task_queue
 from core.upload_security import file_signature_matches, safe_upload_filename
 from models.knowledge import KnowledgeBase, Document
 from models.user import User
@@ -24,7 +26,7 @@ from schemas.knowledge import (
 router = APIRouter(prefix="/knowledge-bases", tags=["知识库管理"])
 
 # 文件上传目录
-UPLOAD_DIR = "/tmp/knowledge_uploads"
+UPLOAD_DIR = os.getenv("KNOWLEDGE_UPLOAD_DIR", "/tmp/knowledge_uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # 支持的文件类型
@@ -91,54 +93,6 @@ def doc_to_response(doc: Document) -> DocumentResponse:
         created_at=doc.created_at,
         updated_at=doc.updated_at,
     )
-
-
-async def process_document(document_id: str, file_path: str, kb_name: str, db_session_factory):
-    """后台处理文档（使用 DocMind 解析、向量化、存储到ES）"""
-    from service.docmind_service import process_document_with_docmind
-
-    # 创建新的数据库会话
-    db = db_session_factory()
-    try:
-        # 获取文档记录
-        doc = db.query(Document).filter(Document.id == document_id).first()
-        if not doc:
-            return
-
-        # 更新状态为处理中
-        doc.status = "processing"
-        db.commit()
-
-        try:
-            # 使用知识库名称作为ES索引名
-            index_name = f"kb_{kb_name}".lower().replace(" ", "_")
-
-            # 使用 DocMind 处理文档
-            result = process_document_with_docmind(
-                file_path=file_path,
-                file_name=doc.filename,
-                index_name=index_name,
-            )
-
-            if result["success"]:
-                doc.status = "completed"
-                doc.chunk_count = result["document_count"]
-                doc.error_message = None
-            else:
-                doc.status = "failed"
-                doc.error_message = result["message"]
-
-        except Exception as e:
-            doc.status = "failed"
-            doc.error_message = str(e)
-
-        db.commit()
-
-    finally:
-        db.close()
-        # 清理临时文件
-        if os.path.exists(file_path):
-            os.remove(file_path)
 
 
 @router.get("", response_model=List[KnowledgeBaseResponse])
@@ -310,7 +264,6 @@ async def delete_knowledge_base(
 @router.post("/{kb_id}/documents", response_model=DocumentUploadResponse)
 async def upload_document(
     kb_id: str,
-    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     source_name: str | None = Form(None),
     source_url: str | None = Form(None),
@@ -430,20 +383,28 @@ async def upload_document(
             detail="文档记录创建失败",
         )
 
-    # 获取数据库会话工厂
-    from core.database import SessionLocal
-
-    # 在后台处理文档
-    background_tasks.add_task(
-        process_document,
-        str(doc.id),
-        file_path,
-        kb.name,
-        SessionLocal
-    )
+    try:
+        task_id = await get_task_queue().enqueue(
+            "document.process",
+            {"document_id": str(doc.id), "file_path": file_path, "kb_name": kb.name},
+            owner_id=str(current_user.id),
+            max_retries=2,
+            timeout_seconds=int(os.getenv("DOCUMENT_TASK_TIMEOUT_SECONDS", "900")),
+        )
+    except (RedisError, ValueError) as exc:
+        doc.status = "failed"
+        doc.error_message = "持久化任务队列不可用"
+        db.commit()
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="文档已拒绝接收：持久化任务队列不可用",
+        ) from exc
 
     return DocumentUploadResponse(
         id=str(doc.id),
+        task_id=task_id,
         filename=doc.filename,
         process_status="pending",
         message="文档已上传，正在后台处理中"

@@ -102,6 +102,21 @@ REVIEW_OUTCOMES = Counter(
     "Terminal review outcomes.",
     ("status", "reason"),
 )
+TASK_RUNS = Counter(
+    "industry_background_tasks_total",
+    "Persistent background-task attempt outcomes.",
+    ("task_type", "outcome"),
+)
+TASK_DURATION = Histogram(
+    "industry_background_task_duration_seconds",
+    "Persistent background-task attempt duration.",
+    ("task_type", "outcome"),
+    buckets=(0.1, 0.5, 1, 2.5, 5, 10, 30, 60, 120, 300, 900, 1800),
+)
+TASK_QUEUE_DEPTH = Gauge(
+    "industry_background_task_queue_depth",
+    "Pending plus not-yet-delivered persistent tasks.",
+)
 
 
 def render_metrics() -> tuple[bytes, str]:
