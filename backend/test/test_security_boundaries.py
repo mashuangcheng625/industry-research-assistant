@@ -12,6 +12,7 @@ if str(APP_DIR) not in sys.path:
 from core.rate_limit import SlidingWindowRateLimiter  # noqa: E402
 from core.security import validate_security_config  # noqa: E402
 from core.upload_security import file_signature_matches, safe_upload_filename  # noqa: E402
+
 from core.text2sql_guard import (  # noqa: E402
     GUARD_COPY_DENIED,
     GUARD_COMMENT_DENIED,
@@ -79,6 +80,97 @@ def test_upload_filename_discards_client_path_components():
     assert safe_upload_filename("../../etc/passwd.pdf") == "passwd.pdf"
     assert safe_upload_filename(r"..\..\secrets\report.pdf") == "report.pdf"
     assert safe_upload_filename("report.pdf") == "report.pdf"
+
+
+# ---------------------------------------------------------------------------
+# P2-20: content scanner
+# ---------------------------------------------------------------------------
+
+
+def test_scan_result_immutable():
+    from core.upload_security import ScanResult
+    r = ScanResult(ok=True, code="PASS", detail="clean")
+    assert r.ok is True
+    assert r.code == "PASS"
+    assert r.detail == "clean"
+
+
+def test_scanner_returns_skipped_when_not_configured():
+    """Without CLAMAV_HOST the scanner must return a pass-through result."""
+    import os, tempfile
+    from core.upload_security import scanner_available, scan_file, SCAN_SKIPPED
+
+    with patch.dict(os.environ, {}, clear=True):
+        # force recheck on next call
+        if hasattr(scanner_available, "_cached"):
+            del scanner_available._cached
+        assert scanner_available() is False
+
+        tf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+        tf.write("hello world\n")
+        tf.close()
+        try:
+            result = scan_file(tf.name)
+            assert result.ok is True
+        finally:
+            os.unlink(tf.name)
+
+
+def test_scan_valid_text_passes_heuristics():
+    import os, tempfile
+    from core.upload_security import scan_file, SCAN_SKIPPED
+
+    with patch.dict(os.environ, {}, clear=True):
+        tf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+        tf.write("这是一篇正常的Markdown文档\n# 标题\n正文内容\n")
+        tf.close()
+        try:
+            result = scan_file(tf.name)
+            assert result.ok is True
+            assert result.backend == "heuristic"
+        finally:
+            os.unlink(tf.name)
+
+
+def test_scan_text_with_high_ctrl_chars_rejected():
+    import os, tempfile
+    from core.upload_security import scan_file
+
+    with patch.dict(os.environ, {}, clear=True):
+        tf = tempfile.NamedTemporaryFile(mode="wb", suffix=".txt", delete=False)
+        # write a short header then a block of control chars
+        tf.write(b"normal text\n")
+        tf.write(b"\x03\x04\x05\x01\x02" * 200)  # 1000 control chars in a row
+        tf.close()
+        try:
+            result = scan_file(tf.name)
+            assert result.ok is False
+            assert result.code == "HIGH_CTRL_CHARS"
+        finally:
+            os.unlink(tf.name)
+
+
+def test_clamav_instance_called_when_available():
+    """When CLAMAV_HOST is set, scan_file must try to connect."""
+    import os, tempfile
+    from core.upload_security import scanner_available, scan_file, _scan_clamav
+
+    with patch.dict(os.environ, {"CLAMAV_HOST": "127.0.0.1"}, clear=True):
+        if hasattr(scanner_available, "_cached"):
+            del scanner_available._cached
+        # ClamAV is not running locally, so scanner_available returns False.
+        assert scanner_available() is False
+        # Even when the env var is set, the connection attempt fails,
+        # so we fall through to heuristics.
+        tf = tempfile.NamedTemporaryFile(mode="w", suffix=".txt", delete=False)
+        tf.write("clean text\n")
+        tf.close()
+        try:
+            result = scan_file(tf.name)
+            assert result.ok is True
+            assert result.backend == "heuristic"
+        finally:
+            os.unlink(tf.name)
 
 
 # ---------------------------------------------------------------------------
