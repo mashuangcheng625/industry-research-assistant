@@ -1,0 +1,64 @@
+{
+  "title": "Trace & Latency — Industry Research Assistant",
+  "tags": ["otel", "trace", "industry-research"],
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "title": "Requests — P50 / P95 latency",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": {"showPoints": "never"}
+        }
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path))",
+          "legendFormat": "P50 {{path}}"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, path))",
+          "legendFormat": "P95 {{path}}"
+        }
+      ]
+    },
+    {
+      "title": "Embedding API latency",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {
+          "expr": "embedding_request_duration_seconds_sum / embedding_request_duration_seconds_count",
+          "legendFormat": "avg latency"
+        }
+      ]
+    },
+    {
+      "title": "Research phase duration",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {
+          "expr": "avg(research_phase_duration_seconds) by (phase)",
+          "legendFormat": "{{phase}}"
+        }
+      ]
+    },
+    {
+      "title": "RAG retrieval",
+      "type": "timeseries",
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}},
+      "targets": [
+        {
+          "expr": "rate(rag_retrieval_duration_seconds_sum[5m]) / rate(rag_retrieval_duration_seconds_count[5m])",
+          "legendFormat": "retrieval avg"
+        }
+      ]
+    }
+  ]
+}
