@@ -21,9 +21,12 @@ from models.user import User  # noqa: E402
 from service.docmind_service import process_document_with_docmind  # noqa: E402
 from service.embedding_router import (  # noqa: E402
     collection_name_for_route,
-    routes_for_ingestion,
+    routes_for_mode,
 )
-from service.milvus_service import get_milvus_service  # noqa: E402
+from service.milvus_service import (  # noqa: E402
+    get_milvus_service,
+    lexical_collection_name,
+)
 from service.source_governance import read_jsonl, resolve_managed_path  # noqa: E402
 
 
@@ -122,13 +125,19 @@ def ingest_candidate(
         # before retrying so a rerun cannot silently duplicate chunks.
         if existing_document:
             doc_id = hashlib.md5(filename.encode()).hexdigest()
-            for route in routes_for_ingestion():
+            milvus = get_milvus_service()
+            for route in routes_for_mode("hybrid"):
                 target = collection_name_for_route(collection_name, route)
-                deleted = get_milvus_service().delete_by_doc_id(target, doc_id)
+                deleted = milvus.delete_by_doc_id(target, doc_id)
                 if not deleted:
                     raise RuntimeError(
                         f"{route.name} 旧向量删除失败，为避免重复切片已中止重建"
                     )
+            if not milvus.delete_by_doc_id(
+                lexical_collection_name(collection_name),
+                doc_id,
+            ):
+                raise RuntimeError("BM25 旧索引删除失败，已中止重建")
 
         result = process_document_with_docmind(
             file_path=str(file_path),

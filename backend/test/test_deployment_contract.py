@@ -90,3 +90,17 @@ def test_compose_postgres_has_no_competing_schema_initializer():
         encoding="utf-8"
     )
     assert "AUTO_CREATE_TABLES=false" in env_example
+
+
+def test_compose_enables_bounded_server_side_lexical_retrieval():
+    compose = yaml.safe_load(
+        (REPOSITORY_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    )
+    environment = compose["services"]["backend"]["environment"]
+
+    assert environment["RAG_HYBRID_ENABLED"] == "${RAG_HYBRID_ENABLED:-true}"
+    assert environment["RAG_LEXICAL_BACKEND"] == "${RAG_LEXICAL_BACKEND:-auto}"
+    assert environment["RAG_LEXICAL_FALLBACK_ENABLED"] == (
+        "${RAG_LEXICAL_FALLBACK_ENABLED:-true}"
+    )
+    assert environment["RAG_LEXICAL_TOP_K"] == "${RAG_LEXICAL_TOP_K:-40}"

@@ -84,6 +84,7 @@ def test_operations_dashboard_includes_persistent_task_health():
     assert any("industry_background_tasks_total" in value for value in expressions)
     assert any("industry_task_outbox_pending_events" in value for value in expressions)
     assert any("industry_task_outbox_deliveries_total" in value for value in expressions)
+    assert any("industry_lexical_searches_total" in value for value in expressions)
 
 
 def test_prometheus_scrapes_and_alerts_on_outbox_dispatcher():
@@ -106,6 +107,7 @@ def test_prometheus_scrapes_and_alerts_on_outbox_dispatcher():
         "TransactionalOutboxBacklogHigh",
         "TransactionalOutboxDeliveryFailed",
     } <= alert_names
+    assert "LexicalSearchFallbackDetected" in alert_names
 
 
 def test_compose_grafana_is_read_only_by_default_and_uses_prometheus():

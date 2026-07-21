@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-21T03:18:06+00:00",
+  "source_route": "cloud",
+  "source_model": "text-embedding-v4",
+  "collection_suffix": "_bm25_v1",
+  "collections": [
+    {
+      "base_collection": "kb_semiconductor_chip_design_eda_ip",
+      "source_collection": "kb_semiconductor_chip_design_eda_ip_text_v4_1024_v1",
+      "target_collection": "kb_semiconductor_chip_design_eda_ip_bm25_v1",
+      "entity_count": 3258,
+      "probe_hit_count": 1,
+      "elapsed_ms": 5407.1
+    },
+    {
+      "base_collection": "kb_semiconductor_materials_equipment",
+      "source_collection": "kb_semiconductor_materials_equipment_text_v4_1024_v1",
+      "target_collection": "kb_semiconductor_materials_equipment_bm25_v1",
+      "entity_count": 627,
+      "probe_hit_count": 1,
+      "elapsed_ms": 5019.9
+    },
+    {
+      "base_collection": "kb_semiconductor_packaging_testing",
+      "source_collection": "kb_semiconductor_packaging_testing_text_v4_1024_v1",
+      "target_collection": "kb_semiconductor_packaging_testing_bm25_v1",
+      "entity_count": 679,
+      "probe_hit_count": 1,
+      "elapsed_ms": 5022.8
+    },
+    {
+      "base_collection": "kb_semiconductor_process",
+      "source_collection": "kb_semiconductor_process_text_v4_1024_v1",
+      "target_collection": "kb_semiconductor_process_bm25_v1",
+      "entity_count": 692,
+      "probe_hit_count": 1,
+      "elapsed_ms": 7601.5
+    }
+  ],
+  "passed": true
+}

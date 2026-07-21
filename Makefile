@@ -20,7 +20,7 @@ MULTI_SOURCE_FIXTURE ?= sample-data/multi_source_advanced_packaging_fixture.json
 MULTI_SOURCE_EVAL ?= sample-data/multi_source_advanced_packaging_eval.json
 MULTI_SOURCE_REPORT ?= /tmp/industry-research-multi-source-report.json
 
-.PHONY: setup-backend test-backend test-backend-unit test-backend-integration test-evidence-contract check-backend-deps check-backend-import lint-frontend build-frontend build-images validate-compose validate-observability validate-sources validate-baseline smoke-ingest-lite audit-ingestion ablate-retrieval-development evaluate-answers-regression demo-rag load-test-chat stress-context-budget run-backend-structured evaluate-answers-regression-structured run-backend-semantic evaluate-answers-regression-semantic build-eval-public validate-eval validate-eval-private evaluate-multi-source check migrate-head migrate-history migrate-autogenerate validate-migrations validate-backup-restore
+.PHONY: setup-backend test-backend test-backend-unit test-backend-integration test-evidence-contract check-backend-deps check-backend-import lint-frontend build-frontend build-images validate-compose validate-observability validate-sources validate-baseline smoke-ingest-lite audit-ingestion rebuild-lexical-indexes benchmark-lexical ablate-retrieval-development evaluate-answers-regression demo-rag load-test-chat stress-context-budget run-backend-structured evaluate-answers-regression-structured run-backend-semantic evaluate-answers-regression-semantic build-eval-public validate-eval validate-eval-private evaluate-multi-source check migrate-head migrate-history migrate-autogenerate validate-migrations validate-backup-restore
 
 setup-backend:
 	python3 -m venv .venv
@@ -123,6 +123,15 @@ smoke-ingest-lite:
 audit-ingestion:
 	cd backend && PYTHONPATH=app ../$(PYTHON) app/scripts/audit_ingestion_consistency.py \
 		--username source_pipeline
+
+rebuild-lexical-indexes:
+	PYTHONPATH=backend/app $(PYTHON) backend/scripts/rebuild_lexical_indexes.py \
+		--output reports/lexical_index_build_latest.json
+
+benchmark-lexical:
+	PYTHONPATH=backend/app $(PYTHON) backend/scripts/benchmark_lexical_retrieval.py \
+		--cases sample-data/semiconductor_rag_eval_development.json \
+		--output reports/lexical_backend_benchmark_latest.json
 
 ablate-retrieval-development:
 	cd backend && PYTHONPATH=app ../$(PYTHON) app/scripts/run_retrieval_ablation.py \

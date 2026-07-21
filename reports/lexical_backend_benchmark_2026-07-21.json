@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-21T03:22:55+00:00",
+  "dataset": "sample-data/semiconductor_rag_eval_development.json",
+  "case_count": 20,
+  "iterations": 3,
+  "source_route": "local",
+  "source_model": "bge-m3",
+  "indexed_chunk_count": 5256,
+  "collection_sizes": {
+    "kb_semiconductor_chip_design_eda_ip_bge_m3_1024_v1": 3258,
+    "kb_semiconductor_materials_equipment_bge_m3_1024_v1": 627,
+    "kb_semiconductor_process_bge_m3_1024_v1": 692,
+    "kb_semiconductor_packaging_testing_bge_m3_1024_v1": 679
+  },
+  "backends": {
+    "scan": {
+      "requests": 60,
+      "average_latency_ms": 1314.26,
+      "p50_latency_ms": 857.907,
+      "p95_latency_ms": 4051.421,
+      "max_latency_ms": 4942.198,
+      "average_candidates": 1314.0,
+      "max_candidates": 3258
+    },
+    "milvus": {
+      "requests": 60,
+      "average_latency_ms": 148.417,
+      "p50_latency_ms": 162.361,
+      "p95_latency_ms": 248.597,
+      "max_latency_ms": 257.722,
+      "average_candidates": 94.3,
+      "max_candidates": 155
+    }
+  },
+  "p95_speedup": 16.297,
+  "passed": true
+}

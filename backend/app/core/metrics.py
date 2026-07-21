@@ -132,6 +132,17 @@ OUTBOX_PENDING_EVENTS = Gauge(
     "industry_task_outbox_pending_events",
     "Pending plus leased transactional outbox rows.",
 )
+LEXICAL_SEARCHES = Counter(
+    "industry_lexical_searches_total",
+    "Lexical retrieval requests by backend and outcome.",
+    ("backend", "outcome"),
+)
+LEXICAL_SEARCH_DURATION = Histogram(
+    "industry_lexical_search_duration_seconds",
+    "Lexical candidate retrieval duration by backend and outcome.",
+    ("backend", "outcome"),
+    buckets=(0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5),
+)
 
 
 def render_metrics() -> tuple[bytes, str]:

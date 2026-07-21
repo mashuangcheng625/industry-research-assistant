@@ -8,8 +8,9 @@
 
 import os
 import re
+import time
 from typing import List, Dict, Any, Optional
-from service.milvus_service import get_milvus_service
+from service.milvus_service import get_milvus_service, lexical_collection_name
 from service.embedding_service import generate_embedding
 from service.embedding_router import (
     EmbeddingRoute,
@@ -359,6 +360,145 @@ def _select_facet_diverse_results(
     return selected[:top_k]
 
 
+def _collect_lexical_candidates(
+    milvus,
+    *,
+    dense_collection_name: str,
+    bm25_collection_name: str,
+    query_variants: List[str],
+    query_focus_terms: List[List[str]],
+    question: str,
+    candidate_k: int,
+    kb_id: Optional[str],
+) -> tuple[Dict[str, Dict[str, Any]], str, Optional[str]]:
+    """Return bounded lexical candidates and the backend/degradation decision."""
+    started_at = time.perf_counter()
+    requested_backend = os.getenv("RAG_LEXICAL_BACKEND", "auto").strip().lower()
+    if requested_backend not in {"auto", "milvus", "scan"}:
+        raise ValueError("RAG_LEXICAL_BACKEND must be auto, milvus, or scan")
+    fallback_enabled = _is_enabled(
+        os.getenv("RAG_LEXICAL_FALLBACK_ENABLED", "true")
+    )
+    rrf_k = max(1, int(os.getenv("RAG_RETRIEVAL_RRF_K", "60")))
+    lexical_k = max(
+        candidate_k,
+        int(os.getenv("RAG_LEXICAL_TOP_K", str(candidate_k))),
+    )
+    candidates: Dict[str, Dict[str, Any]] = {}
+    degradation: Optional[str] = None
+
+    if requested_backend in {"auto", "milvus"}:
+        try:
+            if not milvus.supports_lexical_search(bm25_collection_name):
+                raise LookupError(f"BM25 index unavailable: {bm25_collection_name}")
+            for query_index, variant in enumerate(query_variants):
+                hits = milvus.search_lexical(
+                    bm25_collection_name,
+                    variant,
+                    top_k=lexical_k,
+                    kb_id=kb_id,
+                )
+                for rank, hit in enumerate(hits, start=1):
+                    chunk_id = hit.get("id")
+                    if not chunk_id:
+                        continue
+                    existing = candidates.get(chunk_id, {})
+                    bm25_scores = dict(existing.get("query_bm25_scores", {}))
+                    bm25_scores[query_index] = float(hit.get("bm25_score", 0))
+                    candidates[chunk_id] = {
+                        **existing,
+                        **hit,
+                        "query_bm25_scores": bm25_scores,
+                        "bm25_score": max(
+                            float(existing.get("bm25_score", 0)),
+                            float(hit.get("bm25_score", 0)),
+                        ),
+                        "sparse_rrf_score": float(
+                            existing.get("sparse_rrf_score", 0)
+                        ) + 1.0 / (rrf_k + rank),
+                    }
+            backend = "milvus_bm25"
+        except Exception as exc:
+            if requested_backend == "milvus" and not fallback_enabled:
+                _observe_lexical_search("milvus_bm25", "error", started_at)
+                raise
+            if not fallback_enabled:
+                _observe_lexical_search("milvus_bm25", "error", started_at)
+                raise
+            degradation = f"{type(exc).__name__}: {exc}"
+            candidates = {}
+            backend = "scan"
+    else:
+        backend = "scan"
+
+    if backend == "scan":
+        scan_limit = int(os.getenv("RAG_LEXICAL_SCAN_LIMIT", "10000"))
+        chunks = milvus.list_chunks(dense_collection_name, limit=scan_limit)
+        if not chunks and milvus.get_collection_stats(dense_collection_name).get(
+            "num_entities", 0
+        ):
+            _observe_lexical_search("scan", "error", started_at)
+            raise RuntimeError(f"lexical scan returned no chunks: {dense_collection_name}")
+        for chunk in chunks:
+            chunk_id = chunk.get("id")
+            if not chunk_id:
+                continue
+            candidates[chunk_id] = {**chunk, "query_bm25_scores": {}}
+        for query_index, variant in enumerate(query_variants):
+            scored = [
+                (_lexical_score(variant, item.get("content", "")), item)
+                for item in candidates.values()
+            ]
+            ranked = [
+                item
+                for score, item in sorted(scored, key=lambda pair: pair[0], reverse=True)
+                if score > 0
+            ]
+            for rank, item in enumerate(ranked[:lexical_k], start=1):
+                item["sparse_rrf_score"] = float(
+                    item.get("sparse_rrf_score", 0)
+                ) + 1.0 / (rrf_k + rank)
+
+    for candidate in candidates.values():
+        content = candidate.get("content", "")
+        query_lexical_scores = [
+            _lexical_score(variant, content) for variant in query_variants
+        ]
+        candidate.update({
+            "vector_score": 0.0,
+            "query_vector_scores": {},
+            "dense_rrf_score": 0.0,
+            "query_lexical_scores": query_lexical_scores,
+            "query_focus_scores": [
+                _focus_term_score(focus_terms, content)
+                for focus_terms in query_focus_terms
+            ],
+            "lexical_score": max(query_lexical_scores, default=0.0),
+            "exact_term_score": _technical_exact_score(question, content),
+            "strict_identifier_score": _strict_identifier_score(question, content),
+            "lexical_backend": backend,
+        })
+    _observe_lexical_search(
+        backend,
+        "fallback" if degradation else "success",
+        started_at,
+    )
+    return candidates, backend, degradation
+
+
+def _observe_lexical_search(backend: str, outcome: str, started_at: float) -> None:
+    """Keep metrics isolated from retrieval semantics."""
+    try:
+        from core.metrics import LEXICAL_SEARCH_DURATION, LEXICAL_SEARCHES
+
+        LEXICAL_SEARCHES.labels(backend=backend, outcome=outcome).inc()
+        LEXICAL_SEARCH_DURATION.labels(backend=backend, outcome=outcome).observe(
+            max(0.0, time.perf_counter() - started_at)
+        )
+    except Exception:
+        pass
+
+
 def _retrieve_content_single(
     indexNames: str,
     question: str,
@@ -367,6 +507,7 @@ def _retrieve_content_single(
     min_score: Optional[float] = None,
     embedding_route: EmbeddingRoute | None = None,
     diagnostics: Optional[Dict[str, Any]] = None,
+    lexical_index_name: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     """
     检索相关内容
@@ -420,6 +561,7 @@ def _retrieve_content_single(
             return []
         hybrid_enabled = _is_enabled(os.getenv("RAG_HYBRID_ENABLED", "false"))
         candidate_k = max(top_k * 4, 20) if hybrid_enabled else top_k
+        retrieval_rrf_k = max(1, int(os.getenv("RAG_RETRIEVAL_RRF_K", "60")))
         vector_results_by_id: Dict[str, Dict[str, Any]] = {}
         for query_index, query_vector in enumerate(query_vectors):
             query_results = milvus.search(
@@ -444,45 +586,32 @@ def _retrieve_content_single(
                     **result,
                     "score": best_score,
                     "query_vector_scores": vector_scores,
-                    "rrf_score": float(existing.get("rrf_score", 0))
-                    + 1.0 / (60 + rank),
+                    "dense_rrf_score": float(existing.get("dense_rrf_score", 0))
+                    + 1.0 / (retrieval_rrf_k + rank),
                 }
         vector_results = list(vector_results_by_id.values())
 
         if hybrid_enabled:
-            scan_limit = int(os.getenv("RAG_LEXICAL_SCAN_LIMIT", "10000"))
-            all_chunks = milvus.list_chunks(indexNames, limit=scan_limit)
-            merged_results: Dict[str, Dict[str, Any]] = {}
-
-            for chunk in all_chunks:
-                chunk_id = chunk.get("id")
-                if not chunk_id:
-                    continue
-                query_lexical_scores = [
-                    _lexical_score(variant, chunk.get("content", ""))
-                    for variant in query_variants
-                ]
-                query_focus_scores = [
-                    _focus_term_score(focus_terms, chunk.get("content", ""))
-                    for focus_terms in query_focus_terms
-                ]
-                merged_results[chunk_id] = {
-                    **chunk,
-                    "vector_score": 0.0,
-                    "query_vector_scores": {},
-                    "rrf_score": 0.0,
-                    "query_lexical_scores": query_lexical_scores,
-                    "query_focus_scores": query_focus_scores,
-                    "lexical_score": max(query_lexical_scores, default=0.0),
-                    "exact_term_score": _technical_exact_score(
-                        question,
-                        chunk.get("content", ""),
-                    ),
-                    "strict_identifier_score": _strict_identifier_score(
-                        question,
-                        chunk.get("content", ""),
-                    ),
-                }
+            selected_lexical_name = lexical_index_name or lexical_collection_name(
+                indexNames
+            )
+            merged_results, lexical_backend, lexical_degradation = (
+                _collect_lexical_candidates(
+                    milvus,
+                    dense_collection_name=indexNames,
+                    bm25_collection_name=selected_lexical_name,
+                    query_variants=query_variants,
+                    query_focus_terms=query_focus_terms,
+                    question=question,
+                    candidate_k=candidate_k,
+                    kb_id=kb_id,
+                )
+            )
+            if diagnostics is not None:
+                diagnostics.update({
+                    "lexical_backend": lexical_backend,
+                    "lexical_degradation": lexical_degradation,
+                })
 
             for result in vector_results:
                 chunk_id = result.get("id")
@@ -505,13 +634,23 @@ def _retrieve_content_single(
                     ),
                     "vector_score": float(result.get("score", 0)),
                     "query_vector_scores": result.get("query_vector_scores", {}),
-                    "rrf_score": result.get("rrf_score", 0.0),
+                    "dense_rrf_score": result.get("dense_rrf_score", 0.0),
+                    "sparse_rrf_score": existing.get("sparse_rrf_score", 0.0),
+                    "bm25_score": existing.get("bm25_score", 0.0),
+                    "query_bm25_scores": existing.get("query_bm25_scores", {}),
+                    "lexical_backend": lexical_backend,
                     "query_lexical_scores": existing.get("query_lexical_scores", []),
                     "query_focus_scores": existing.get("query_focus_scores", []),
                 }
 
             vector_weight = float(os.getenv("RAG_VECTOR_WEIGHT", "0.75"))
             lexical_weight = float(os.getenv("RAG_LEXICAL_WEIGHT", "0.25"))
+            rrf_k = max(1, int(os.getenv("RAG_RETRIEVAL_RRF_K", "60")))
+            rrf_weight = min(
+                1.0,
+                max(0.0, float(os.getenv("RAG_RRF_FUSION_WEIGHT", "0.35"))),
+            )
+            max_rrf_score = 2 * len(query_variants) / (rrf_k + 1)
             results = []
             for result in merged_results.values():
                 query_vector_scores = result.get("query_vector_scores", {})
@@ -548,9 +687,22 @@ def _retrieve_content_single(
                     )
                     for index in range(len(query_variants))
                 ]
-                base_score = (
+                feature_score = (
                     vector_weight * float(result.get("vector_score", 0))
                     + lexical_weight * float(result.get("lexical_score", 0))
+                )
+                result["retrieval_rrf_score"] = (
+                    float(result.get("dense_rrf_score", 0))
+                    + float(result.get("sparse_rrf_score", 0))
+                )
+                normalized_rrf_score = (
+                    result["retrieval_rrf_score"] / max_rrf_score
+                    if max_rrf_score > 0
+                    else 0.0
+                )
+                base_score = (
+                    (1 - rrf_weight) * feature_score
+                    + rrf_weight * normalized_rrf_score
                 )
                 exact_term_score = result.get("exact_term_score")
                 if exact_term_score is None:
@@ -571,6 +723,9 @@ def _retrieve_content_single(
                     **result,
                     "vector_score": float(result.get("score", 0)),
                     "lexical_score": 0.0,
+                    "bm25_score": 0.0,
+                    "retrieval_rrf_score": float(result.get("dense_rrf_score", 0)),
+                    "lexical_backend": "disabled",
                     "query_lexical_scores": [],
                     "query_relevance_scores": [
                         float(result.get("query_vector_scores", {}).get(index, 0))
@@ -677,23 +832,20 @@ def _retrieve_content_single(
                     max_neighbors,
                     max(0, top_k + total_extra - len(filtered_results)),
                 )
-            if hybrid_enabled:
-                neighbor_pool = all_chunks
-            else:
-                neighbor_pool = []
-                for seed in filtered_results:
-                    index = int(seed.get("chunk_index", -1))
-                    requested = [
-                        index + offset
-                        for offset in range(-neighbor_window, neighbor_window + 1)
-                        if offset and index + offset >= 0
-                    ]
-                    neighbor_pool.extend(milvus.get_neighbor_chunks(
-                        indexNames,
-                        seed.get("doc_id", ""),
-                        requested,
-                        limit=len(requested),
-                    ))
+            neighbor_pool = []
+            for seed in filtered_results:
+                index = int(seed.get("chunk_index", -1))
+                requested = [
+                    index + offset
+                    for offset in range(-neighbor_window, neighbor_window + 1)
+                    if offset and index + offset >= 0
+                ]
+                neighbor_pool.extend(milvus.get_neighbor_chunks(
+                    indexNames,
+                    seed.get("doc_id", ""),
+                    requested,
+                    limit=len(requested),
+                ))
             filtered_results = _expand_with_neighbor_chunks(
                 filtered_results,
                 neighbor_pool,
@@ -713,6 +865,9 @@ def _retrieve_content_single(
                 "score": result.get("score", 0),
                 "vector_score": result.get("vector_score", result.get("score", 0)),
                 "lexical_score": result.get("lexical_score", 0),
+                "bm25_score": result.get("bm25_score", 0),
+                "retrieval_rrf_score": result.get("retrieval_rrf_score", 0),
+                "lexical_backend": result.get("lexical_backend", "disabled"),
                 "exact_term_score": result.get("exact_term_score"),
                 "strict_identifier_score": result.get("strict_identifier_score"),
                 "chunk_index": result.get("chunk_index"),
@@ -846,6 +1001,7 @@ def retrieve_content(
             kb_id=kb_id,
             min_score=min_score,
             embedding_route=route,
+            lexical_index_name=lexical_collection_name(indexNames),
         )
         for result in results:
             result["retrieval_routes"] = [route.name]
@@ -873,6 +1029,7 @@ def retrieve_content(
             min_score=min_score,
             embedding_route=route,
             diagnostics=diagnostics,
+            lexical_index_name=lexical_collection_name(indexNames),
         )
         if results:
             results_by_route[route.name] = results

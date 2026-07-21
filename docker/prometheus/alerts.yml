@@ -80,3 +80,11 @@ groups:
           severity: critical
         annotations:
           summary: An outbox row exhausted its Redis delivery attempts
+
+      - alert: LexicalSearchFallbackDetected
+        expr: increase(industry_lexical_searches_total{outcome="fallback"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: Hybrid retrieval fell back from Milvus BM25 to an in-process scan

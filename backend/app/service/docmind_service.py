@@ -14,7 +14,7 @@ from service.embedding_router import (
     collection_name_for_route,
     routes_for_ingestion,
 )
-from service.milvus_service import get_milvus_service
+from service.milvus_service import get_milvus_service, lexical_collection_name
 
 
 LOCAL_TEXT_EXTENSIONS = {
@@ -414,6 +414,7 @@ def process_document_with_docmind(
         doc_id = hashlib.md5(file_name.encode()).hexdigest()
         milvus = milvus_service or get_milvus_service()
         inserted_routes: list[str] = []
+        lexical_documents: list[dict[str, Any]] = []
 
         if embedding_fn is not None:
             route_jobs = [(None, index_name, embedding_fn(chunks))]
@@ -466,6 +467,20 @@ def process_document_with_docmind(
             print(f"开始插入 Milvus，集合: {target_collection}")
             milvus.insert_documents(target_collection, documents)
             inserted_routes.append(getattr(route, "name", "legacy"))
+            if not lexical_documents:
+                lexical_documents = [
+                    {key: value for key, value in document.items() if key != "vector"}
+                    for document in documents
+                ]
+
+        lexical_target = None
+        if (
+            embedding_fn is None
+            and os.getenv("RAG_LEXICAL_BACKEND", "auto").strip().lower() != "scan"
+        ):
+            lexical_target = lexical_collection_name(index_name)
+            print(f"开始写入 Milvus BM25，集合: {lexical_target}")
+            milvus.insert_lexical_documents(lexical_target, lexical_documents)
 
         result["success"] = True
         result["message"] = (
@@ -474,6 +489,7 @@ def process_document_with_docmind(
         )
         result["document_count"] = len(chunks)
         result["embedding_routes"] = inserted_routes
+        result["lexical_index"] = lexical_target
 
         print(f"文档处理完成: {result['message']}")
 

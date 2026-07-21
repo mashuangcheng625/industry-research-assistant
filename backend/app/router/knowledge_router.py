@@ -1,4 +1,5 @@
 """知识库管理路由"""
+import hashlib
 import os
 from datetime import datetime
 from typing import List
@@ -589,6 +590,32 @@ async def delete_document(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="文档不存在"
+        )
+
+    # Fail closed before deleting the SQL record: otherwise stale dense/BM25
+    # evidence could remain retrievable after the UI reports success.
+    from service.embedding_router import collection_name_for_route, routes_for_mode
+    from service.milvus_service import get_milvus_service, lexical_collection_name
+
+    collection_base = f"kb_{kb.name}".lower().replace(" ", "_")
+    milvus_doc_id = hashlib.md5(doc.filename.encode()).hexdigest()
+    milvus = get_milvus_service()
+    targets = [
+        collection_name_for_route(collection_base, route)
+        # Delete both supported dense routes even if the current ingestion mode
+        # changed after this document was indexed.
+        for route in routes_for_mode("hybrid")
+    ]
+    targets.append(lexical_collection_name(collection_base))
+    failed_targets = [
+        target
+        for target in targets
+        if not milvus.delete_by_doc_id(target, milvus_doc_id)
+    ]
+    if failed_targets:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="文档索引删除失败，数据库记录已保留",
         )
 
     # 删除文件（如果存在）

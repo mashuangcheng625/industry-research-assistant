@@ -194,14 +194,23 @@ def main() -> int:
 
     try:
         # This paid but tiny request must succeed before any data is removed.
+        print("Preflight...", flush=True)
         report["preflight"] = _cloud_embedding_preflight()
+        print("Preflight OK", flush=True)
 
         from pymilvus import Collection, connections, utility
         from service.docmind_service import process_document_with_docmind
         from service.milvus_service import MilvusService
 
-        connections.disconnect("default")
+        print("Imports done", flush=True)
+        try:
+            connections.disconnect("default")
+        except Exception:  # noqa: BLE001 — may not exist yet
+            pass
+
         milvus = MilvusService()
+        print(f"Milvus connected. Collections: {len(utility.list_collections())} total.", flush=True)
+        print("Milvus connected", flush=True)
         route = get_embedding_route("cloud")
         queue = args.queue.resolve()
         candidates = read_jsonl(queue)

@@ -9,8 +9,27 @@ from pymilvus import (
     CollectionSchema,
     FieldSchema,
     DataType,
+    Function,
+    FunctionType,
     utility,
 )
+
+
+LEXICAL_CONTENT_FIELD = "content"
+LEXICAL_SPARSE_FIELD = "sparse"
+
+
+def lexical_collection_name(base_collection_name: str) -> str:
+    """Return the versioned Milvus BM25 collection for a business index."""
+    suffix = os.getenv("RAG_LEXICAL_COLLECTION_SUFFIX", "_bm25_v1").strip()
+    if not suffix or not all(
+        character.isalnum() or character == "_" for character in suffix
+    ):
+        raise ValueError(
+            "RAG_LEXICAL_COLLECTION_SUFFIX must contain only letters, "
+            "digits, or underscores"
+        )
+    return f"{base_collection_name}{suffix}"
 
 
 class MilvusService:
@@ -102,6 +121,146 @@ class MilvusService:
         print(f"集合 {collection_name} 创建成功")
         return collection
 
+    def create_lexical_collection(self, collection_name: str) -> Collection:
+        """Create a server-side BM25 index without changing dense collections."""
+        if utility.has_collection(collection_name):
+            collection = Collection(collection_name)
+            collection.load()
+            return collection
+
+        analyzer_params = {
+            "tokenizer": os.getenv("RAG_LEXICAL_TOKENIZER", "icu"),
+            "filter": ["lowercase"],
+        }
+        fields = [
+            FieldSchema(name="id", dtype=DataType.VARCHAR, is_primary=True, max_length=64),
+            FieldSchema(name="doc_id", dtype=DataType.VARCHAR, max_length=64),
+            FieldSchema(name="kb_id", dtype=DataType.VARCHAR, max_length=128),
+            FieldSchema(name="filename", dtype=DataType.VARCHAR, max_length=512),
+            FieldSchema(
+                name=LEXICAL_CONTENT_FIELD,
+                dtype=DataType.VARCHAR,
+                max_length=65535,
+                enable_analyzer=True,
+                analyzer_params=analyzer_params,
+            ),
+            FieldSchema(name="chunk_index", dtype=DataType.INT64),
+            FieldSchema(name=LEXICAL_SPARSE_FIELD, dtype=DataType.SPARSE_FLOAT_VECTOR),
+        ]
+        bm25_function = Function(
+            name="content_bm25",
+            function_type=FunctionType.BM25,
+            input_field_names=[LEXICAL_CONTENT_FIELD],
+            output_field_names=[LEXICAL_SPARSE_FIELD],
+        )
+        collection = Collection(
+            name=collection_name,
+            schema=CollectionSchema(
+                fields=fields,
+                functions=[bm25_function],
+                description=f"Server-side BM25 index: {collection_name}",
+            ),
+        )
+        collection.create_index(
+            field_name=LEXICAL_SPARSE_FIELD,
+            index_params={
+                "index_type": "SPARSE_INVERTED_INDEX",
+                "metric_type": "BM25",
+                "params": {"inverted_index_algo": "DAAT_MAXSCORE"},
+            },
+        )
+        collection.load()
+        print(f"BM25 集合 {collection_name} 创建成功")
+        return collection
+
+    def insert_lexical_documents(
+        self,
+        collection_name: str,
+        documents: List[Dict[str, Any]],
+        *,
+        flush: bool = True,
+    ) -> int:
+        """Insert raw chunks; Milvus generates sparse BM25 vectors internally."""
+        collection = self.create_lexical_collection(collection_name)
+        rows = [
+            {
+                "id": str(document["id"]),
+                "doc_id": str(document.get("doc_id", "")),
+                "kb_id": str(document.get("kb_id", "")),
+                "filename": str(document.get("filename", ""))[:512],
+                LEXICAL_CONTENT_FIELD: str(document.get("content", ""))[:65535],
+                "chunk_index": int(document.get("chunk_index", 0)),
+            }
+            for document in documents
+        ]
+        if rows:
+            collection.upsert(rows)
+            if flush:
+                collection.flush()
+        return len(rows)
+
+    def supports_lexical_search(self, collection_name: str) -> bool:
+        """Check schema capability instead of assuming every collection is BM25-ready."""
+        if not utility.has_collection(collection_name):
+            return False
+        collection = Collection(collection_name)
+        fields = {field.name: field.dtype for field in collection.schema.fields}
+        schema_is_compatible = (
+            fields.get(LEXICAL_CONTENT_FIELD) == DataType.VARCHAR
+            and fields.get(LEXICAL_SPARSE_FIELD) == DataType.SPARSE_FLOAT_VECTOR
+        )
+        if not schema_is_compatible:
+            return False
+
+        # Standalone returns Function metadata, while Milvus Lite 2.6 omits
+        # functions when deserializing the same valid BM25 schema. The sparse
+        # field pair is therefore the portable capability contract; an actual
+        # search error is still handled by the caller's explicit fallback.
+        functions = getattr(collection.schema, "functions", None) or []
+        return not functions or any(
+            function.type == FunctionType.BM25 for function in functions
+        )
+
+    def search_lexical(
+        self,
+        collection_name: str,
+        query: str,
+        top_k: int = 20,
+        kb_id: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Search a bounded server-side BM25 posting list using raw query text."""
+        if not self.supports_lexical_search(collection_name):
+            raise LookupError(f"BM25 collection is unavailable or incompatible: {collection_name}")
+        collection = Collection(collection_name)
+        collection.load()
+        safe_kb_id = (
+            kb_id.replace("\\", "\\\\").replace('"', '\\"')
+            if kb_id
+            else None
+        )
+        expr = f'kb_id == "{safe_kb_id}"' if safe_kb_id else None
+        results = collection.search(
+            data=[query],
+            anns_field=LEXICAL_SPARSE_FIELD,
+            param={"metric_type": "BM25", "params": {"drop_ratio_search": 0}},
+            limit=max(1, int(top_k)),
+            expr=expr,
+            output_fields=["id", "doc_id", "kb_id", "filename", "content", "chunk_index"],
+        )
+        return [
+            {
+                "id": hit.entity.get("id"),
+                "doc_id": hit.entity.get("doc_id"),
+                "kb_id": hit.entity.get("kb_id"),
+                "filename": hit.entity.get("filename"),
+                "content": hit.entity.get("content"),
+                "chunk_index": hit.entity.get("chunk_index"),
+                "bm25_score": float(hit.score),
+            }
+            for hits in results
+            for hit in hits
+        ]
+
     def insert_documents(
         self,
         collection_name: str,
@@ -148,7 +307,9 @@ class MilvusService:
                 "vector": document["vector"],
             }
             rows.append({key: value for key, value in row.items() if key in field_names})
-        collection.insert(rows)
+        # Stable chunk IDs make retries idempotent after a partial multi-index
+        # ingestion failure.
+        collection.upsert(rows)
         collection.flush()
         self._invalidate_chunk_cache(collection_name)
 
