@@ -1,5 +1,8 @@
 # 证据驱动行业研究平台
 
+[![CI](https://github.com/mashuangcheng625/industry-research-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/mashuangcheng625/industry-research-assistant/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 一个面向技术、产业与公司研究的多源大模型平台，并以**半导体全产业链**作为深度垂直落地。
 平台统一承载专业知识库、新闻政策、招投标、产业数据库、Text2SQL、上市公司行情和研究 Agent；
 半导体垂直层则提供从芯片设计与 EDA/IP、材料与设备、晶圆制造到封装测试的来源治理、
