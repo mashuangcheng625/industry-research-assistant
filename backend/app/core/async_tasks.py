@@ -156,6 +156,18 @@ class TaskContext:
 class TaskQueue:
     """Persistent task repository and Redis Streams transport."""
 
+    _ENQUEUE_IF_ABSENT_SCRIPT = """
+    if redis.call('EXISTS', KEYS[1]) == 1 then
+      return 0
+    end
+    redis.call('HSET', KEYS[1], unpack(ARGV, 4))
+    redis.call('EXPIRE', KEYS[1], ARGV[1])
+    redis.call('ZADD', KEYS[2], ARGV[2], ARGV[3])
+    redis.call('ZADD', KEYS[3], ARGV[2], ARGV[3])
+    redis.call('XADD', KEYS[4], '*', 'task_id', ARGV[3])
+    return 1
+    """
+
     def __init__(self, redis: Redis, settings: Optional[TaskQueueSettings] = None):
         self.redis = redis
         self.settings = settings or TaskQueueSettings.from_env()
@@ -212,13 +224,30 @@ class TaskQueue:
             "worker_id": "",
         }
         key = self.record_key(task_id)
-        async with self.redis.pipeline(transaction=True) as pipe:
-            pipe.hset(key, mapping=record)
-            pipe.expire(key, self.settings.retention_seconds)
-            pipe.zadd(self.all_tasks_key, {task_id: score})
-            pipe.zadd(self.owner_key(str(owner_id)), {task_id: score})
-            pipe.xadd(self.stream_key, {"task_id": task_id})
-            await pipe.execute()
+        hash_args: list[str] = []
+        for field, value in record.items():
+            hash_args.extend((field, value))
+        created = await self.redis.eval(
+            self._ENQUEUE_IF_ABSENT_SCRIPT,
+            4,
+            key,
+            self.all_tasks_key,
+            self.owner_key(str(owner_id)),
+            self.stream_key,
+            self.settings.retention_seconds,
+            score,
+            task_id,
+            *hash_args,
+        )
+        if not created:
+            existing = await self.redis.hmget(key, "task_type", "owner_id", "payload")
+            same_identity = existing[:2] == [task_type, str(owner_id)]
+            try:
+                same_payload = json.loads(existing[2]) == json.loads(payload_json)
+            except (TypeError, json.JSONDecodeError):
+                same_payload = False
+            if not same_identity or not same_payload:
+                raise ValueError("task_id already exists with different task data")
         return task_id
 
     async def get(self, task_id: str) -> Optional[TaskRecord]:

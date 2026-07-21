@@ -154,6 +154,28 @@
       "targets": [{"expr": "sum by (task_type, outcome) (rate(industry_background_tasks_total[$__rate_interval]))", "legendFormat": "{{task_type}} / {{outcome}}", "refId": "A"}],
       "title": "Persistent task attempts",
       "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "PostgreSQL task intents still pending or held by a live dispatcher lease.",
+      "fieldConfig": {"defaults": {"color": {"mode": "thresholds"}, "thresholds": {"mode": "absolute", "steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 10}, {"color": "red", "value": 50}]}}, "overrides": []},
+      "gridPos": {"h": 5, "w": 6, "x": 0, "y": 32},
+      "id": 13,
+      "options": {"colorMode": "background", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto", "wideLayout": true},
+      "targets": [{"expr": "industry_task_outbox_pending_events", "legendFormat": "pending", "refId": "A"}],
+      "title": "Outbox backlog",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "prometheus"},
+      "description": "Outbox publication outcomes; retry and failed indicate PostgreSQL-to-Redis delivery pressure.",
+      "fieldConfig": {"defaults": {"color": {"mode": "palette-classic"}, "custom": {"axisCenteredZero": false, "axisColorMode": "text", "axisPlacement": "auto", "drawStyle": "line", "fillOpacity": 20, "lineInterpolation": "smooth", "lineWidth": 2, "pointSize": 5, "showPoints": "never", "stacking": {"group": "A", "mode": "normal"}}, "unit": "reqps"}, "overrides": []},
+      "gridPos": {"h": 5, "w": 18, "x": 6, "y": 32},
+      "id": 14,
+      "options": {"legend": {"calcs": ["lastNotNull"], "displayMode": "table", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "sum by (outcome) (rate(industry_task_outbox_deliveries_total[$__rate_interval]))", "legendFormat": "{{outcome}}", "refId": "A"}],
+      "title": "Outbox delivery outcomes",
+      "type": "timeseries"
     }
   ],
   "refresh": "10s",

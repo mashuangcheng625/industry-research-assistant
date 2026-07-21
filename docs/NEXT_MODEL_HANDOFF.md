@@ -44,7 +44,7 @@ make validate-observability
 - regression 端到端：严格质量 16/20，SLA 20/20，拒答 4/4，P95 12.477 秒；
 - 并发 4：8/8、P95 10.217 秒；并发 8：16/16、P95 19.919 秒；
 - 上下文压力：600,400 输入 token，证据预算内选取 3,002/6,000；
-- 后端测试：469 项（459 unit + 10 integration，含 Redis 持久任务故障恢复）；前端 lint/build 通过；Prometheus 7 条规则有效；
+- 后端测试：480 项（461 unit + 19 integration，含 Transactional Outbox 与 Redis 故障恢复）；前端 lint/build 通过；Prometheus 规则有效；
 - Agent 真实运行：取消和精确恢复已验证；另一次完整审核因 1 critical、2 major 正确进入
   `research_review_failed`，没有被错误放行。
 
@@ -59,7 +59,7 @@ make validate-observability
   输出预留；6,000-token 继续作为证据子预算。Memory 摘要、Text2SQL、语义裁判和旧
   ReAct/DR-G 兼容链路也已覆盖；
 - 词法召回仍会扫描候选文本，不适合大规模生产索引；
-- `/metrics` 已支持 multiprocess 聚合并提供 Grafana 看板；OpenTelemetry 为 opt-in；数据库已有覆盖 14 张表的
+- `/metrics` 已支持 multiprocess 聚合并提供 Grafana 看板；OpenTelemetry 为 opt-in；数据库已有覆盖 15 张表的
   Alembic 两段迁移链，CI 已配置隔离库往返迁移与 ORM schema drift 门禁；
 - 新闻、招投标、Text2SQL、股票有真实代码与入口，但缺少和 RAG 同等级的专项评测；
 - blind-v2 已首次运行，但因知识库映射和金标来源缺陷转为已解盲诊断集；

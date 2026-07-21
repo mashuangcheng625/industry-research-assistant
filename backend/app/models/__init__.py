@@ -4,6 +4,7 @@ from .knowledge import KnowledgeBase, Document
 from .industry_data import IndustryStats, CompanyData, PolicyData
 from .research import ResearchCheckpoint
 from .news import IndustryNews, BiddingInfo, NewsCollectionTask
+from .task_outbox import TaskOutbox
 
 __all__ = [
     "User",
@@ -20,4 +21,5 @@ __all__ = [
     "IndustryNews",
     "BiddingInfo",
     "NewsCollectionTask",
+    "TaskOutbox",
 ]

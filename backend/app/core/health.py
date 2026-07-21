@@ -41,6 +41,21 @@ def _task_worker() -> None:
     raise ConnectionError("no live persistent task worker heartbeat")
 
 
+def _outbox_dispatcher() -> None:
+    """Require at least one unexpired transactional outbox heartbeat."""
+    from core.redis_client import get_redis_client
+
+    client = get_redis_client()
+    prefix = os.getenv("TASK_QUEUE_PREFIX", "industry:tasks")
+    dispatchers_key = f"{prefix}:outbox-dispatchers"
+    dispatchers = client.smembers(dispatchers_key)
+    for dispatcher_id in dispatchers:
+        if client.exists(f"{prefix}:outbox-dispatcher:{dispatcher_id}"):
+            return
+        client.srem(dispatchers_key, dispatcher_id)
+    raise ConnectionError("no live transactional outbox dispatcher heartbeat")
+
+
 def _milvus() -> None:
     from pymilvus import connections, utility
 
@@ -137,6 +152,8 @@ def readiness_checks() -> dict[str, Callable[[], None]]:
     checks = dict(STORAGE_CHECKS)
     if env_bool("READINESS_CHECK_TASK_WORKER", False):
         checks["task_worker"] = _task_worker
+    if env_bool("READINESS_CHECK_OUTBOX_DISPATCHER", False):
+        checks["outbox_dispatcher"] = _outbox_dispatcher
     if env_bool("READINESS_CHECK_MODELS", False):
         from service.embedding_router import get_embedding_route
         from service.llm_router import resolve_llm_endpoint

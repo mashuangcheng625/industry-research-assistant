@@ -49,5 +49,5 @@ def test_postgres_backup_restore_drill():
     if not database_url:
         pytest.skip("BACKUP_TEST_DATABASE_URL is not configured")
     result = validate_backup_restore(database_url)
-    assert result["table_count"] == 14
+    assert result["table_count"] == 15
     assert result["backup_size_bytes"] > 0

@@ -82,6 +82,30 @@ def test_operations_dashboard_includes_persistent_task_health():
     ]
     assert any("industry_background_task_queue_depth" in value for value in expressions)
     assert any("industry_background_tasks_total" in value for value in expressions)
+    assert any("industry_task_outbox_pending_events" in value for value in expressions)
+    assert any("industry_task_outbox_deliveries_total" in value for value in expressions)
+
+
+def test_prometheus_scrapes_and_alerts_on_outbox_dispatcher():
+    prometheus_root = REPOSITORY_ROOT / "docker" / "prometheus"
+    config = yaml.safe_load(
+        (prometheus_root / "prometheus.yml").read_text(encoding="utf-8")
+    )
+    jobs = {item["job_name"]: item for item in config["scrape_configs"]}
+    assert jobs["industry-outbox-dispatcher"]["static_configs"][0]["targets"] == [
+        "outbox-dispatcher:8002"
+    ]
+
+    alerts = yaml.safe_load(
+        (prometheus_root / "alerts.yml").read_text(encoding="utf-8")
+    )
+    rules = [rule for group in alerts["groups"] for rule in group["rules"]]
+    alert_names = {rule["alert"] for rule in rules}
+    assert {
+        "TransactionalOutboxDispatcherDown",
+        "TransactionalOutboxBacklogHigh",
+        "TransactionalOutboxDeliveryFailed",
+    } <= alert_names
 
 
 def test_compose_grafana_is_read_only_by_default_and_uses_prometheus():

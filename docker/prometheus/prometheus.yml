@@ -16,3 +16,8 @@ scrape_configs:
     static_configs:
       - targets:
           - task-worker:8001
+
+  - job_name: industry-outbox-dispatcher
+    static_configs:
+      - targets:
+          - outbox-dispatcher:8002

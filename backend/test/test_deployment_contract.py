@@ -57,6 +57,28 @@ def test_compose_runs_persistent_worker_with_shared_upload_storage():
     }
 
 
+def test_compose_runs_transactional_outbox_dispatcher_before_api():
+    compose = yaml.safe_load(
+        (REPOSITORY_ROOT / "docker-compose.yml").read_text(encoding="utf-8")
+    )
+    services = compose["services"]
+    dispatcher = services["outbox-dispatcher"]
+
+    assert dispatcher["command"] == [
+        "python",
+        "/app/app/scripts/run_outbox_dispatcher.py",
+    ]
+    assert dispatcher["image"] == services["backend"]["image"]
+    assert dispatcher["depends_on"]["postgres"] == {"condition": "service_healthy"}
+    assert dispatcher["depends_on"]["redis"] == {"condition": "service_healthy"}
+    assert services["backend"]["depends_on"]["outbox-dispatcher"] == {
+        "condition": "service_healthy"
+    }
+    assert services["backend"]["environment"][
+        "READINESS_CHECK_OUTBOX_DISPATCHER"
+    ] == "true"
+
+
 def test_compose_postgres_has_no_competing_schema_initializer():
     compose = yaml.safe_load(
         (REPOSITORY_ROOT / "docker-compose.yml").read_text(encoding="utf-8")

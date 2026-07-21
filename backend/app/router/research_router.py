@@ -19,10 +19,11 @@ from core.redis_client import cache  # 导入 Redis 缓存
 from core.metrics import CANCEL_REQUESTS, RUN_LOCK_OPERATIONS
 from core.research_control import request_research_cancel
 from core.rate_limit import enforce_research_rate_limit
-from core.async_tasks import get_task_queue
-from redis.exceptions import RedisError
+from core.database import get_db
+from core.task_outbox import create_task_outbox
 from models.user import User
 from router.auth_router import get_current_user_required
+from sqlalchemy.orm import Session
 
 # V2 导入
 from service.deep_research_v2.service import DeepResearchV2Service
@@ -151,13 +152,15 @@ def release_research_run_lock(session_id: str, owner_token: str) -> None:
 async def enqueue_research(
     request: ResearchRequest,
     current_user: User = Depends(get_current_user_required),
+    db: Session = Depends(get_db),
 ):
     """Queue a durable V2 research run for polling clients."""
     if request.version != "v2":
         raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="persistent research tasks require version=v2")
     session_id = request.session_id or str(uuid.uuid4())
     try:
-        task_id = await get_task_queue().enqueue(
+        outbox = create_task_outbox(
+            db,
             "research.run",
             {
                 "query": request.query,
@@ -167,14 +170,17 @@ async def enqueue_research(
                 "search_web": request.get_search_web(),
                 "search_local": request.get_search_local(),
             },
-            owner_id=str(current_user.id),
+            owner_id=current_user.id,
             max_retries=int(os.getenv("RESEARCH_TASK_MAX_RETRIES", "1")),
             timeout_seconds=int(os.getenv("RESEARCH_TASK_TIMEOUT_SECONDS", "1800")),
         )
-    except (RedisError, ValueError) as exc:
+        task_id = outbox.task_id
+        db.commit()
+    except Exception as exc:
+        db.rollback()
         raise HTTPException(
             status_code=HTTP_503_SERVICE_UNAVAILABLE,
-            detail="persistent research queue unavailable",
+            detail="persistent research outbox unavailable",
         ) from exc
     return ResearchTaskAccepted(
         task_id=task_id,

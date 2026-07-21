@@ -59,6 +59,17 @@ def test_model_readiness_is_opt_in_and_checks_both_models():
         }
     with patch.dict(os.environ, {"READINESS_CHECK_TASK_WORKER": "true"}, clear=True):
         assert set(readiness_checks()) == {"postgres", "redis", "milvus", "task_worker"}
+    with patch.dict(
+        os.environ,
+        {"READINESS_CHECK_OUTBOX_DISPATCHER": "true"},
+        clear=True,
+    ):
+        assert set(readiness_checks()) == {
+            "postgres",
+            "redis",
+            "milvus",
+            "outbox_dispatcher",
+        }
 
 
 def test_openai_compatible_model_readiness_requires_configured_model():

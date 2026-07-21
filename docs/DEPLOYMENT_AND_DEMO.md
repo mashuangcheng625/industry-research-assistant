@@ -179,7 +179,7 @@ BACKUP_TEST_DATABASE_URL=postgresql://user:password@host/industry_assistant_back
 - 前端生产依赖 `npm audit --omit=dev` 为 0 漏洞，开发依赖仍有 audit 项；
 - 前端已完成路由级代码分割与 `echarts/core` 按需引入；修复 vendor 循环依赖后的
   ECharts chunk 为 690.01 kB（gzip 235.05 kB）；
-- 已有覆盖 14 张表的 Alembic 迁移链和 upgrade/downgrade 命令；Compose 的一次性
+- 已有覆盖 15 张表的 Alembic 迁移链和 upgrade/downgrade 命令；Compose 的一次性
   `migrate` 服务成功后后端才启动，默认不再调用 SQLAlchemy `create_all`；
 - CI 门禁会在两个专用 PostgreSQL 库上分别验证往返迁移、ORM schema drift
   和备份破坏—恢复；尚未验证生产数据量下的无停机 schema 升级；

@@ -211,3 +211,75 @@ def test_payload_size_is_rejected_before_redis_write():
             await redis.aclose()
 
     _run(exercise())
+
+
+@pytest.mark.integration
+def test_stable_task_id_is_idempotent_and_never_resets_existing_state():
+    async def exercise():
+        redis, queue, prefix = await _fixture()
+        calls = 0
+        try:
+            task_id = "task-stable-outbox-id"
+            first = await queue.enqueue(
+                "echo",
+                {"value": 7, "nested": {"first": 1, "second": 2}},
+                owner_id="owner-a",
+                task_id=task_id,
+            )
+            second = await queue.enqueue(
+                "echo",
+                {"nested": {"second": 2, "first": 1}, "value": 7},
+                owner_id="owner-a",
+                task_id=task_id,
+            )
+            assert first == second == task_id
+
+            stream_rows = await redis.xrange(queue.stream_key)
+            assert [fields["task_id"] for _, fields in stream_rows] == [task_id]
+
+            async def echo(_context, payload):
+                nonlocal calls
+                calls += 1
+                return payload
+
+            worker = TaskWorker(queue, {"echo": echo}, consumer_name="worker-a")
+            assert await worker.run_once(block_ms=1)
+            completed = await queue.get(task_id)
+            assert completed is not None
+            assert completed.status == TaskStatusEnum.SUCCEEDED
+
+            await queue.enqueue(
+                "echo",
+                {"nested": {"second": 2, "first": 1}, "value": 7},
+                owner_id="owner-a",
+                task_id=task_id,
+            )
+            unchanged = await queue.get(task_id)
+            assert unchanged is not None
+            assert unchanged.status == TaskStatusEnum.SUCCEEDED
+            assert unchanged.attempts == 1
+            assert calls == 1
+        finally:
+            await _cleanup(redis, prefix)
+
+    _run(exercise())
+
+
+@pytest.mark.integration
+def test_stable_task_id_rejects_conflicting_projection():
+    async def exercise():
+        redis, queue, prefix = await _fixture()
+        try:
+            task_id = "task-stable-conflict"
+            await queue.enqueue("echo", {"value": 1}, owner_id="owner-a", task_id=task_id)
+            with pytest.raises(ValueError, match="different task data"):
+                await queue.enqueue(
+                    "echo",
+                    {"value": 2},
+                    owner_id="owner-a",
+                    task_id=task_id,
+                )
+        finally:
+            await _cleanup(redis, prefix)
+
+    _run(exercise())

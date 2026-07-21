@@ -4,11 +4,10 @@ from pathlib import Path
 from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Form
-from redis.exceptions import RedisError
 from sqlalchemy.orm import Session
 
 from core.database import get_db
-from core.async_tasks import get_task_queue
+from core.task_outbox import create_task_outbox
 from models.chat import ChatAttachment, ChatSession
 from models.user import User
 from router.auth_router import get_current_user_required
@@ -140,27 +139,27 @@ async def upload_attachment(
         status="pending",
     )
     db.add(att)
-    db.commit()
-    db.refresh(att)
-
     try:
-        task_id = await get_task_queue().enqueue(
+        db.flush()
+        outbox = create_task_outbox(
+            db,
             "attachment.process",
             {"attachment_id": str(att.id), "file_path": file_path},
-            owner_id=str(current_user.id),
+            owner_id=current_user.id,
             max_retries=2,
             timeout_seconds=int(os.getenv("ATTACHMENT_TASK_TIMEOUT_SECONDS", "300")),
         )
-    except (RedisError, ValueError) as exc:
-        att.status = "failed"
-        att.error_message = "持久化任务队列不可用"
+        task_id = outbox.task_id
         db.commit()
+        db.refresh(att)
+    except Exception:
+        db.rollback()
         if os.path.exists(file_path):
             os.remove(file_path)
         raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="附件已拒绝接收：持久化任务队列不可用",
-        ) from exc
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="附件记录与后台任务创建失败",
+        )
 
     response = attachment_to_response(att)
     response.task_id = task_id

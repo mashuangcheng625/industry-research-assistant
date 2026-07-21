@@ -13,7 +13,7 @@
 
 | 项目 | 期望 | 实际 | 备注 |
 | --- | --- | --- | --- |
-| 后端单元 + 集成测试 | 全绿 | 469 项（459 unit + 10 integration） | `make test-backend-unit` / `make test-backend-integration` |
+| 后端单元 + 集成测试 | 全绿 | 480 项（461 unit + 19 integration） | `make test-backend-unit` / `make test-backend-integration` |
 | Evidence 契约测试 | 全绿 | 48/48 | `make test-evidence-contract` |
 | 前端 ESLint | 0 error / 0 warning | 0/0 | `make lint-frontend` |
 | 前端生产构建 | 通过 | 通过，dist 2.56 MB | `make build-frontend` |

@@ -117,6 +117,21 @@ TASK_QUEUE_DEPTH = Gauge(
     "industry_background_task_queue_depth",
     "Pending plus not-yet-delivered persistent tasks.",
 )
+OUTBOX_DELIVERIES = Counter(
+    "industry_task_outbox_deliveries_total",
+    "Transactional outbox delivery outcomes.",
+    ("outcome",),
+)
+OUTBOX_DELIVERY_DURATION = Histogram(
+    "industry_task_outbox_delivery_duration_seconds",
+    "PostgreSQL outbox to Redis publication duration.",
+    ("outcome",),
+    buckets=(0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10),
+)
+OUTBOX_PENDING_EVENTS = Gauge(
+    "industry_task_outbox_pending_events",
+    "Pending plus leased transactional outbox rows.",
+)
 
 
 def render_metrics() -> tuple[bytes, str]:

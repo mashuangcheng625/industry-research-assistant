@@ -77,7 +77,7 @@ Runner 已完成 12/12 确定性端到端门禁，但真实在线数据源仍未
 | 并发压力 | 并发 4 时 8/8，P95 10.217 秒 | 并发 8 时 P95 19.919 秒，已接近饱和 |
 | 上下文压力 | 600,400 输入 token 中选取 3,002/6,000 | 历史证据子预算通过；主 Chat/Agent 已增加 32K 总预算，待补同规模总预算报告 |
 | 多源联合研究 | 冻结脱敏 fixture 12/12 | 确定性 Runner 逐题执行，不代表线上数据质量 |
-| 自动化验证 | 后端 469 项，前端 lint/build 通过 | 459 项单元测试 + 10 项集成测试（含 Redis 持久队列故障恢复） |
+| 自动化验证 | 后端 480 项，前端 lint/build 通过 | 461 项单元测试 + 19 项集成测试（含 Transactional Outbox 与 Redis 故障恢复） |
 
 对应报告见 [`reports/`](reports/)，评测口径见
 [`docs/RAG_EVALUATION_PROTOCOL.md`](docs/RAG_EVALUATION_PROTOCOL.md)。简历与项目介绍中的
@@ -142,7 +142,8 @@ readiness 和 Prometheus 指标；readiness 可选择校验生成模型与 embed
 
 ### 6. 持久化长任务
 
-文档入库、附件解析和非流式深度研究通过 Redis Streams 投递给独立 Worker。
+文档入库、附件解析和非流式深度研究先与业务记录在同一 PostgreSQL
+事务写入 Transactional Outbox，再由独立 Dispatcher 幂等投递到 Redis Streams。
 队列提供超时、指数退避重试、持久化取消、状态查询和 `XAUTOCLAIM` 崩溃恢复；API
 与 Worker 使用共享上传卷，不依赖容器私有 `/tmp`。设计与故障语义见
 [`docs/PERSISTENT_TASKS.md`](docs/PERSISTENT_TASKS.md)。登录用户可在 `/tasks` 任务中心查看入队、执行、
@@ -224,8 +225,8 @@ docker compose --profile app exec backend \
 ## 验证命令
 
 ```bash
-make check                       # 依赖、469 项后端测试、前端、Compose、数据与评测隔离
-make validate-observability      # Prometheus 配置、7 条告警和 Grafana 看板
+make check                       # 依赖、480 项后端测试、前端、Compose、数据与评测隔离
+make validate-observability      # Prometheus 配置、10 条告警和 Grafana 看板
 make build-images                # 构建非 root 后端镜像与 Nginx 前端镜像
 make demo-rag                    # 正例、跨环节问题与无证据拒答
 make load-test-chat              # 带质量门槛的并发测试
@@ -275,7 +276,7 @@ docker-compose.yml       core / app / search / observability profiles
 - 本地 4B 语义裁判效果不稳定，默认关闭；它也不是形式化蕴含证明；
 - `/metrics` 已支持 Prometheus multiprocess 聚合，Grafana 自动装配研究运行看板；
   OpenTelemetry 可按需导出 FastAPI、HTTPX 与 SQLAlchemy trace，但尚未配置默认 trace 后端；
-- 已提供覆盖 14 张表的 Alembic 迁移链，Compose 通过一次性 `migrate` 服务先迁移再启动后端；CI 门禁会在隔离 PostgreSQL 上验证迁移往返、ORM schema drift 与 `pg_dump` / `pg_restore` 破坏—恢复；
+- 已提供覆盖 15 张表的 Alembic 迁移链，Compose 通过一次性 `migrate` 服务先迁移再启动后端；CI 门禁会在隔离 PostgreSQL 上验证迁移往返、ORM schema drift 与 `pg_dump` / `pg_restore` 破坏—恢复；
 - 尚未实现定时备份、异地保存、TLS、HA 和生产级密钥托管；
 - blind-v2 首次运行已完成，但暴露出知识库映射和金标来源缺陷，现仅作为已解盲诊断集；
   下一轮可信泛化结论需要修正校验流程后由独立维护者制作 blind-v3；

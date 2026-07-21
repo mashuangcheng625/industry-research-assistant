@@ -4,11 +4,10 @@ from datetime import datetime
 from typing import List
 from uuid import UUID, uuid4
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
-from redis.exceptions import RedisError
 from sqlalchemy.orm import Session
 
 from core.database import get_db
-from core.async_tasks import get_task_queue
+from core.task_outbox import create_task_outbox
 from core.upload_security import file_signature_matches, safe_upload_filename
 from models.knowledge import KnowledgeBase, Document
 from models.user import User
@@ -372,6 +371,16 @@ async def upload_document(
     kb.document_count = (kb.document_count or 0) + 1
 
     try:
+        db.flush()
+        outbox = create_task_outbox(
+            db,
+            "document.process",
+            {"document_id": str(doc.id), "file_path": file_path, "kb_name": kb.name},
+            owner_id=current_user.id,
+            max_retries=2,
+            timeout_seconds=int(os.getenv("DOCUMENT_TASK_TIMEOUT_SECONDS", "900")),
+        )
+        task_id = outbox.task_id
         db.commit()
         db.refresh(doc)
     except Exception:
@@ -382,25 +391,6 @@ async def upload_document(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="文档记录创建失败",
         )
-
-    try:
-        task_id = await get_task_queue().enqueue(
-            "document.process",
-            {"document_id": str(doc.id), "file_path": file_path, "kb_name": kb.name},
-            owner_id=str(current_user.id),
-            max_retries=2,
-            timeout_seconds=int(os.getenv("DOCUMENT_TASK_TIMEOUT_SECONDS", "900")),
-        )
-    except (RedisError, ValueError) as exc:
-        doc.status = "failed"
-        doc.error_message = "持久化任务队列不可用"
-        db.commit()
-        if os.path.exists(file_path):
-            os.remove(file_path)
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="文档已拒绝接收：持久化任务队列不可用",
-        ) from exc
 
     return DocumentUploadResponse(
         id=str(doc.id),

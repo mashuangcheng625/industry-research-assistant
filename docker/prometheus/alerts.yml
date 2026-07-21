@@ -56,3 +56,27 @@ groups:
           severity: warning
         annotations:
           summary: A persistent background-task attempt failed or timed out
+
+      - alert: TransactionalOutboxDispatcherDown
+        expr: up{job="industry-outbox-dispatcher"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: PostgreSQL task intents are not being published to Redis
+
+      - alert: TransactionalOutboxBacklogHigh
+        expr: industry_task_outbox_pending_events > 50
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Transactional outbox backlog has remained above 50
+
+      - alert: TransactionalOutboxDeliveryFailed
+        expr: increase(industry_task_outbox_deliveries_total{outcome="failed"}[15m]) > 0
+        for: 0m
+        labels:
+          severity: critical
+        annotations:
+          summary: An outbox row exhausted its Redis delivery attempts

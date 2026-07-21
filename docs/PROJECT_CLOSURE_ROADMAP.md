@@ -160,8 +160,8 @@ PDF 解析、结构恢复、清洗与质量检查
 ### 已知缺口
 
 - 仓库已公开并采用 MIT License；`main` 的 GitHub Actions 后端、前端与干净镜像构建全部通过；
-- 后端 Python 3.12 传递依赖已锁定，459 条 unit 与 10 条 integration
-  （含 Redis Streams 持久任务故障恢复）由带硬超时的 `make check` 验证；
+- 后端 Python 3.12 传递依赖已锁定，461 条 unit 与 19 条 integration
+  （含 Transactional Outbox 与 Redis Streams 故障恢复）由带硬超时的 `make check` 验证；
 - 公开评测已分离为 40 题有标签开发集与 40 题无标签问题集，公开 CI
   会拒绝 test/hidden 答案字段；完整 80 题键仅在 Git 忽略目录。
 - 前端 ESLint 为 0 error / 0 warning，生产构建通过；

@@ -522,5 +522,5 @@ unsupported claim 和 SLA failure。
 | regression answer 16/20 | 严格概念-引用-切片门槛通过 16 题 | “问答准确率 80%” |
 | refusal 4/4 | 四道冻结无证据题全部拒答 | “对任意幻觉都能 100% 拦截” |
 | 并发 4 P95 10.217s | 本机、本地 4B、两题闭环压测结果 | “生产 SLA 为 10 秒” |
-| 469 tests | 工程门禁包含 459 unit + 10 integration，含 Redis 持久任务故障恢复 | “系统没有 bug” |
+| 480 tests | 工程门禁包含 461 unit + 19 integration，含 Transactional Outbox 与 Redis 故障恢复 | “系统没有 bug” |
 | 干净镜像 smoke | Python 3.12/Node 22 容器可构建并就绪 | “已完成生产部署” |
