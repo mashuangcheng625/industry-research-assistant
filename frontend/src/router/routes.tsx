@@ -25,6 +25,7 @@ const MemoryPage      = lazy(() => import('@/pages/memory'))
 const DatabasePage    = lazy(() => import('@/pages/database'))
 const NewsPage        = lazy(() => import('@/pages/news'))
 const BiddingPage     = lazy(() => import('@/pages/bidding'))
+const TasksPage       = lazy(() => import('@/pages/tasks'))
 
 export type IRouteObject = {
   children?: IRouteObject[]
@@ -97,6 +98,14 @@ export const routes: IRouteObject[] = [
     element: (
       <LazyRoute>
         <BiddingPage />
+      </LazyRoute>
+    ),
+  },
+  {
+    path: '/tasks',
+    element: (
+      <LazyRoute>
+        <TasksPage />
       </LazyRoute>
     ),
   },

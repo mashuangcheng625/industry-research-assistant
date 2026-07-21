@@ -16,6 +16,9 @@ import { useSnapshot } from 'valtio'
 import { NavItem } from './nav-item'
 import './nav.scss'
 
+const IconTasks =
+  'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%23474946%22 stroke-width=%221.8%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22%3E%3Cpath d=%22M5 4.5h14v15H5z%22/%3E%3Cpath d=%22M8 9h8M8 13h8M8 17h5%22/%3E%3Cpath d=%22M8 4.5V3m8 1.5V3%22/%3E%3C/svg%3E'
+
 const COMPACT_DIRECTION_NAMES: Record<string, string> = {
   chip_design_eda_ip: '芯片设计',
   materials_equipment: '材料设备',
@@ -69,6 +72,7 @@ export function Nav() {
         label: '研究记录',
         icon: IconHistory,
         href: '#',
+        className: 'nav-item--mobile-secondary',
         onClick: () => setSessionDrawerOpen(true),
       },
       {
@@ -76,7 +80,14 @@ export function Nav() {
         label: '研究记忆',
         icon: IconMemory,
         href: '#',
+        className: 'nav-item--mobile-secondary',
         onClick: () => message.info('研究记忆功能正在开发中'),
+      },
+      {
+        key: 'tasks',
+        label: '任务中心',
+        icon: IconTasks,
+        href: '/tasks',
       },
       {
         key: 'knowledge',
@@ -89,24 +100,28 @@ export function Nav() {
         label: '产业数据分析',
         icon: IconDatabase,
         href: '/database',
+        className: 'nav-item--mobile-secondary',
       },
       {
         key: 'news',
         label: '产业动态',
         icon: IconNews,
         href: '/news',
+        className: 'nav-item--mobile-secondary',
       },
       {
         key: 'bid',
         label: '招投标情报',
         icon: IconBid,
         href: '/bidding',
+        className: 'nav-item--mobile-secondary',
       },
       {
         key: 'demo',
         label: '面试演示',
         icon: IconKnowledge,
         href: '/demo',
+        className: 'nav-item--mobile-secondary',
       },
       // 暂时隐藏职业规划
       // {

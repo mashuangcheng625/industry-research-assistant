@@ -68,6 +68,18 @@ queued/retrying/running -> cancelled
 文档和附件 Handler 含不可中断的同步解析/入库步骤，因此开始执行后拒绝取消并返回
 409，不会把“副作用已完成”误报为 cancelled。
 
+## Web 任务中心
+
+登录用户可通过侧边导航进入 `/tasks`。页面复用上述 API，不在前端伪造任务状态：
+
+- 显示 queued、running、retrying、succeeded、failed 和 cancelled 六种状态；
+- 仅存在非终态任务时每 4 秒轮询，并避免请求重叠；
+- 展开有界的错误或结果面板，长内容不撑破页面；
+- 取消前显式确认，并遵守运行中文档任务不可中断的后端语义。
+
+移动端保留任务中心作为一级导航；响应式可见性由语义类控制，不依赖会随
+菜单顺序漂移的 `nth-child` 选择器。
+
 ## 容器与运维
 
 Compose `app` profile 增加 `task-worker`，API 只在 Worker 心跳健康后启动。

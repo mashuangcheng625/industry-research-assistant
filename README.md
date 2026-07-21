@@ -145,7 +145,8 @@ readiness 和 Prometheus 指标；readiness 可选择校验生成模型与 embed
 文档入库、附件解析和非流式深度研究通过 Redis Streams 投递给独立 Worker。
 队列提供超时、指数退避重试、持久化取消、状态查询和 `XAUTOCLAIM` 崩溃恢复；API
 与 Worker 使用共享上传卷，不依赖容器私有 `/tmp`。设计与故障语义见
-[`docs/PERSISTENT_TASKS.md`](docs/PERSISTENT_TASKS.md)。
+[`docs/PERSISTENT_TASKS.md`](docs/PERSISTENT_TASKS.md)。登录用户可在 `/tasks` 任务中心查看入队、执行、
+重试、成功、失败与取消状态，并对允许中断的任务发起持久化取消。
 
 ## 快速复现
 
