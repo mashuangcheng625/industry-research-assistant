@@ -77,7 +77,7 @@ Runner 已完成 12/12 确定性端到端门禁，但真实在线数据源仍未
 | 并发压力 | 并发 4 时 8/8，P95 10.217 秒 | 并发 8 时 P95 19.919 秒，已接近饱和 |
 | 上下文压力 | 600,400 输入 token 中选取 3,002/6,000 | 历史证据子预算通过；主 Chat/Agent 已增加 32K 总预算，待补同规模总预算报告 |
 | 多源联合研究 | 冻结脱敏 fixture 12/12 | 确定性 Runner 逐题执行，不代表线上数据质量 |
-| 自动化验证 | 后端 480 项，前端 lint/build 通过 | 461 项单元测试 + 19 项集成测试（含 Transactional Outbox 与 Redis 故障恢复） |
+| 自动化验证 | 后端 487 项，前端 lint/build 通过 | 467 项单元测试 + 20 项集成测试（含 Transactional Outbox 与 Redis 故障恢复） |
 
 对应报告见 [`reports/`](reports/)，评测口径见
 [`docs/RAG_EVALUATION_PROTOCOL.md`](docs/RAG_EVALUATION_PROTOCOL.md)。简历与项目介绍中的
@@ -225,7 +225,7 @@ docker compose --profile app exec backend \
 ## 验证命令
 
 ```bash
-make check                       # 依赖、480 项后端测试、前端、Compose、数据与评测隔离
+make check                       # 依赖、487 项后端测试、前端、Compose、数据与评测隔离
 make validate-observability      # Prometheus 配置、10 条告警和 Grafana 看板
 make build-images                # 构建非 root 后端镜像与 Nginx 前端镜像
 make demo-rag                    # 正例、跨环节问题与无证据拒答

@@ -72,7 +72,7 @@ Rerank           已配置 / 未配置
 │ ③ Agent 恢复 │ 可点击引用 [1][2][3]      │ RRF → Rerank        │
 │              │                         │ 文档名、页码、分数  │
 ├──────────────┴─────────────────────────┴─────────────────────┤
-│ 461 单测 ｜ 19 集成测试 ｜ Hybrid 5/5 ｜ CI Passed         │
+│ 467 单测 │ 20 集成测试 │ Hybrid 5/5 │ CI Passed         │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -181,7 +181,7 @@ Completed    false
 | 0:30–2:30 | 运行 UCIe 正例 | 解释双 Collection、RRF、Rerank 和无降级状态 |
 | 2:30–3:20 | 点击一个回答引用 | 展示文档名、页码、原文和回答论断的对应关系 |
 | 3:20–4:10 | 运行 NX-999 反例 | 展示严格标识符与证据不足拒答 |
-| 4:10–4:40 | 打开验证栏 | 展示 461 项单测、19 项集成测试、Hybrid 5/5 和 CI |
+| 4:10–4:40 | 打开验证栏 | 展示 467 项单测、20 项集成测试、Hybrid 5/5 和 CI |
 | 4:40–5:00 | 说明能力边界 | 固定集结果不代表开放域 100%，当前定位是研究型 MVP |
 
 ### 8.1 开场话术
@@ -201,7 +201,7 @@ Completed    false
 
 | 展示项 | 当前口径 | 证据 |
 | --- | ---: | --- |
-| 单元测试 | 461 项 | `make test-backend-unit` |
+| 单元测试 | 467 项 | `make test-backend-unit` |
 | Milvus Lite / Redis 限流与持久任务 / Alembic / PostgreSQL 备份恢复集成测试 | 10 项 | `make test-backend-integration` |
 | 真实模型 Hybrid 冒烟 | 5/5 | `reports/p1-5-model-smoke.json` |
 | regression 检索 | 20/20 | baseline manifest 指向的冻结报告 |

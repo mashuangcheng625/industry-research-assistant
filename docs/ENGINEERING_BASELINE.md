@@ -58,7 +58,7 @@ make validate-sources
 
 | 检查项 | 结果 |
 | --- | ---: |
-| 后端测试 | 480 项（461 unit + 19 integration，含 Transactional Outbox 与 Redis 故障恢复） |
+| 后端测试 | 487 项（467 unit + 20 integration，含 Transactional Outbox 与 Redis 故障恢复） |
 | 全语料 Milvus Lite smoke | 15 份资料 / 36 任务 / 5256 切片，4/4 库对账通过 |
 | Python 编译检查 | 通过 |
 | Python 依赖一致性 | `pip check` 通过 |
